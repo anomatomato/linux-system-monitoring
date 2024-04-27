@@ -11,6 +11,7 @@
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
+// TODO change following macros according to main.c (posix-mq-to-mqtt-bridge)
 #define MQ_PATH "/my_queue"
 #define MAX_MSG_SIZE 50
 
