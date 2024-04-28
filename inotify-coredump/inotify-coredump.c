@@ -7,46 +7,48 @@
 #include <fcntl.h>        /* For O_* constants */
 #include <sys/stat.h>     /* For mode constants */
 #include <linux/limits.h> /* For NAME_MAX */
+#include "inotify-coredump.h"
 
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 // TODO change following macros according to main.c (posix-mq-to-mqtt-bridge)
 #define MQ_PATH "/my_queue"
-#define MAX_MSG_SIZE 50
+#define MAX_MSG_SIZE 150
 
 /* Send message in InfluxDB Line Protocol to posix-mq-to-mqtt-bridge */
-void send_to_mq(const char *message)
+int send_to_mq(const char *message)
 {
     //! Test
-    printf("%s\n", message);
+    printf("send_to_mq: %s\n", message);
+    //! mqd_t mq = mq_open(MQ_PATH, O_WRONLY | O_CREAT, 0666, NULL);
 
     mqd_t mq = mq_open(MQ_PATH, O_WRONLY);
     if (mq == -1)
     {
-        perror("mq_open failed");
-        exit(-1);
+        return -1;
     }
 
     if (mq_send(mq, message, strlen(message), 0) == -1)
     {
-        perror("mq_send failed");
-        //! mq_close(mq);
-        exit(-1);
+        mq_close(mq);
+        return -1;
     }
+    mq_close(mq);
+    return 0;
 }
 
-int main()
+int inotify_coredump()
 {
     int fd, wd, len;
-    char buf[BUF_LEN];
+    char buffer[BUF_LEN];
 
     /* Initialize inotify instance */
     fd = inotify_init();
     if (fd < 0)
     {
         perror("inotify_init failed");
-        return 1;
+        return -1;
     }
 
     /* Watch WATCH_DIR for new files */
@@ -55,16 +57,14 @@ int main()
     {
         perror("inotify_add_watch failed");
         close(fd);
-        return 1;
+        return -1;
     }
 
     /* Event loop */
     for (;;)
     {
-        int i = 0;
-
         /* Read events */
-        len = read(fd, buf, BUF_LEN);
+        len = read(fd, buffer, BUF_LEN);
         if (len < 0)
         {
             perror("read failed");
@@ -72,18 +72,21 @@ int main()
         }
 
         /* Process events */
-        while (i < len)
+        for (int i = 0; i < len;)
         {
-            struct inotify_event *event = (struct inotify_event *)&buf[i];
+            struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->len && event->mask & IN_CREATE)
             {
                 char message[MAX_MSG_SIZE];
-                snprintf(message, MAX_MSG_SIZE, "New core dump file created: %s\n", event->name);
+                snprintf(message, MAX_MSG_SIZE + 1, "New core dump file created in %s: %s\n", WATCH_DIR, event->name);
 
                 //! Test
                 printf("%s\n", message);
 
-                send_to_mq(message);
+                if (send_to_mq(message) == -1)
+                {
+                    perror("send_to_mq failed");
+                }
             }
             i += EVENT_SIZE + event->len;
         }
@@ -91,7 +94,10 @@ int main()
 
     inotify_rm_watch(fd, wd);
     close(fd);
-    exit(EXIT_SUCCESS);
-
     return 0;
+}
+
+int main()
+{
+    return inotify_coredump();
 }
