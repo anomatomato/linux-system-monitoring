@@ -1,0 +1,4 @@
+in order to create a coredump on your system, run
+./infinite
+or
+./fail
