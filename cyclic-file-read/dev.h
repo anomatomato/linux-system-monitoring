@@ -1,7 +1,7 @@
 #ifndef _CFR_NET_H_
 #define _CFR_NET_H_
 
-#include<stdio.h>
+#include <stdio.h>
 
 typedef struct net
 {
@@ -10,10 +10,10 @@ typedef struct net
     struct net* next;
 } net_t;
 
-int* insert_element(FILE *file);
+int* insert_element(FILE* file);
 void count_total();
 void write_file(FILE* file);
-int line_count(FILE *file);
+int line_count(FILE* file);
 
 void stat();
 

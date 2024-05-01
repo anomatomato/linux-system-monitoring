@@ -1,23 +1,25 @@
+#include "inotify-coredump.h"
+#include <fcntl.h>        /* For O_* constants */
+#include <linux/limits.h> /* For NAME_MAX */
+#include <mqueue.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/inotify.h>
-#include <unistd.h>
 #include <string.h>
-#include <mqueue.h>
-#include <fcntl.h>        /* For O_* constants */
-#include <sys/stat.h>     /* For mode constants */
-#include <linux/limits.h> /* For NAME_MAX */
-#include "inotify-coredump.h"
+#include <sys/inotify.h>
+#include <sys/stat.h> /* For mode constants */
+#include <unistd.h>
 
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
-#define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
+#define BUF_LEN                                                                \
+    (1024 *                                                                    \
+     (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 // TODO change following macros according to main.c (posix-mq-to-mqtt-bridge)
 #define MQ_PATH "/my_queue"
 #define MAX_MSG_SIZE 150
 
 /* Send message in InfluxDB Line Protocol to posix-mq-to-mqtt-bridge */
-int send_to_mq(const char *message)
+int send_to_mq(const char* message)
 {
     //! Test
     printf("send_to_mq: %s\n", message);
@@ -74,11 +76,13 @@ int inotify_coredump()
         /* Process events */
         for (int i = 0; i < len;)
         {
-            struct inotify_event *event = (struct inotify_event *)&buffer[i];
+            struct inotify_event* event = (struct inotify_event*)&buffer[i];
             if (event->len && event->mask & IN_CREATE)
             {
                 char message[MAX_MSG_SIZE];
-                snprintf(message, MAX_MSG_SIZE + 1, "New core dump file created in %s: %s\n", WATCH_DIR, event->name);
+                snprintf(message, MAX_MSG_SIZE + 1,
+                         "New core dump file created in %s: %s\n", WATCH_DIR,
+                         event->name);
 
                 //! Test
                 printf("%s\n", message);

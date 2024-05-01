@@ -1,11 +1,11 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>    /* For O_* constants */
-#include <sys/stat.h> /* For mode constants */
+#include "MQTTClient.h"
+#include <fcntl.h> /* For O_* constants */
 #include <mqueue.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "MQTTClient.h"
+#include <sys/stat.h> /* For mode constants */
+#include <unistd.h>
 
 #define MQ_PATH "/my_queue"
 #define MAX_MSG_SIZE 50
@@ -14,15 +14,18 @@
 #define TIMEOUT 10000L
 
 int main()
-{   
+{
     mq_unlink(MQ_PATH);
     char hostname[20];
     gethostname(hostname, sizeof(hostname));
     struct mq_attr attr;
-    attr.mq_maxmsg = 10;
-    attr.mq_msgsize = MAX_MSG_SIZE; 
-    // opening a message queue with write/read permission, non blocked( for testing purposes ) with MQ_PATH as its name
-    mqd_t new_queue = mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR | O_NONBLOCK), (S_IRUSR | S_IWUSR), &attr);
+    attr.mq_maxmsg  = 10;
+    attr.mq_msgsize = MAX_MSG_SIZE;
+    // opening a message queue with write/read permission, non blocked( for
+    // testing purposes ) with MQ_PATH as its name
+    mqd_t new_queue =
+        mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR | O_NONBLOCK),
+                (S_IRUSR | S_IWUSR), &attr);
     if (new_queue == -1)
     {
         perror("In mq_open ");
@@ -30,7 +33,7 @@ int main()
     }
     // testing send functionality
     char message[20] = "New Message";
-    long priority = 0;
+    long priority    = 0;
     if (mq_send(new_queue, message, sizeof(message), priority) != 0)
     {
         perror("mq_send failed");
@@ -46,14 +49,15 @@ int main()
     int rc;
 
     if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID,
-                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS)
+                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=
+        MQTTCLIENT_SUCCESS)
     {
         printf("Failed to create client, return code %d\n", rc);
         exit(EXIT_FAILURE);
     }
 
     conn_opts.keepAliveInterval = 20;
-    conn_opts.cleansession = 1;
+    conn_opts.cleansession      = 1;
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS)
     {
         printf("Failed to connect, return code %d\n", rc);
@@ -66,14 +70,15 @@ int main()
         exit(-1);
     }
 
-    pubmsg.payload = received_msg;
+    pubmsg.payload    = received_msg;
     pubmsg.payloadlen = (int)strlen(received_msg);
-    pubmsg.qos = 2;
-    pubmsg.retained = 0;
+    pubmsg.qos        = 2;
+    pubmsg.retained   = 0;
 
     char* topic = "test";
 
-    if ((rc = MQTTClient_publishMessage(client, topic, &pubmsg, &token)) != MQTTCLIENT_SUCCESS)
+    if ((rc = MQTTClient_publishMessage(client, topic, &pubmsg, &token)) !=
+        MQTTCLIENT_SUCCESS)
     {
         printf("Failed to publish message, return code %d\n", rc);
         exit(EXIT_FAILURE);
