@@ -21,6 +21,8 @@ int send_to_mq(const char *message)
 {
     //! Test
     printf("send_to_mq: %s\n", message);
+
+    // for testing the creation and writing of the message queue
     //! mqd_t mq = mq_open(MQ_PATH, O_WRONLY | O_CREAT, 0666, NULL);
 
     mqd_t mq = mq_open(MQ_PATH, O_WRONLY);
