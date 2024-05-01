@@ -1,12 +1,12 @@
 ## 1. Create coredumps on your system (for testing purposes) 
 
-In order to ==**enable coredumps**== on your system, open terminal and run
+In order to **enable coredumps** on your system, open terminal and run
 
 ```bash
 ulimit -c ulimited
 ```
 
-In order to ==**create an example coredump**== on your system, run
+In order to **create an example coredump** on your system, run
 
 ```bash
 ./infinite
