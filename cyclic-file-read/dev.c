@@ -1,19 +1,21 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include"dev.h"
+#include "dev.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-net_t* head = NULL;
+net_t* head     = NULL;
 int line_number = 0;
 
-int* insert_element(FILE* file) {
+int* insert_element(FILE* file)
+{
     char buffer[128];
     fgets(buffer, 128, file);
     fgets(buffer, 128, file);
 
     net_t* node = (net_t*)malloc(sizeof(net_t));
 
-    if (node) {
+    if (node)
+    {
         fgets(buffer, 128, file);
         printf("%s\n", buffer);
         char* token = strtok(buffer, " ");
@@ -21,7 +23,8 @@ int* insert_element(FILE* file) {
 
         node->name = token;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 10; i++)
+        {
             token = strtok(NULL, " ");
             sscanf(token, "%f", &f);
             node->stats[i] = f;
@@ -29,13 +32,15 @@ int* insert_element(FILE* file) {
 
         node->next = NULL;
 
-        if (head == NULL) {
+        if (head == NULL)
+        {
             head = node;
             return 0;
         }
 
         net_t* current = head;
-        while (current->next != NULL) {
+        while (current->next != NULL)
+        {
             current = current->next;
         }
         current->next = node;
@@ -43,19 +48,21 @@ int* insert_element(FILE* file) {
     }
     perror("No available Memory");
     return NULL;
-
 }
 
-void write_file(FILE* file) {
-
+void write_file(FILE* file)
+{
 }
 
-int line_count(FILE *file) {
+int line_count(FILE* file)
+{
     int lines = 0;
 
-    while (!feof(file)) {
+    while (!feof(file))
+    {
         int ch = fgetc(file);
-        if (ch == '\n') {
+        if (ch == '\n')
+        {
             lines++;
         }
     }
@@ -64,15 +71,18 @@ int line_count(FILE *file) {
     return lines;
 }
 
-void dev() {
+void dev()
+{
     FILE* net;
     FILE* net_out;
 
-    if ((net = fopen("/proc/dev/net", "r")) == NULL) {
+    if ((net = fopen("/proc/dev/net", "r")) == NULL)
+    {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    if ((net_out = fopen("net_out", "w")) == NULL) {
+    if ((net_out = fopen("net_out", "w")) == NULL)
+    {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
@@ -80,7 +90,8 @@ void dev() {
     line_number = line_count(net);
     printf("lines:%d\n", line_number);
 
-    for (int i = 0; i < line_number; i++) {
+    for (int i = 0; i < line_number; i++)
+    {
         insert_element(net);
     }
 
@@ -93,7 +104,8 @@ void dev() {
     free(head);
 }
 
-int main() {
+int main()
+{
     dev();
     return 0;
 }
