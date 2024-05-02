@@ -59,8 +59,7 @@ int inotify_coredump()
             if (event->len && event->mask & IN_CREATE)
             {
                 char message[MAX_MSG_SIZE];
-                snprintf(message, MAX_MSG_SIZE + 1,
-                         "New core dump file created in %s: %s\n", WATCH_DIR,
+                snprintf(message, MAX_MSG_SIZE, "%s, %s\n", WATCH_DIR,
                          event->name);
 
                 //! Test
@@ -78,9 +77,4 @@ int inotify_coredump()
     inotify_rm_watch(fd, wd);
     close(fd);
     return 0;
-}
-
-int main()
-{
-    return inotify_coredump();
 }

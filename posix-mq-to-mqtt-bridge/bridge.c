@@ -17,6 +17,12 @@
 
 int finished = 0;
 
+struct client_msg
+{
+    MQTTAsync client;
+    char* msg;
+} typedef client_msg_t;
+
 void connlost(void* context, char* cause)
 {
     MQTTAsync client                   = (MQTTAsync)context;
@@ -89,9 +95,9 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response)
     finished = 1;
 }
 
-void onConnect(void* context, MQTTAsync_successData* response)
+void onConnect(client_msg_t* context, MQTTAsync_successData* response)
 {
-    MQTTAsync client               = (MQTTAsync)context;
+    MQTTAsync client               = (MQTTAsync)context->client;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg       = MQTTAsync_message_initializer;
     int rc;
@@ -100,7 +106,7 @@ void onConnect(void* context, MQTTAsync_successData* response)
     opts.onSuccess    = onSend;
     opts.onFailure    = onSendFailure;
     opts.context      = client;
-    pubmsg.payload    = PAYLOAD;
+    pubmsg.payload    = context->msg;
     pubmsg.payloadlen = (int)strlen(PAYLOAD);
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
@@ -119,7 +125,7 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-int main(int argc, char* argv[])
+int bridge()
 {
     char hostname[20];
     gethostname(hostname, sizeof(hostname));
@@ -135,11 +141,9 @@ int main(int argc, char* argv[])
         perror("In mq_receive ");
         exit(-1);
     }
-
     MQTTAsync client;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
-
     if ((rc = MQTTAsync_create(&client, ADDRESS, CLIENTID,
                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=
         MQTTASYNC_SUCCESS)
@@ -155,11 +159,16 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
+    client_msg_t cm;
+    cm.client                   = client;
+    cm.msg                      = received_msg;
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession      = 1;
     conn_opts.onSuccess         = onConnect;
     conn_opts.onFailure         = onConnectFailure;
-    conn_opts.context           = client;
+
+    conn_opts.context = &cm;
+
     if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
@@ -168,7 +177,7 @@ int main(int argc, char* argv[])
 
     printf("Waiting for publication of %s\n"
            "on topic %s for client with ClientID: %s\n",
-           PAYLOAD, TOPIC, CLIENTID);
+           received_msg, TOPIC, CLIENTID);
 
     while (!finished)
         usleep(10000L);

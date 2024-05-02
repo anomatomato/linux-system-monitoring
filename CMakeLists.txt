@@ -13,7 +13,10 @@ add_executable(stats-recording main.c)
 
 add_subdirectory(utilities)
 add_subdirectory(posix-mq-to-mqtt-bridge)
+add_subdirectory(inotify-coredump)
 
+target_link_libraries(stats-recording PRIVATE bridge)
+target_link_libraries(stats-recording PRIVATE inotify-coredump)
 target_link_libraries(stats-recording PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
