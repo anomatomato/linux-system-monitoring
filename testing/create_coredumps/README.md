@@ -3,7 +3,7 @@
 In order to **enable coredumps** on your system, open terminal and run
 
 ```bash
-ulimit -c ulimited
+ulimit -c unlimited
 ```
 
 In order to **create an example coredump** on your system, run
