@@ -1,6 +1,13 @@
 ## 1. Setup
 
+### Clone the repository
+
+```bash
+git clone git@gitlab.ibr.cs.tu-bs.de:cm-courses/sep/groups/ss24/cm0/stats-recording.git
+```
+
 ### Install Linux Developer Tools
+
 - Debian, Ubuntu, popOS, and other Debian-based distributions:
   
 ```bash
@@ -26,35 +33,37 @@ git clone https://github.com/microsoft/vcpkg
 
 ### VSCode with CMake Tools and vcpkg
 - Install the **C/C++ Extension** and the **CMake Extension** by Microsoft
+- Open `stats-recording` in vscode with *File>Open Folder* or in terminal:
+   
+  ```bash
+  cd path/to/stats-recording  #insert path/to/
+  code .
+  ```
+
 - Add the following to your workspace `settings.json` will make CMake Tools automatically use vcpkg for libraries:
 
 ```json
-// typically in a ".vscode" folder
 {
   "cmake.configureSettings": {
     "CMAKE_TOOLCHAIN_FILE": "[vcpkg root]/scripts/buildsystems/vcpkg.cmake"
   }
 }
 ```
-
-It should look something like this:
+- `settings.json` typically in a `.vscode` folder
+- It should look something like this:
 
 ```json
 {
   "cmake.configureSettings": {
     "CMAKE_TOOLCHAIN_FILE": "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
   },
-  // other settings
+  "other.settings":{
+
+  }
 }
 ```
 
 Finally configure the include paths. This tells the IntelliSense where to look for header files:
-  1. **Open `stats-recording` in vscode** with *File>Open Folder* or in terminal:
-   
-  ```bash
-  cd path/to/stats-recording  #insert path/to/
-  code .
-  ```
 
   1. **Access the Command Palette**: Press `F1`, `⇧⌘P` or `Ctrl+Shift+P` to open the Command Palette
   2. **Edit Configurations**: 
@@ -70,3 +79,4 @@ Example:
       ]
       ```
 
+***Good luck*** :sunglasses:
