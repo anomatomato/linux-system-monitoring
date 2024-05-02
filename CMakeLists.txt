@@ -11,7 +11,10 @@ find_package(eclipse-paho-mqtt-c CONFIG REQUIRED)
 
 add_executable(stats-recording main.c)
 
+add_executable(bridge ./posix-mq-to-mqtt-bridge/bridge.c)
+
 target_link_libraries(stats-recording PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
+target_link_libraries(bridge PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
