@@ -127,20 +127,27 @@ int messageArrived(void* context, char* topicName, int topicLen,
 
 int bridge()
 {
+    /* Destory a possible old queue */
+    mq_unlink(MQ_PATH);
+
     char hostname[20];
     gethostname(hostname, sizeof(hostname));
     struct mq_attr attr;
     attr.mq_maxmsg  = 10;
     attr.mq_msgsize = MAX_MSG_SIZE;
     char received_msg[MAX_MSG_SIZE + 1];
-    mqd_t new_queue =
-        mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR | O_NONBLOCK),
-                (S_IRUSR | S_IWUSR), &attr);
+    mqd_t new_queue = mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR),
+                              (S_IRUSR | S_IWUSR), &attr);
+
     if (mq_receive(new_queue, received_msg, sizeof(received_msg), NULL) == -1)
     {
         perror("In mq_receive ");
+        mq_unlink(MQ_PATH);
         exit(-1);
     }
+
+    printf("Received message: %s\n", received_msg);
+
     MQTTAsync client;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
@@ -149,6 +156,7 @@ int bridge()
         MQTTASYNC_SUCCESS)
     {
         printf("Failed to create client object, return code %d\n", rc);
+        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
 
@@ -156,6 +164,7 @@ int bridge()
                                      NULL)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to set callback, return code %d\n", rc);
+        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
 
@@ -172,15 +181,17 @@ int bridge()
     if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
+        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
 
-    printf("Waiting for publication of %s\n"
-           "on topic %s for client with ClientID: %s\n",
+    printf("Waiting for publication of \"%s\" on topic \"%s\" for client "
+           "with ClientID: %s\n",
            received_msg, TOPIC, CLIENTID);
 
     while (!finished)
         usleep(10000L);
     MQTTAsync_destroy(&client);
+    mq_unlink(MQ_PATH);
     return rc;
 }
