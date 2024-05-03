@@ -1,5 +1,5 @@
-#include "../utilities/mq.h"
 #include "MQTTAsync.h"
+#include "mq.h"
 #include <fcntl.h>
 #include <mqueue.h>
 #include <stdio.h>
@@ -138,6 +138,13 @@ int bridge()
     char received_msg[MAX_MSG_SIZE + 1];
     mqd_t new_queue = mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR),
                               (S_IRUSR | S_IWUSR), &attr);
+    if (new_queue == -1)
+    {
+        perror("mq_open failed");
+        return -1;
+    }
+
+    printf("Waiting for message on queue: %s ...\n", MQ_PATH);
 
     if (mq_receive(new_queue, received_msg, sizeof(received_msg), NULL) == -1)
     {
