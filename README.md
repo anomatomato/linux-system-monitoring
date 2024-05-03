@@ -26,7 +26,6 @@ sudo git clone https://github.com/microsoft/vcpkg
 sudo ./vcpkg/bootstrap-vcpkg.sh
 ```
 
-- We will name `[vcpkg root]` as the directory, where you installed vcpkg, e.g. `/opt`
 - Next install the `paho-mqtt` library:
 
 ```bash
@@ -47,16 +46,6 @@ sudo ./vcpkg/vcpkg install paho-mqtt
 ```json
 {
   "cmake.configureSettings": {
-    "CMAKE_TOOLCHAIN_FILE": "[vcpkg root]/scripts/buildsystems/vcpkg.cmake"
-  }
-}
-```
-- `settings.json` typically in a `.vscode` folder
-- It should look something like this:
-
-```json
-{
-  "cmake.configureSettings": {
     "CMAKE_TOOLCHAIN_FILE": "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
   },
   "other.settings":{
@@ -65,19 +54,21 @@ sudo ./vcpkg/vcpkg install paho-mqtt
 }
 ```
 
+- `settings.json` typically in a `.vscode` folder
+
 Finally configure the include paths. This tells the IntelliSense where to look for header files:
 
   1. **Access the Command Palette**: Press `F1`, `⇧⌘P` or `Ctrl+Shift+P` to open the Command Palette
   2. **Edit Configurations**: 
      1. Type `C/C++:Edit configurations(UI)` scroll down to *Include Path* and insert 
-     `[vcpkg root]/vcpkg/installed/[architecture]/include`. Architecture can be e.g. *x64-linux* or *arm-64*
+     `/opt/vcpkg/installed/[architecture]/include`. Architecture can be e.g. *x64-linux* or *arm-64*
      2. Alternative: Type `C/C++: Edit Configurations (JSON)` and edit the `c_cpp_properties.json` file instead.
 Example:
      
       ```json
       "includePath": [
         "${workspaceFolder}/**",
-        "[vcpkg root]/vcpkg/installed/[architecture]/include"
+        "/opt/vcpkg/installed/[architecture]/include"
       ]
       ```
 
