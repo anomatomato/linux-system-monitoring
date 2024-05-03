@@ -13,10 +13,6 @@ typedef struct cpu
     struct cpu* next;
 } cpu_t;
 
-void create_list(FILE *file, int lines);
-void percentages(int lines);
-void write_file(FILE* file_i, FILE* file_o, int lines, int btime);
-void free_list();
-void stat(int btime);
+void stat(int lines, char* btime);
 
 #endif

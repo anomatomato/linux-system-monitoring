@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include"../include/common.h"
 #include"../include/stat.h"
 
 cpu_t* stat_head = NULL;
@@ -114,26 +113,19 @@ void free_list() {
     }
 }
 
-void stat(int btime) {
+void stat(int lines, char* btime) {
+
     FILE* stat;
-    FILE* stat_perc;
 
     if ((stat = fopen(FILE_IN, "r")) == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    if ((stat_perc = fopen(FILE_OUT, "w")) == NULL) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
-
-    int lines = line_count(stat);
 
     create_list(stat, lines);
     percentages(lines);
-    write_file(stat, stat_perc, lines, btime);
+    //write_file(stat, stat_perc, lines, btime);
     free_list();
 
     fclose(stat);
-    fclose(stat_perc);
 }

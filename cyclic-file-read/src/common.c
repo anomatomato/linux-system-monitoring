@@ -16,32 +16,3 @@ int line_count(FILE* file) {
     rewind(file);
     return lines;
 }
-
-int get_btime() {
-    FILE* stat;
-    char buffer[128];
-    char* token;
-    int btime;
-
-    if ((stat = fopen("/proc/stat", "r")) == NULL) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
-
-    int lines = line_count(stat);
-
-    for (int i = 0; i < (lines-7); i++) {
-        fgets(buffer, 128, stat);
-    }
-
-    fscanf(stat, "%*[^\n]");
-    fgets(buffer, 128, stat);
-    fgets(buffer, 128, stat);
-
-    token = strtok(buffer, " ");
-    token = strtok(NULL, " ");
-
-    sscanf(token, "%d", &btime);
-
-    return btime;
-}

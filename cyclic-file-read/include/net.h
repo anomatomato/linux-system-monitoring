@@ -3,11 +3,6 @@
 
 #include<stdio.h>
 
-typedef struct net
-{
-    char* name;
-    int data[16];
-    struct net* next;
-} net_t;
+void net(char* btime);
 
 #endif

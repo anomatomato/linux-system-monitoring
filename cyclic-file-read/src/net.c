@@ -1,77 +1,74 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include"../include/common.h"
 #include"../include/net.h"
 
-net_t* net_head = NULL;
+void write_message(FILE* file, int lines, char* btime) {
+    char buffer[256];
+    fgets(buffer, 256, file);
+    fgets(buffer, 256, file);
 
-int* insert_element(FILE* file) {
-    char buffer[128];
-    fgets(buffer, 128, file);
-    fgets(buffer, 128, file);
+    char form1[10][32] = {"proc-net-dev,interface=\0", ",direction=receive bytes=\0", ",packets=\0", ",errs=\0", ",drop=\0", ",fifo=\0", ",frame=\0", ",compressed=\0", ",multicast=\0", " \0"};
+    char form2[10][32] = {"proc-net-dev,interface=\0", ",direction=transmit bytes=\0", ",packets=\0", ",errs=\0", ",drop=\0", ",fifo=\0", ",colls=\0", ",carrier=\0", ",compressed=\0", " \0"};
 
-    net_t* node = (net_t*)malloc(sizeof(net_t));
+    char message[256];
+    char name[32];
+    char* token;
 
-    if (node) {
-        fgets(buffer, 128, file);
-        printf("%s\n", buffer);
-        char* token = strtok(buffer, " ");
-        float f;
+    for (int l = 0; l < lines - 2; l++) {
 
-        node->name = token;
+        message[0] = '\0';
+        name[0] = '\0';
+        strcat(message, form1[0]);
 
-        for (int i = 0; i < 10; i++) {
+        fgets(buffer, 256, file);
+        token = strtok(buffer, " ");
+
+        token[strlen(token) -1] = '\0';
+        strcat(message, token);
+        strcpy(name, token);
+
+        for (int i = 1; i < 9; i++) {
+            strcat(message, form1[i]);
             token = strtok(NULL, " ");
-            sscanf(token, "%f", &f);
-            node->data[i] = f;
+            strcat(message, token);
         }
+        strcat(message, form1[9]);
 
-        node->next = NULL;
+        strcat(message, btime);
+        printf("%s\n", message);
 
-        if (net_head == NULL) {
-            net_head = node;
-            return 0;
+        message[0] = '\0';
+        strcat(message, form1[0]);
+        strcat(message, name);
+
+        for (int i = 1; i < 9; i++) {
+            strcat(message, form2[i]);
+            token = strtok(NULL, " ");
+            strcat(message, token);
         }
+        strcat(message, form2[9]);
 
-        net_t* current = net_head;
-        while (current->next != NULL) {
-            current = current->next;
-        }
-        current->next = node;
-        return 0;
+        strcat(message, btime);
+        printf("%s\n", message);
     }
-    perror("No available Memory");
-    return NULL;
-
 }
 
-void write_file(FILE* file) {
-
-}
-
-void dev() {
+void net(char* btime) {
     FILE* net;
-    FILE* net_out;
+    int lines;
+    char time[16];
+    strcpy(time, btime);
 
-    if ((net = fopen("/proc/dev/net", "r")) == NULL) {
+    if ((net = fopen("/proc/net/dev", "r")) == NULL) {
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    if ((net_out = fopen("net_out", "w")) == NULL) {
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }
 
-    int lines = line_count(net);
-    printf("lines:%d\n", lines);
+    lines = line_count(net);
 
-    for (int i = 0; i < lines; i++) {
-        insert_element(net);
-    }
-
-    write_file(net_out);
+    write_message(net, lines, time);
 
     fclose(net);
-    fclose(net_out);
-    free(net_head);
 }

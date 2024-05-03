@@ -4,6 +4,5 @@
 #include<stdio.h>
 
 int line_count(FILE* file);
-int get_btime();
 
 #endif
