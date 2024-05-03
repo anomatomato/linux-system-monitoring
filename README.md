@@ -61,7 +61,8 @@ Finally configure the include paths. This tells the IntelliSense where to look f
   1. **Access the Command Palette**: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
   2. **Edit Configurations**: 
      1. Type `C/C++:Edit configurations(UI)` scroll down to *Include Path* and insert 
-     `/opt/vcpkg/installed/[architecture]/include`. Architecture can be e.g. *x64-linux* or *arm-64*
+     `/opt/vcpkg/installed/[architecture]/include`. 
+        - ***Architecture*** can be e.g. *x64-linux* or *arm-64*
      2. Alternative: Type `C/C++:Edit Configurations (JSON)` and edit the `c_cpp_properties.json` file instead.
 Example:
      
