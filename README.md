@@ -21,14 +21,16 @@ sudo apt-get install build-essential tar curl zip unzip
 - First download and bootstrap vcpkg itself in an open terminal:
 
 ```bash
-git clone https://github.com/microsoft/vcpkg
-./vcpkg/bootstrap-vcpkg.sh
+cd /opt
+sudo git clone https://github.com/microsoft/vcpkg
+sudo ./vcpkg/bootstrap-vcpkg.sh
 ```
-- We will name `[vcpkg root]` as the directory, where you installed vcpkg
+
+- We will name `[vcpkg root]` as the directory, where you installed vcpkg, e.g. `/opt`
 - Next install the `paho-mqtt` library:
 
 ```bash
-./vcpkg/vcpkg install paho-mqtt
+sudo ./vcpkg/vcpkg install paho-mqtt
 ```
 
 ### VSCode with CMake Tools and vcpkg
@@ -78,5 +80,54 @@ Example:
         "[vcpkg root]/vcpkg/installed/[architecture]/include"
       ]
       ```
+
+## 2. Build and Run
+
+- Build:
+  
+```bash
+mkdir build   # if not already exists
+cd build
+cmake ..
+make
+```
+
+- Run:
+```bash
+./stats-recording
+```
+
+## 3. Testing
+
+### Inotify-coredump
+
+- This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
+- First build the project
+- For the following, you will need 3 terminals in `stats-recording`:
+
+  **Terminal 1**:
+
+  ```bash
+  cd build
+  ./stats-recording
+  ```
+
+  **Terminal 2**:
+
+  ```bash
+  cd build/Testing
+  ./inotify-coredump-test
+  ```
+
+  **Terminal 3**:
+
+  ```bash
+  cd testing/create_coredumps
+  ./segmentation_fault
+  ```
+
+- Now you should see the output in *Terminal 1* and *Terminal 2*
+
+- For more information read the `README.md` in `testing/create_coredumps`
 
 ***Good luck*** :sunglasses:
