@@ -90,6 +90,11 @@ make
 ./stats-recording
 ```
 
+Alternatively use the **CMake-Extension** in VSCode:
+- Open the Command Palette and try following commands:
+  * *CMake:Build*
+  * *CMake:Debug*
+
 ## 3. Testing
 
 ### Inotify-coredump
