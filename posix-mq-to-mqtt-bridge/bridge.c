@@ -169,7 +169,7 @@ int register_all_queues()
     return epid;
 }
 
-int connect_to_broker(MQTTAsync client, MQTTAsync_callOptions conn_opts, char* received_msg)
+int connect_to_broker(MQTTAsync client, MQTTAsync_connectOptions conn_opts, char* received_msg)
 {
     int rc;
     client_msg_t cm;
@@ -188,10 +188,10 @@ int connect_to_broker(MQTTAsync client, MQTTAsync_callOptions conn_opts, char* r
         mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
-    return rc
+    return rc;
 }
 
-void receive_and_push_messages(MQTTAsync client, MQTTAsync_callOptions conn_opts, int epollfd)
+void receive_and_push_messages(MQTTAsync client, MQTTAsync_connectOptions conn_opts, int epollfd)
 {
     struct epoll_event ev, events[MAX_EVENTS];
     ev.events = EPOLLIN;
