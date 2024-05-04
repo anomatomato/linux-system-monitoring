@@ -6,9 +6,10 @@
 #include <sys/stat.h> /* For mode constants */
 #include <time.h>
 
-int send_to_mq(const char* message)
+int send_to_mq(const char* message, const char* mq_path)
 {
-    mqd_t mq = mq_open(MQ_PATH, O_WRONLY);
+    printf("send_to_mq: %s\n", message);
+    mqd_t mq = mq_open(mq_path, O_WRONLY);
     if (mq == -1)
     {
         perror("mq_open failed");
@@ -22,6 +23,7 @@ int send_to_mq(const char* message)
         return -1;
     }
     mq_close(mq);
+    printf("send_to_mq done\n");
     return 0;
 }
 
