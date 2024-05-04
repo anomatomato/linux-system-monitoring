@@ -126,7 +126,7 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-char* init_mq(char* mq_path)
+mqd_t init_mq(char* mq_path)
 {
     struct mq_attr attr;
     attr.mq_maxmsg  = 10;
@@ -153,7 +153,6 @@ int register_all_queues()
     if (epid == -1)
     {
         perror("epoll_create1");
-        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
     for (int i = 0; i < NUM_QUEUES; i++)
@@ -185,7 +184,6 @@ int connect_to_broker(MQTTAsync client, MQTTAsync_connectOptions conn_opts, char
     if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
-        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
     return rc;
@@ -211,7 +209,6 @@ void receive_and_push_messages(MQTTAsync client, MQTTAsync_connectOptions conn_o
                            sizeof(received_msg), NULL) == -1)
             {
                 perror("In mq_receive ");
-                mq_unlink(MQ_PATH);
                 exit(-1);
             }
             if (connect_to_broker(client, conn_opts, received_msg) == -1){
@@ -222,7 +219,7 @@ void receive_and_push_messages(MQTTAsync client, MQTTAsync_connectOptions conn_o
     }
 }
 
-void bridge()
+int bridge()
 {
     char received_msg[MAX_MSG_SIZE + 1];
     int epid = register_all_queues();
@@ -247,7 +244,6 @@ void bridge()
                                      NULL)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to set callback, return code %d\n", rc);
-        mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
 
@@ -260,6 +256,5 @@ void bridge()
     while (!finished)
         usleep(10000L);
     MQTTAsync_destroy(&client);
-    mq_unlink(MQ_PATH);
     return rc;
 }
