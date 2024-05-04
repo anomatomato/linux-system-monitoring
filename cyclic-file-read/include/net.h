@@ -3,6 +3,8 @@
 
 #include<stdio.h>
 
+#define NET_FILE "/proc/net/dev"
+
 void net(char* btime);
 
 #endif
