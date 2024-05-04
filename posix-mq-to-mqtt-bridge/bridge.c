@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -125,38 +126,99 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-int bridge()
+char* init_mq(char* mq_path)
 {
-    /* Destory a possible old queue */
-    mq_unlink(MQ_PATH);
-
-    char hostname[20];
-    gethostname(hostname, sizeof(hostname));
     struct mq_attr attr;
     attr.mq_maxmsg  = 10;
     attr.mq_msgsize = MAX_MSG_SIZE;
-    char received_msg[MAX_MSG_SIZE + 1];
-    mqd_t new_queue = mq_open(MQ_PATH, (__O_CLOEXEC | O_CREAT | O_RDWR),
+    mqd_t new_queue = mq_open(mq_path, (__O_CLOEXEC | O_CREAT | O_RDWR),
                               (S_IRUSR | S_IWUSR), &attr);
-    if (new_queue == -1)
+    return new_queue;
+}
+
+char* add_hostname_to_msg(char* msg)
+{
+    char hostname[20];
+    gethostname(hostname, sizeof(hostname));
+    char* tag = "host=";
+    strcat(tag, hostname);
+    strcat(tag, msg);
+    return msg;
+}
+
+void register_all_queues()
+{
+    int epid = epoll_create1(0);
+    for (int i = 0; i < NUM_QUEUES; i++)
     {
-        perror("mq_open failed");
-        return -1;
+        mqd_t new_queue = init_mq();
+        if (new_queue == -1)
+        {
+            perror("mq_open failed");
+            return -1;
+        }
+        epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, NULL);
     }
+    return epid;
+}
 
-    printf("Waiting for message on queue: %s ...\n", MQ_PATH);
+void connect_to_broker(MQTTAsync client, char* received_msg)
+{
+    client_msg_t cm;
+    cm.client                   = client;
+    cm.msg                      = received_msg;
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession      = 1;
+    conn_opts.onSuccess         = onConnect;
+    conn_opts.onFailure         = onConnectFailure;
 
-    if (mq_receive(new_queue, received_msg, sizeof(received_msg), NULL) == -1)
+    conn_opts.context = &cm;
+
+    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
-        perror("In mq_receive ");
+        printf("Failed to start connect, return code %d\n", rc);
         mq_unlink(MQ_PATH);
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
+}
+
+void receive_and_push_messages(MQTTAsync client)
+{
+    for (;;)
+    {
+        nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+        if (nfds == -1)
+        {
+            perror("epoll_wait");
+            exit(EXIT_FAILURE);
+        }
+
+        for (n = 0; n < nfds; ++n)
+        {   
+            char* received_msg;
+            if (mq_receive(events[n].data.fd, received_msg,
+                           sizeof(received_msg), NULL) == -1)
+            {
+                perror("In mq_receive ");
+                mq_unlink(MQ_PATH);
+                exit(-1);
+            }
+            connect_to_broker(client, received_msg);
+        }
+    }
+}
+
+void bridge()
+{
+    char received_msg[MAX_MSG_SIZE + 1];
+    int epid = register_all_queues();
+    printf("Waiting for message on queue: %s ...\n", MQ_PATH);
 
     printf("Received message: %s\n", received_msg);
 
     MQTTAsync client;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+
     int rc;
     if ((rc = MQTTAsync_create(&client, ADDRESS, CLIENTID,
                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=
@@ -175,22 +237,7 @@ int bridge()
         exit(EXIT_FAILURE);
     }
 
-    client_msg_t cm;
-    cm.client                   = client;
-    cm.msg                      = received_msg;
-    conn_opts.keepAliveInterval = 20;
-    conn_opts.cleansession      = 1;
-    conn_opts.onSuccess         = onConnect;
-    conn_opts.onFailure         = onConnectFailure;
-
-    conn_opts.context = &cm;
-
-    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
-    {
-        printf("Failed to start connect, return code %d\n", rc);
-        mq_unlink(MQ_PATH);
-        exit(EXIT_FAILURE);
-    }
+    receive_and_push_messages(client);
 
     printf("Waiting for publication of \"%s\" on topic \"%s\" for client "
            "with ClientID: %s\n",
