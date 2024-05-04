@@ -15,7 +15,7 @@
 #define PAYLOAD "Hello World!"
 #define QOS 2
 #define TIMEOUT 10000L
-
+#define MAX_EVENTS 10
 int finished = 0;
 
 struct client_msg
@@ -149,6 +149,13 @@ char* add_hostname_to_msg(char* msg)
 void register_all_queues()
 {
     int epid = epoll_create1(0);
+    
+    if (epollfd == -1)
+    {
+        perror("epoll_create1");
+        mq_unlink(MQ_PATH);
+        exit(EXIT_FAILURE);
+    }
     for (int i = 0; i < NUM_QUEUES; i++)
     {
         mqd_t new_queue = init_mq();
@@ -182,11 +189,13 @@ void connect_to_broker(MQTTAsync client, char* received_msg)
     }
 }
 
-void receive_and_push_messages(MQTTAsync client)
+void receive_and_push_messages(MQTTAsync client, int epollfd)
 {
+    struct epoll_event ev, events[MAX_EVENTS];
+    ev.events = EPOLLIN;
     for (;;)
     {
-        nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
+        nfds = epoll_wait(epollfd, &events, MAX_EVENTS, -1);
         if (nfds == -1)
         {
             perror("epoll_wait");
