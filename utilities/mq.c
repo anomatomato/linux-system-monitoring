@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h> /* For mode constants */
+#include <time.h>
 
-/* Send message in InfluxDB Line Protocol to posix-mq-to-mqtt-bridge */
 int send_to_mq(const char* message)
 {
     mqd_t mq = mq_open(MQ_PATH, O_WRONLY);
@@ -23,4 +23,9 @@ int send_to_mq(const char* message)
     }
     mq_close(mq);
     return 0;
+}
+
+long long get_timestamp()
+{
+    return (long long)time(NULL) * 1000000000;
 }
