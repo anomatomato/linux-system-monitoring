@@ -15,9 +15,6 @@
 #define BUF_LEN                                                                \
     (1024 *                                                                    \
      (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
-// TODO change following macros according to main.c (posix-mq-to-mqtt-bridge)
-
-/* Send message in InfluxDB Line Protocol to posix-mq-to-mqtt-bridge */
 
 int inotify_coredump()
 {
@@ -59,11 +56,9 @@ int inotify_coredump()
             if (event->len && event->mask & IN_CREATE)
             {
                 char message[MAX_MSG_SIZE];
-                snprintf(message, MAX_MSG_SIZE, "%s, %s\n", WATCH_DIR,
-                         event->name);
-
-                //! Test
-                printf("%s\n", message);
+                snprintf(message, MAX_MSG_SIZE,
+                         "coredump,path=%s corefile=%s %lld", WATCH_DIR,
+                         event->name, get_timestamp());
 
                 if (send_to_mq(message) == -1)
                 {
