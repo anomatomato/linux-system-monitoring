@@ -146,11 +146,11 @@ char* add_hostname_to_msg(char* msg)
     return msg;
 }
 
-void register_all_queues()
+int register_all_queues()
 {
     int epid = epoll_create1(0);
     
-    if (epollfd == -1)
+    if (epid == -1)
     {
         perror("epoll_create1");
         mq_unlink(MQ_PATH);
@@ -158,7 +158,7 @@ void register_all_queues()
     }
     for (int i = 0; i < NUM_QUEUES; i++)
     {
-        mqd_t new_queue = init_mq();
+        mqd_t new_queue = init_mq(MESSAGE_QUEUES[i]);
         if (new_queue == -1)
         {
             perror("mq_open failed");
@@ -169,8 +169,9 @@ void register_all_queues()
     return epid;
 }
 
-void connect_to_broker(MQTTAsync client, char* received_msg)
+int connect_to_broker(MQTTAsync client, MQTTAsync_callOptions conn_opts, char* received_msg)
 {
+    int rc;
     client_msg_t cm;
     cm.client                   = client;
     cm.msg                      = received_msg;
@@ -187,22 +188,23 @@ void connect_to_broker(MQTTAsync client, char* received_msg)
         mq_unlink(MQ_PATH);
         exit(EXIT_FAILURE);
     }
+    return rc
 }
 
-void receive_and_push_messages(MQTTAsync client, int epollfd)
+void receive_and_push_messages(MQTTAsync client, MQTTAsync_callOptions conn_opts, int epollfd)
 {
     struct epoll_event ev, events[MAX_EVENTS];
     ev.events = EPOLLIN;
     for (;;)
     {
-        nfds = epoll_wait(epollfd, &events, MAX_EVENTS, -1);
+        int nfds = epoll_wait(epollfd, &events, MAX_EVENTS, -1);
         if (nfds == -1)
         {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
 
-        for (n = 0; n < nfds; ++n)
+        for (int n = 0; n < nfds; ++n)
         {   
             char* received_msg;
             if (mq_receive(events[n].data.fd, received_msg,
@@ -212,7 +214,10 @@ void receive_and_push_messages(MQTTAsync client, int epollfd)
                 mq_unlink(MQ_PATH);
                 exit(-1);
             }
-            connect_to_broker(client, received_msg);
+            if (connect_to_broker(client, conn_opts, received_msg) == -1){
+                perror("connect_to_broker failed");
+                exit(EXIT_FAILURE);
+            }
         }
     }
 }
@@ -246,7 +251,7 @@ void bridge()
         exit(EXIT_FAILURE);
     }
 
-    receive_and_push_messages(client);
+    receive_and_push_messages(client, conn_opts, epid);
 
     printf("Waiting for publication of \"%s\" on topic \"%s\" for client "
            "with ClientID: %s\n",
