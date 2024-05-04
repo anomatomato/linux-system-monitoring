@@ -60,10 +60,13 @@ int inotify_coredump()
                          "coredump,path=%s corefile=%s %lld", WATCH_DIR,
                          event->name, get_timestamp());
 
-                if (send_to_mq(message) == -1)
+                printf("%s\n", message);
+
+                if (send_to_mq(message, MESSAGE_QUEUES[0]) == -1)
                 {
                     perror("send_to_mq failed");
                 }
+                printf("After send_to_mq\n");
             }
             i += EVENT_SIZE + event->len;
         }
