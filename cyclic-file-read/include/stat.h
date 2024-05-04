@@ -3,16 +3,14 @@
 
 #include<stdio.h>
 
-#define FILE_IN "/proc/stat"
-#define FILE_OUT "stat_perc"
+#define STAT_FILE "/proc/stat"
 
-typedef struct cpu
-{
-    int name;
-    float stats[10];
-    struct cpu* next;
-} cpu_t;
+typedef struct Cpu {                    /*struct, da unterschiedliche kernanzahl und werte müssen bearbeitet werden*/
+        int name;
+        float stats[10];
+        struct Cpu* next;
+} Cpu_t;
 
-void stat(int lines, char* btime);
+void stat(char* btime);
 
 #endif
