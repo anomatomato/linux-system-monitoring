@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 #define ADDRESS "tcp://localhost:1883/"
-#define CLIENTID "ExampleClientPub"
+#define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
 #define PAYLOAD "Hello World!"
 #define QOS 2
@@ -109,9 +109,10 @@ void onConnect(client_msg_t* context, MQTTAsync_successData* response)
     opts.onFailure    = onSendFailure;
     opts.context      = client;
     pubmsg.payload    = context->msg;
-    pubmsg.payloadlen = (int)strlen(PAYLOAD);
+    pubmsg.payloadlen = MAX_MSG_SIZE;
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
+
     if ((rc = MQTTAsync_sendMessage(client, TOPIC, &pubmsg, &opts)) !=
         MQTTASYNC_SUCCESS)
     {
@@ -129,7 +130,6 @@ int messageArrived(void* context, char* topicName, int topicLen,
 
 char* init_mq(char* mq_path)
 {
-    mq_unlink(mq_path);
     struct mq_attr attr;
     attr.mq_maxmsg  = 10;
     attr.mq_msgsize = MAX_MSG_SIZE;
@@ -139,14 +139,14 @@ char* init_mq(char* mq_path)
     return new_queue;
 }
 
-char* add_hostname_to_msg(char* msg)
+void add_hostname_to_msg(char* msg)
 {
     char hostname[20];
     gethostname(hostname, sizeof(hostname));
-    char* tag = "host=";
+    char tag[6 + sizeof(hostname)] = "host=";
     strcat(tag, hostname);
-    strcat(tag, msg);
-    return msg;
+    strcat(msg, " ");
+    strcat(msg, tag);
 }
 
 int register_all_queues()
@@ -173,9 +173,11 @@ int register_all_queues()
     return epid;
 }
 
-int connect_to_broker(MQTTAsync client, MQTTAsync_connectOptions conn_opts,
+int connect_to_broker(MQTTAsync client,
                       char* received_msg)
 {
+    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+
     int rc;
     client_msg_t cm;
     cm.client                   = client;
@@ -195,8 +197,7 @@ int connect_to_broker(MQTTAsync client, MQTTAsync_connectOptions conn_opts,
     return rc;
 }
 
-void receive_and_push_messages(MQTTAsync client,
-                               MQTTAsync_connectOptions conn_opts, int epollfd, struct epoll_event* events)
+void receive_and_push_messages(MQTTAsync client, int epollfd, struct epoll_event* events)
 {
     for (;;)
     {
@@ -217,13 +218,15 @@ void receive_and_push_messages(MQTTAsync client,
                 perror("In mq_receive ");
                 exit(-1);
             }
+            add_hostname_to_msg(&received_msg);
+
             printf("received message: %s\n", &received_msg);
-            if (connect_to_broker(client, conn_opts, received_msg) == -1)
+
+            if (connect_to_broker(client, &received_msg) == -1)
             {
                 perror("connect_to_broker failed");
                 exit(EXIT_FAILURE);
             }
-            printf("After connect_to_borker\n");
         }
     }
 }
@@ -235,7 +238,6 @@ void bridge()
     int epid = register_all_queues();
     printf("Bridge is running\n");
     MQTTAsync client;
-    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
     int rc;
     if ((rc = MQTTAsync_create(&client, ADDRESS, CLIENTID,
@@ -253,11 +255,7 @@ void bridge()
         exit(EXIT_FAILURE);
     }
 
-    receive_and_push_messages(client, conn_opts, epid, events);
-
-    printf("Waiting for publication of \"%s\" on topic \"%s\" for client "
-           "with ClientID: %s\n",
-           received_msg, TOPIC, CLIENTID);
+    receive_and_push_messages(client, epid, events);
 
     while (!finished)
         usleep(10000L);
