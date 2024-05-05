@@ -6,6 +6,15 @@ In order to **enable coredumps** on your system, open terminal and run
 ulimit -c unlimited
 ```
 
+if you don't have the folder `.coredump`, create it:
+```bash
+mkdir ~/.coredump
+```
+
+```bash
+sudo sysctl -w kernel.core_pattern=/home/$USER/.coredump/%E.%t.core
+```
+
 In order to **create an example coredump** on your system, run
 
 ```bash
