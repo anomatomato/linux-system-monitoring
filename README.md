@@ -110,13 +110,6 @@ Alternatively use the **CMake-Extension** in VSCode:
   ./stats-recording
   ```
 
-  **Terminal 2**:
-
-  ```bash
-  cd build/Testing
-  ./inotify-coredump-test
-  ```
-
   **Terminal 3**:
 
   ```bash
