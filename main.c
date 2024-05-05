@@ -1,25 +1,33 @@
 #include "bridge.h"
 #include "inotify-coredump.h"
 #include <pthread.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+
 int main()
 {
-
-    pthread_t main_thread;
+    pthread_t bridge_thread, inotify_thread;
 
     printf("Before creation\n");
-    int result = pthread_create(&main_thread, NULL, bridge, NULL);
+
+    int rc1 = pthread_create(&bridge_thread, NULL, bridge, NULL);
+    int rc2 = pthread_create(&inotify_thread, NULL, inotify_coredump, NULL);
+    
     printf("After creation\n");
 
-    if (result != 0)
+    if (rc1 != 0)
     {
-        perror("pthread_create failed");
+        perror("pthread_create for bridge failed");
+        exit(-1);
+    }
+    if (rc2 != 0)
+    {
+        perror("pthread_create for inotify_coredump failed");
         exit(-1);
     }
 
-    pthread_join(main_thread, NULL);
-    // pthread_t inotify_coredump_thread;
-    // pthread_create(&inotify_coredump_thread, NULL, inotify_coredump, NULL);
-    printf("Last creation\n");
 
+    while(1);
     return 0;
 }

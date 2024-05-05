@@ -20,7 +20,7 @@ int inotify_coredump()
 {
     int fd, wd, len;
     char buffer[BUF_LEN];
-
+    printf("I am running in inotify_coredump\n");
     /* Initialize inotify instance */
     fd = inotify_init();
     if (fd < 0)
@@ -53,8 +53,10 @@ int inotify_coredump()
         for (int i = 0; i < len;)
         {
             struct inotify_event* event = (struct inotify_event*)&buffer[i];
+            printf("looping\n");
             if (event->len && event->mask & IN_CREATE)
             {
+                printf("I am here in if block\n");
                 char message[MAX_MSG_SIZE];
                 snprintf(message, MAX_MSG_SIZE,
                          "coredump,path=%s corefile=%s %lld", WATCH_DIR,

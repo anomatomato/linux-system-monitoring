@@ -8,6 +8,7 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #define ADDRESS "tcp://localhost:1883/"
 #define CLIENTID "ExampleClientPub"
@@ -134,7 +135,6 @@ char* init_mq(char* mq_path)
     mqd_t new_queue = mq_open(mq_path, (__O_CLOEXEC | O_CREAT | O_RDWR),
                               (S_IRUSR | S_IWUSR), &attr);
 
-    printf("Created mq: %s\n", mq_path);
     return new_queue;
 }
 
@@ -235,7 +235,7 @@ void bridge()
 {
     char received_msg[MAX_MSG_SIZE + 1];
     int epid = register_all_queues();
-
+    printf("Bridge is running\n");
     MQTTAsync client;
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
