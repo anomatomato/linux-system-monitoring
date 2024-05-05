@@ -9,12 +9,9 @@ int main()
 {
     pthread_t bridge_thread, inotify_thread;
 
-    printf("Before creation\n");
-
     int rc1 = pthread_create(&bridge_thread, NULL, bridge, NULL);
     int rc2 = pthread_create(&inotify_thread, NULL, inotify_coredump, NULL);
     
-    printf("After creation\n");
 
     if (rc1 != 0)
     {

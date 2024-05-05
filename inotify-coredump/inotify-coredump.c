@@ -10,7 +10,7 @@
 #include <sys/stat.h> /* For mode constants */
 #include <unistd.h>
 
-#define WATCH_DIR "/var/lib/systemd/coredump"
+#define WATCH_DIR "/home/karenjan/.coredump/"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
     (1024 *                                                                    \
@@ -43,6 +43,7 @@ int inotify_coredump()
     {
         /* Read events */
         len = read(fd, buffer, BUF_LEN);
+        printf("I am here\n");
         if (len < 0)
         {
             perror("read failed");
@@ -53,7 +54,6 @@ int inotify_coredump()
         for (int i = 0; i < len;)
         {
             struct inotify_event* event = (struct inotify_event*)&buffer[i];
-            printf("looping\n");
             if (event->len && event->mask & IN_CREATE)
             {
                 printf("I am here in if block\n");
@@ -68,7 +68,6 @@ int inotify_coredump()
                 {
                     perror("send_to_mq failed");
                 }
-                printf("After send_to_mq\n");
             }
             i += EVENT_SIZE + event->len;
         }

@@ -23,7 +23,6 @@ int send_to_mq(const char* message, const char* mq_path)
         return -1;
     }
     mq_close(mq);
-    printf("send_to_mq done\n");
     return 0;
 }
 
