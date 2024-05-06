@@ -17,10 +17,10 @@
 // local path
 const char* binary_pacct = "/var/log/pacct/binary_pacct";
 const char* original_pacct =
-    "/home/ngoc/sep/stats-recording/inotify-pacct/src/original_pacct.txt";
+    "/var/log/pacct/original_pacct.txt";
 const char* copy_pacct =
-    "/home/ngoc/sep/stats-recording/inotify-pacct/src/copy_pacct.txt";
-const char* diff = "/home/ngoc/sep/stats-recording/inotify-pacct/src/diff.txt";
+    "/var/log/pacct/copy_pacct.txt";
+const char* diff = "/var/log/pacct/diff.txt";
 
 /**
  * Copies a file from the source path to the destination path.
