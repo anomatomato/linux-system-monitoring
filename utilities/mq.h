@@ -1,5 +1,5 @@
 #define MAX_MSG_SIZE 150
-#define NUM_QUEUES 1
+#define NUM_QUEUES 2
 #define MESSAGE_QUEUES ((char const*[]){"/inotify_coredump", "/inotify_pacct"})
 
 /* Send message in InfluxDB Line Protocol to posix-mq-to-mqtt-bridge */
