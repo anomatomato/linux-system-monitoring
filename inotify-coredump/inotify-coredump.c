@@ -10,7 +10,7 @@
 #include <sys/stat.h> /* For mode constants */
 #include <unistd.h>
 
-#define WATCH_DIR "/var/lib/systemd/coredump"
+#define WATCH_DIR "/home/karenjan/.coredump/"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
     (1024 *                                                                    \

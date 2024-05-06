@@ -10,7 +10,7 @@ int main()
     pthread_t bridge_thread, inotify_thread;
 
     int rc1 = pthread_create(&bridge_thread, NULL, bridge, NULL);
-    int rc2 = pthread_create(&inotify_thread, NULL, inotify_coredump, NULL);
+    //int rc2 = pthread_create(&inotify_thread, NULL, inotify_coredump, NULL);
     
 
     if (rc1 != 0)
@@ -18,11 +18,11 @@ int main()
         perror("pthread_create for bridge failed");
         exit(-1);
     }
-    if (rc2 != 0)
-    {
-        perror("pthread_create for inotify_coredump failed");
-        exit(-1);
-    }
+    // if (rc2 != 0)
+    // {
+    //     perror("pthread_create for inotify_coredump failed");
+    //     exit(-1);
+    // }
 
 
     while(1);

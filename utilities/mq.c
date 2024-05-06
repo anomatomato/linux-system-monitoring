@@ -8,8 +8,13 @@
 
 int send_to_mq(const char* message, const char* mq_path)
 {
+    mq_unlink(mq_path);
     printf("send_to_mq: %s\n", message);
-    mqd_t mq = mq_open(mq_path, O_WRONLY);
+    struct mq_attr attr;
+    attr.mq_maxmsg  = 10;
+    attr.mq_msgsize = MAX_MSG_SIZE;
+    mqd_t mq = mq_open(mq_path, (__O_CLOEXEC | O_CREAT | O_RDWR),
+                              (S_IRUSR | S_IWUSR), &attr);
     if (mq == -1)
     {
         perror("mq_open failed");
