@@ -16,6 +16,7 @@ add_test(NAME Inotify-Coredump-Test COMMAND inotify-coredump-test)
 add_subdirectory(utilities)
 add_subdirectory(posix-mq-to-mqtt-bridge)
 add_subdirectory(inotify-coredump)
+add_subdirectory(inotify-pacct)
 
 target_link_libraries(inotify-coredump-test PRIVATE utilities bridge inotify-coredump)
 target_link_libraries(inotify-coredump-test PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
