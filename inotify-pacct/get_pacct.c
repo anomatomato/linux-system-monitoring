@@ -107,6 +107,13 @@ void write_diff(const char* old_file, const char* new_file,
  */
 int enable_process_accounting()
 {
+    FILE* file = fopen(binary_pacct, "w");
+    if (!file)
+    {
+        fprintf(stderr, "Error opening file\n");
+        exit(1);
+    }
+   
     // Attempt to enable process accounting
     if (acct(binary_pacct) == -1)
     {
@@ -116,6 +123,8 @@ int enable_process_accounting()
 
     printf("Process accounting enabled. Records are being saved to: %s\n",
            binary_pacct);
+    
+    fclose(file);
 
     sleep(10);
 
