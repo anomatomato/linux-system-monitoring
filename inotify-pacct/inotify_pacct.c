@@ -15,7 +15,7 @@
 // server path
 // #define WATCH_FILE "/opt/stats-recording/inotify-pacct/src/diff.txt"
 
-#define WATCH_FILE "/home/ngoc/sep/stats-recording/inotify-pacct/src/diff.txt"
+#define WATCH_FILE "/var/log/pacct/diff.txt"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
     (1024 *                                                                    \
