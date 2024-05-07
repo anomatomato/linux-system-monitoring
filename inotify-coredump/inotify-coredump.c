@@ -59,7 +59,7 @@ int inotify_coredump()
                 printf("I am here in if block\n");
                 char message[MAX_MSG_SIZE];
                 snprintf(message, MAX_MSG_SIZE,
-                         "coredump,path=%s corefile=%s %lld", WATCH_DIR,
+                         "coredump,path=%s corefile=\"%s\" %lld", WATCH_DIR,
                          event->name, get_timestamp());
 
                 printf("%s\n", message);
