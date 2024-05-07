@@ -8,7 +8,6 @@
 #include <sys/epoll.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <stdbool.h>
 
 #define ADDRESS "tcp://localhost:1883/"
 #define CLIENTID "bridge"
@@ -17,6 +16,7 @@
 #define QOS 2
 #define TIMEOUT 10000L
 #define MAX_EVENTS 10
+
 int finished = 0;
 
 struct client_msg
@@ -109,7 +109,7 @@ void onConnect(client_msg_t* context, MQTTAsync_successData* response)
     opts.onFailure    = onSendFailure;
     opts.context      = client;
     pubmsg.payload    = context->msg;
-    pubmsg.payloadlen = MAX_MSG_SIZE;
+    pubmsg.payloadlen = strlen(context->msg); // war vorher nur MAX_MSG_SIZE
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
 
@@ -128,7 +128,7 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-char* init_mq(char* mq_path)
+mqd_t init_mq(const char* mq_path)
 {
     struct mq_attr attr;
     attr.mq_maxmsg  = 10;
@@ -160,9 +160,9 @@ int register_all_queues()
     for (int i = 0; i < NUM_QUEUES; i++)
     {
         struct epoll_event ev;
-        ev.events = EPOLLIN;
+        ev.events       = EPOLLIN;
         mqd_t new_queue = init_mq(MESSAGE_QUEUES[i]);
-        ev.data.fd = (int)new_queue;
+        ev.data.fd      = (int)new_queue;
         if (new_queue == -1)
         {
             perror("mq_open failed");
@@ -173,8 +173,7 @@ int register_all_queues()
     return epid;
 }
 
-int connect_to_broker(MQTTAsync client,
-                      char* received_msg)
+int connect_to_broker(MQTTAsync client, char* received_msg)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 
@@ -197,7 +196,8 @@ int connect_to_broker(MQTTAsync client,
     return rc;
 }
 
-void receive_and_push_messages(MQTTAsync client, int epollfd, struct epoll_event* events)
+void receive_and_push_messages(MQTTAsync client, int epollfd,
+                               struct epoll_event* events)
 {
     for (;;)
     {
@@ -211,18 +211,15 @@ void receive_and_push_messages(MQTTAsync client, int epollfd, struct epoll_event
 
         for (int n = 0; n < nfds; ++n)
         {
-            char received_msg;
-            if (mq_receive(events[n].data.fd, &received_msg,
-                           MAX_MSG_SIZE, NULL) == -1)
+            char received_msg[MAX_MSG_SIZE + 1] = {0};
+            if (mq_receive(events[n].data.fd, received_msg, MAX_MSG_SIZE,
+                           NULL) == -1)
             {
                 perror("In mq_receive ");
                 exit(-1);
             }
-            add_hostname_to_msg(&received_msg);
 
-            printf("received message: %s\n", &received_msg);
-
-            if (connect_to_broker(client, &received_msg) == -1)
+            if (connect_to_broker(client, received_msg) == -1)
             {
                 perror("connect_to_broker failed");
                 exit(EXIT_FAILURE);
@@ -231,7 +228,7 @@ void receive_and_push_messages(MQTTAsync client, int epollfd, struct epoll_event
     }
 }
 
-void bridge()
+int bridge()
 {
     char received_msg[MAX_MSG_SIZE + 1];
     struct epoll_event events[MAX_EVENTS];
