@@ -22,8 +22,7 @@
 #define WATCH_DIR "/dev/mqueue"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
-    (1024 *                                                                    \
-     (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
+    (1024 * (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
 
 int finished = 0;
 
@@ -117,7 +116,7 @@ void onConnect(client_msg_t* context, MQTTAsync_successData* response)
     opts.onFailure    = onSendFailure;
     opts.context      = client;
     pubmsg.payload    = context->msg;
-    pubmsg.payloadlen = MAX_MSG_SIZE;
+    pubmsg.payloadlen = strlen(context->msg);
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
 
@@ -166,9 +165,9 @@ int init_epoll()
 int register_queue(int epid, char* mq_path)
 {
     struct epoll_event ev;
-    ev.events       = EPOLLIN;
+    ev.events                           = EPOLLIN;
     char slashed_path[MAX_MSG_SIZE / 2] = "/";
-    strcat(slashed_path, mq_path);  
+    strcat(slashed_path, mq_path);
     mqd_t new_queue = init_mq(slashed_path);
     ev.data.fd      = (int)new_queue;
     if (new_queue == -1)
@@ -179,8 +178,7 @@ int register_queue(int epid, char* mq_path)
     epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
-int connect_to_broker(MQTTAsync client,
-                      char* received_msg)
+int connect_to_broker(MQTTAsync client, char* received_msg)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
@@ -202,23 +200,24 @@ int connect_to_broker(MQTTAsync client,
     return rc;
 }
 
-struct client_epoll {
+struct client_epoll
+{
     MQTTAsync client;
-    int epollfd;    
+    int epollfd;
     struct epoll_event* events;
-    
+
 } typedef client_epoll_t;
 
 void receive_and_push_messages(client_epoll_t* cet)
 {
-    int epollfd = cet->epollfd;
-    struct epoll_event *events = cet->events;
-    MQTTAsync client = cet->client;
+    int epollfd                = cet->epollfd;
+    struct epoll_event* events = cet->events;
+    MQTTAsync client           = cet->client;
     for (;;)
-    {   
+    {
         int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
         printf("wait successfullt waited\n");
-        
+
         if (nfds == -1)
         {
             perror("epoll_wait");
@@ -228,8 +227,8 @@ void receive_and_push_messages(client_epoll_t* cet)
         for (int n = 0; n < nfds; ++n)
         {
             char received_msg;
-            if (mq_receive(events[n].data.fd, &received_msg,
-                           MAX_MSG_SIZE, NULL) == -1)
+            if (mq_receive(events[n].data.fd, &received_msg, MAX_MSG_SIZE,
+                           NULL) == -1)
             {
                 perror("In mq_receive ");
                 exit(-1);
@@ -299,14 +298,13 @@ int inotify_mq(int* epid)
     return 0;
 }
 
-
-void bridge()
+int bridge()
 {
     struct epoll_event events[MAX_EVENTS];
     int epid = init_epoll();
-    printf("epid: %d\n");
+    printf("epid: %d\n", epid);
     printf("Bridge is running\n");
-    
+
     MQTTAsync client;
 
     int rc;
@@ -327,13 +325,12 @@ void bridge()
 
     pthread_t broker_thread, inotify_thread;
     client_epoll_t ce;
-    ce.client = client;
+    ce.client  = client;
     ce.epollfd = epid;
-    ce.events = events;
-    int rc1 =
-        pthread_create(&inotify_thread, NULL, inotify_mq, &epid);
-    int rc2 = pthread_create(&broker_thread, NULL,
-                             receive_and_push_messages, &ce);
+    ce.events  = events;
+    int rc1    = pthread_create(&inotify_thread, NULL, inotify_mq, &epid);
+    int rc2 =
+        pthread_create(&broker_thread, NULL, receive_and_push_messages, &ce);
 
     while (!finished)
         usleep(10000L);
