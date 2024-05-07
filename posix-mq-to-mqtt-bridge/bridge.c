@@ -135,7 +135,7 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-mqd_t init_mq(char* mq_path)
+mqd_t init_mq(const char* mq_path)
 {
     mqd_t new_queue = mq_open(mq_path, O_RDONLY);
     return new_queue;
@@ -226,18 +226,15 @@ void receive_and_push_messages(client_epoll_t* cet)
 
         for (int n = 0; n < nfds; ++n)
         {
-            char received_msg;
-            if (mq_receive(events[n].data.fd, &received_msg, MAX_MSG_SIZE,
+            char received_msg[MAX_MSG_SIZE + 1] = {0};
+            if (mq_receive(events[n].data.fd, received_msg, MAX_MSG_SIZE,
                            NULL) == -1)
             {
                 perror("In mq_receive ");
                 exit(-1);
             }
-            add_hostname_to_msg(&received_msg);
 
-            printf("received message: %s\n", &received_msg);
-
-            if (connect_to_broker(client, &received_msg) == -1)
+            if (connect_to_broker(client, received_msg) == -1)
             {
                 perror("connect_to_broker failed");
                 exit(EXIT_FAILURE);
