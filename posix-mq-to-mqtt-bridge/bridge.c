@@ -257,5 +257,4 @@ int bridge()
     while (!finished)
         usleep(10000L);
     MQTTAsync_destroy(&client);
-    return rc;
 }
