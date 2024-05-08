@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(stats-recording VERSION 0.1.0 LANGUAGES C)
 
-set(CMAKE_TOOLCHAIN_FILE "~/opt/vcpkg/scripts/buildsystems/vcpkg.make")
+set(CMAKE_TOOLCHAIN_FILE "/opt/vcpkg/scripts/buildsystems/vcpkg.make" CACHE STRING "Vcpkg toolchain file")
 
 include(CTest)
 enable_testing()
