@@ -78,7 +78,7 @@ Example:
 
 - First time with vcpkg:
 ```bash
-cd [path/to]/stats-recording
+cd path/to/stats-recording  #insert path/to/
 cmake -B build -S . "-DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
 cmake --build build
 ```
