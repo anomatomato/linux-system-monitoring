@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define ADDRESS "tcp://localhost:1883/"
+#define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
 #define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
 #define PAYLOAD "Hello World!"
