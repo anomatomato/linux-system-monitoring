@@ -101,7 +101,7 @@ Alternatively use the **CMake-Extension** in VSCode:
 
 - This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
 - First build the project
-- For the following, you will need 3 terminals in `stats-recording`:
+- For the following, you will need 2 terminals in `stats-recording`:
 
   **Terminal 1**:
 
@@ -110,7 +110,7 @@ Alternatively use the **CMake-Extension** in VSCode:
   ./stats-recording
   ```
 
-  **Terminal 3**:
+  **Terminal 2**:
 
   ```bash
   cd testing/create_coredumps
