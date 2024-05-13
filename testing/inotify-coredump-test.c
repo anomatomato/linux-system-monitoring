@@ -11,6 +11,10 @@
 
 int main()
 {
-    inotify_coredump();
+    if (inotify_coredump() == -1)
+    {
+        perror("inotify_coredump failed");
+        return -1;
+    }
     return 0;
 }
