@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define ADDRESS "tcp://localhost:1883/"
+#define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
 #define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
 #define PAYLOAD "Hello World!"
@@ -126,17 +126,6 @@ int messageArrived(void* context, char* topicName, int topicLen,
 {
     // not expecting any messages
     return 1;
-}
-
-mqd_t init_mq(const char* mq_path)
-{
-    struct mq_attr attr;
-    attr.mq_maxmsg  = 10;
-    attr.mq_msgsize = MAX_MSG_SIZE;
-    mqd_t new_queue = mq_open(mq_path, (__O_CLOEXEC | O_CREAT | O_RDWR),
-                              (S_IRUSR | S_IWUSR), &attr);
-
-    return new_queue;
 }
 
 void add_hostname_to_msg(char* msg)
