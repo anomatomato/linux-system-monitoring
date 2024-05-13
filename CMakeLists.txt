@@ -6,7 +6,20 @@ set(CMAKE_TOOLCHAIN_FILE "/opt/vcpkg/scripts/buildsystems/vcpkg.make" CACHE STRI
 include(CTest)
 enable_testing()
 
-set(CMAKE_PREFIX_PATH "/opt/vcpkg/installed/x64-linux/share")
+# Detect system architecture
+if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
+    set(VCPKG_TARGET_TRIPLET "arm64-linux")
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm")
+    set(VCPKG_TARGET_TRIPLET "arm-linux")
+elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64")
+    set(VCPKG_TARGET_TRIPLET "x64-linux")
+else()
+    message(FATAL_ERROR "Unsupported processor: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+endif()
+
+# Set the CMAKE_PREFIX_PATH based on the detected architecture
+set(CMAKE_PREFIX_PATH "/opt/vcpkg/installed/${VCPKG_TARGET_TRIPLET}/share")
+
 find_package(eclipse-paho-mqtt-c CONFIG REQUIRED)
 
 add_executable(stats-recording ${CMAKE_SOURCE_DIR}/main.c)
