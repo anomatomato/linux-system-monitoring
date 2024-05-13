@@ -76,6 +76,13 @@ Example:
 
 ## 2. Build and Run
 
+- First time with vcpkg:
+```bash
+cd [path/to]/stats-recording
+cmake -B build -S . "-DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
+cmake --build build
+```
+
 - Build:
   
 ```bash
@@ -119,6 +126,6 @@ Alternatively use the **CMake-Extension** in VSCode:
 
 - Now you should see the output in *Terminal 1* and *Terminal 2*
 
-- For more information read the `README.md` in `testing/create_coredumps`
+- For more information [read](/testing/create_coredumps/README.md) the `README.md` in `testing/create_coredumps`
 
 ***Good luck*** :sunglasses:
