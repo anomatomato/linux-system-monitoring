@@ -22,7 +22,12 @@
 #define WATCH_DIR "/dev/mqueue"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
+<<<<<<< HEAD
     (1024 * (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
+=======
+    (1024 *                                                                    \
+     (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
+>>>>>>> c00c880 (merge with development)
 
 int finished = 0;
 
@@ -178,7 +183,8 @@ int register_queue(int epid, char* mq_path)
     epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
-int connect_to_broker(MQTTAsync client, char* received_msg)
+int connect_to_broker(MQTTAsync client,
+                      char* received_msg)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
@@ -214,10 +220,9 @@ void receive_and_push_messages(client_epoll_t* cet)
     struct epoll_event* events = cet->events;
     MQTTAsync client           = cet->client;
     for (;;)
-    {
+    {   
         int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
         printf("wait successfullt waited\n");
-
         if (nfds == -1)
         {
             perror("epoll_wait");
