@@ -15,7 +15,6 @@
 #define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
 #define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
-#define PAYLOAD "Hello World!"
 #define QOS 2
 #define TIMEOUT 10000L
 #define MAX_EVENTS 10
