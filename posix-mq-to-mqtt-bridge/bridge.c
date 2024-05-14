@@ -104,11 +104,11 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response)
 
 void onConnect(client_msg_t* context, MQTTAsync_successData* response)
 {
+    printf("Successfully connected to broker\n");
     MQTTAsync* client               = (MQTTAsync)context->client;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg       = MQTTAsync_message_initializer;
     int rc;
-    printf("Successful connection\n");
     opts.onSuccess    = onSend;
     opts.onFailure    = onSendFailure;
     opts.context      = client;
@@ -244,7 +244,7 @@ int inotify_mq(int* epid)
 {
     int fd, wd, len;
     char buffer[BUF_LEN];
-    printf("I am running in inotify_mq\n");
+    printf("watching %s\n", WATCH_DIR);
     /* Initialize inotify instance */
     fd = inotify_init();
     if (fd < 0)
@@ -267,7 +267,6 @@ int inotify_mq(int* epid)
     {
         /* Read events */
         len = read(fd, buffer, BUF_LEN);
-        printf("I am here\n");
         if (len < 0)
         {
             perror("read failed");
@@ -296,11 +295,8 @@ int main()
 {
     struct epoll_event events[MAX_EVENTS];
     int epid = init_epoll();
-    printf("epid: %d\n", epid);
-    printf("Bridge is running\n");
-
+    printf("bridge is running...\n");
     MQTTAsync client;
-
     int rc;
     if ((rc = MQTTAsync_create(&client, ADDRESS, CLIENTID,
                                MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=

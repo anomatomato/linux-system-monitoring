@@ -20,7 +20,7 @@ int inotify_coredump()
 {
     int fd, wd, len;
     char buffer[BUF_LEN];
-    printf("I am running in inotify_coredump\n");
+    printf("inotify_coredump running...\n");
     /* Initialize inotify instance */
     fd = inotify_init();
     init_mq("/inotify_coredump");
@@ -44,7 +44,6 @@ int inotify_coredump()
     {
         /* Read events */
         len = read(fd, buffer, BUF_LEN);
-        printf("I am here\n");
         if (len < 0)
         {
             perror("read failed");
@@ -57,13 +56,11 @@ int inotify_coredump()
             struct inotify_event* event = (struct inotify_event*)&buffer[i];
             if (event->len && event->mask & IN_CREATE)
             {
-                printf("I am here in if block\n");
                 char message[MAX_MSG_SIZE];
                 snprintf(message, MAX_MSG_SIZE,
                          "coredump,path=%s corefile=\"%s\" %lld", WATCH_DIR,
                          event->name, get_timestamp());
 
-                printf("%s\n", message);
 
                 if (send_to_mq(message, MESSAGE_QUEUES[0]) == -1)
                 {
