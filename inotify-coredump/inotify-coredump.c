@@ -23,6 +23,7 @@ int inotify_coredump()
     printf("I am running in inotify_coredump\n");
     /* Initialize inotify instance */
     fd = inotify_init();
+    init_mq("/inotify_coredump");
     if (fd < 0)
     {
         perror("inotify_init failed");
