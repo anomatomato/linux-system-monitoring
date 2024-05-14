@@ -1,5 +1,3 @@
-#include "MQTTClient.h"
-#include "bridge.h"
 #include "inotify-coredump.h"
 #include <fcntl.h> /* For O_* constants */
 #include <mqueue.h>
