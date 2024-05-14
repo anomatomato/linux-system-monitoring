@@ -118,7 +118,7 @@ void onConnect(client_msg_t* context, MQTTAsync_successData* response)
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
 
-    printf("Trying to send a message: %s", context->msg);
+    printf("Trying to send a message: %s\n", context->msg);
 
     if ((rc = MQTTAsync_sendMessage(*client, TOPIC, &pubmsg, &opts)) !=
         MQTTASYNC_SUCCESS)
