@@ -137,7 +137,7 @@ int messageArrived(void* context, char* topicName, int topicLen,
     return 1;
 }
 
-mqd_t init_mq(const char* mq_path)
+mqd_t initialize_mq(const char* mq_path)
 {
     mqd_t new_queue = mq_open(mq_path, O_RDONLY);
     return new_queue;
