@@ -12,7 +12,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
+#define ADDRESS "tcp://localhost:1883/"
 #define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
 #define QOS 2
@@ -21,18 +21,13 @@
 #define WATCH_DIR "/dev/mqueue"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
-<<<<<<< HEAD
     (1024 * (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
-=======
-    (1024 *                                                                    \
-     (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
->>>>>>> c00c880 (merge with development)
 
 int finished = 0;
 
 struct client_msg
 {
-    MQTTAsync client;
+    MQTTAsync* client;
     char* msg;
 } typedef client_msg_t;
 
@@ -64,7 +59,6 @@ void onDisconnectFailure(void* context, MQTTAsync_failureData* response)
 void onDisconnect(void* context, MQTTAsync_successData* response)
 {
     printf("Successful disconnection\n");
-    finished = 1;
 }
 
 void onSendFailure(void* context, MQTTAsync_failureData* response)
@@ -87,7 +81,7 @@ void onSendFailure(void* context, MQTTAsync_failureData* response)
 
 void onSend(void* context, MQTTAsync_successData* response)
 {
-    MQTTAsync client                 = (MQTTAsync)context;
+    MQTTAsync* client                 = (MQTTAsync)context;
     MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
     int rc;
 
@@ -95,7 +89,7 @@ void onSend(void* context, MQTTAsync_successData* response)
     opts.onSuccess = onDisconnect;
     opts.onFailure = onDisconnectFailure;
     opts.context   = client;
-    if ((rc = MQTTAsync_disconnect(client, &opts)) != MQTTASYNC_SUCCESS)
+    if ((rc = MQTTAsync_disconnect(*client, &opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start disconnect, return code %d\n", rc);
         exit(EXIT_FAILURE);
@@ -110,11 +104,10 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response)
 
 void onConnect(client_msg_t* context, MQTTAsync_successData* response)
 {
-    MQTTAsync client               = (MQTTAsync)context->client;
+    MQTTAsync* client               = (MQTTAsync)context->client;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg       = MQTTAsync_message_initializer;
     int rc;
-
     printf("Successful connection\n");
     opts.onSuccess    = onSend;
     opts.onFailure    = onSendFailure;
@@ -125,12 +118,16 @@ void onConnect(client_msg_t* context, MQTTAsync_successData* response)
     pubmsg.qos        = QOS;
     pubmsg.retained   = 0;
 
-    if ((rc = MQTTAsync_sendMessage(client, TOPIC, &pubmsg, &opts)) !=
+    printf("Trying to send a message: %s", context->msg);
+
+    if ((rc = MQTTAsync_sendMessage(*client, TOPIC, &pubmsg, &opts)) !=
         MQTTASYNC_SUCCESS)
     {
         printf("Failed to start sendMessage, return code %d\n", rc);
         exit(EXIT_FAILURE);
     }
+
+    free(context);
 }
 
 int messageArrived(void* context, char* topicName, int topicLen,
@@ -173,7 +170,7 @@ int register_queue(int epid, char* mq_path)
     ev.events                           = EPOLLIN;
     char slashed_path[MAX_MSG_SIZE / 2] = "/";
     strcat(slashed_path, mq_path);
-    mqd_t new_queue = init_mq(slashed_path);
+    mqd_t new_queue = initialize_mq(slashed_path);
     ev.data.fd      = (int)new_queue;
     if (new_queue == -1)
     {
@@ -183,21 +180,19 @@ int register_queue(int epid, char* mq_path)
     epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
-int connect_to_broker(MQTTAsync client, char* received_msg)
+int connect_to_broker(MQTTAsync* client, char* received_msg)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
-    client_msg_t cm;
-    cm.client                   = client;
-    cm.msg                      = received_msg;
+    client_msg_t* cm            = (client_msg_t*)malloc(sizeof(client_msg_t));
+    cm->client                   = client;
+    cm->msg                      = received_msg;
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession      = 1;
     conn_opts.onSuccess         = onConnect;
     conn_opts.onFailure         = onConnectFailure;
-
-    conn_opts.context = &cm;
-
-    if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS)
+    conn_opts.context = cm;
+    if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
         exit(EXIT_FAILURE);
@@ -207,7 +202,7 @@ int connect_to_broker(MQTTAsync client, char* received_msg)
 
 struct client_epoll
 {
-    MQTTAsync client;
+    MQTTAsync* client;
     int epollfd;
     struct epoll_event* events;
 
@@ -217,12 +212,9 @@ void receive_and_push_messages(client_epoll_t* cet)
 {
     int epollfd                = cet->epollfd;
     struct epoll_event* events = cet->events;
-    MQTTAsync client           = cet->client;
     for (;;)
     {
         int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
-        printf("wait successfullt waited\n");
-
         if (nfds == -1)
         {
             perror("epoll_wait");
@@ -231,19 +223,19 @@ void receive_and_push_messages(client_epoll_t* cet)
 
         for (int n = 0; n < nfds; ++n)
         {
-            char received_msg[MAX_MSG_SIZE + 1] = {0};
+            char received_msg[MAX_MSG_SIZE];
             if (mq_receive(events[n].data.fd, received_msg, MAX_MSG_SIZE,
                            NULL) == -1)
             {
                 perror("In mq_receive ");
                 exit(-1);
             }
-
-            if (connect_to_broker(client, received_msg) == -1)
+            if (connect_to_broker(cet->client, received_msg) == -1)
             {
                 perror("connect_to_broker failed");
                 exit(EXIT_FAILURE);
             }
+            printf("Connecting to broker\n");
         }
     }
 }
@@ -300,7 +292,7 @@ int inotify_mq(int* epid)
     return 0;
 }
 
-int bridge()
+int main()
 {
     struct epoll_event events[MAX_EVENTS];
     int epid = init_epoll();
@@ -327,7 +319,7 @@ int bridge()
 
     pthread_t broker_thread, inotify_thread;
     client_epoll_t ce;
-    ce.client  = client;
+    ce.client  = &client;
     ce.epollfd = epid;
     ce.events  = events;
     int rc1    = pthread_create(&inotify_thread, NULL, inotify_mq, &epid);

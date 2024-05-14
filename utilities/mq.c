@@ -16,7 +16,7 @@ int init_mq(const char* mq_path)
     attr.mq_msgsize = MAX_MSG_SIZE;
 
     /* Create the message queue */
-    mqd_t mq = mq_open(mq_path, (O_CREAT | O_RDWR), (S_IRUSR | S_IWUSR), &attr);
+    mqd_t mq = mq_open(mq_path, O_CREAT, (S_IRUSR | S_IWUSR), &attr);
     if (mq == -1)
     {
         perror("mq_open failed");
