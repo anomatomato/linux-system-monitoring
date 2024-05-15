@@ -1,48 +1,40 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../include/stat.h"
-#include "../include/net.h"
-#include "../include/disk.h"
-#include "../include/common.h"
+#include "cyclic-file-read.h"
+#include "stat.h"
+#include "net.h"
+#include "disk.h"
+#include "pid.h"
+#include "sys.h"
+#include "common.h"
+#include "../../utilities/mq.h"
 
-char* get_btime() {
-        FILE* stat;                                                                     /*btime ist in /proc/stat*/
+int cfr() {
+        if (init_mq("/cfr") == -1)
+                return 1;
 
-        if ((stat = fopen(STAT_FILE, "r")) == NULL) {
-                perror("fopen");
-                exit(EXIT_FAILURE);
+        if (stat() == 1) {
+                perror("stat");
+                printf("Failed to read /proc/stat\n");
         }
-
-        char line_buffer[MAX_LINE];
-        char* token;
-        int lines = line_count(stat);                                           /*btime an fünft-letzter stelle*/
-
-        for (int i = 0; i < (lines-7); i++) {
-                fgets(line_buffer, MAX_LINE, stat);
+        if (net() == 1) {
+                perror("net");
+                printf("Failed to read /proc/net/dev\n");
         }
+        if (disk() == 1) {
+                perror("disk");
+                printf("Failed to read /proc/diskstats\n");
+        }
+        /*if (pid("stat") == 1) {
+                perror("pid");
+                printf("Failed to read /proc/<pid>/stat\n");
+        }
+        if (pid("statm") == 1) {
+                perror("pid");
+                printf("Failed to read /proc/<pid>/statm\n");
+        }*/
+        //sys();
 
-        fscanf(stat, "%*[^\n]");
-        fgets(line_buffer, MAX_LINE, stat);
-        fgets(line_buffer, MAX_LINE, stat);
-        fgets(line_buffer, MAX_LINE, stat);                     /*mit all den fgets' an die stelle kommen*/
+        dequeue();
 
-        token = strtok(line_buffer, " ");
-        token = strtok(NULL, " ");
-
-        fclose(stat);
-
-        return token;
-}
-
-int main(int argc, char* argv[]) {
-        char* btime;
-        btime = get_btime();                                            /*boot-time ermitteln; jede line braucht das*/
-
-        char time[MAX_BUFFER];
-        strcpy(time, btime);                    /*btime kopieren; nach nächstem fopen geht btime verloren*/
-
-        stat(time);
-        net(time);
-        disk(time);
+        return 0;
 }

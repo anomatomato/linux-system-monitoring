@@ -1,11 +1,20 @@
-#ifndef _COMM_H_
-#define _COMM_H_
+#ifndef _CFR_COMM_H_
+#define _CFR_COMM_H_
 
-#include<stdio.h>
+#include <stdio.h>
 
-#define MAX_LINE 512                                                            /*platz für das lesen von zeilen*/
+#define MAX_LINE 1024                                                            /*platz für das lesen von zeilen*/
 #define MAX_BUFFER 64                                                   /*hauptsächlich platz für die form-strings*/
 
+typedef struct CFRqueue {
+        char message[MAX_LINE];
+        struct CFRqueue* next;
+} Queue;
+
 int line_count(FILE* file);
+
+int enqueue(char* message);
+
+void dequeue();
 
 #endif

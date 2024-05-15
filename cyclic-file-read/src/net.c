@@ -1,11 +1,10 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include"../include/net.h"
-#include"../include/common.h"
+#include <stdio.h>
+#include <string.h>
+#include "net.h"
+#include "common.h"
 
 
-void write_net_message(FILE* file, int lines, char* btime) {
+int write_net_message(FILE* file, int lines) {
         char line_buffer[MAX_LINE];
         fgets(line_buffer, MAX_LINE, file);
         fgets(line_buffer, MAX_LINE, file);                     /*erste zwei zeilen uninteresant*/
@@ -29,6 +28,11 @@ void write_net_message(FILE* file, int lines, char* btime) {
                 strcat(message, form1[0]);
 
                 fgets(line_buffer, MAX_LINE, file);
+                if (line_buffer[strlen(line_buffer) -1] != '\n') {
+                        printf("File too big.\n");
+                        return 1;
+                }
+
                 token = strtok(line_buffer, " ");
                 token[strlen(token) -1] = '\0';
                 strcat(message, token);
@@ -41,40 +45,50 @@ void write_net_message(FILE* file, int lines, char* btime) {
                         strcat(message, token);
                 }
                 strcat(message, form1[9]);
-                strcat(message, btime);
 
-                printf("%s\n", message);
+                if (enqueue(message) == 1)
+                        return 1;
+
                 message[0] = '\0';                                                      /*message wiederverwenden*/
 
                 strcat(message, form1[0]);
                 strcat(message, name);
                 name[0] = '\0';                                                                 /*name wiederverwenden*/
 
-                for (int i = 1; i < 9; i++) {                                   /*gelesene werte für gegenrichtung*/
+                for (int i = 1; i < 8; i++) {                                   /*gelesene werte für gegenrichtung*/
                         strcat(message, form2[i]);
                         token = strtok(NULL, " ");
                         strcat(message, token);
                 }
-                strcat(message, form2[9]);
-                strcat(message, btime);
+                strcat(message, form2[8]);
+                token = strtok(NULL, " ");
+                token[strlen(token) - 1] = '\0';
+                strcat(message, token);
 
-                printf("%s\n", message);
+                strcat(message, form2[9]);
+
+                if (enqueue(message) == 1)
+                        return 1;
+
                 message[0] = '\0';
         }
+        return 0;
 }
 
-void net(char* btime) {
-        FILE* net;
+int net() {
+        FILE* netf;
         int lines;
 
-        if ((net = fopen(NET_FILE, "r")) == NULL) {
+        if ((netf = fopen(NET_FILE, "r")) == NULL) {
                 perror("fopen");
-                exit(EXIT_FAILURE);
+                return 1;
         }
 
-        lines = line_count(net);
+        lines = line_count(netf);
 
-        write_net_message(net, lines, btime);
+        if (write_net_message(netf, lines) == 1)
+                return 1;
 
-        fclose(net);
+        fclose(netf);
+        return 0;
 }

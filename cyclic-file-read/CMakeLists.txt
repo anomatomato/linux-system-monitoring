@@ -1,17 +1,6 @@
-cmake_minimum_required(VERSION 3.27)
-project(cyclic_file_read C)
+file(GLOB_RECURSE SRC_FILES src/*.c)
+add_library(cyclic-file-read ${SRC_FILES})
 
-set(CMAKE_C_STANDARD 11)
+target_include_directories(cyclic-file-read PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-include_directories(include)
-
-add_executable(cyclic_file_read
-        include/disk.h
-        include/net.h
-        include/stat.h
-        src/cycle-file-read.c
-        src/disk.c
-        src/net.c
-        src/stat.c
-        src/common.c
-        include/common.h)
+link_libraries(sensors)

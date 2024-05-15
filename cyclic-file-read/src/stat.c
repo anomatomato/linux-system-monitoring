@@ -1,18 +1,23 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include"../include/stat.h"
-#include"../include/common.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "stat.h"
+#include "common.h"
 
 Cpu_t* stat_head = NULL;
 
-void create_list(FILE* file, int lines) {
+int create_list(FILE* file, int lines) {
         for (int i = 0; i < (lines-7); i++) {
-                Cpu_t *node = (Cpu_t *) malloc(sizeof(Cpu_t));
+                Cpu_t* node = (Cpu_t*) malloc(sizeof(Cpu_t));
 
                 if (node) {
                         char line_buffer[MAX_LINE];
                         fgets(line_buffer, MAX_LINE, file);                     /*dateizeile lesen*/
+
+                        if (line_buffer[strlen(line_buffer) -1] != '\n') {
+                                printf("File too big.\n");
+                                return 1;
+                        }
 
                         char* token;
                         token = strtok(line_buffer, " ");                               /*zeile unterteilen*/
@@ -40,10 +45,11 @@ void create_list(FILE* file, int lines) {
                         }
 
                 } else {
-                        perror("No available Memory");
-                        exit(EXIT_FAILURE);
+                        perror("malloc");
+                        return 1;
                 }
         }
+        return 0;
 }
 
 void percentages(int lines) {
@@ -75,15 +81,21 @@ void percentages(int lines) {
         }
 }
 
-void write_stat_message(FILE* file, int lines, char* btime) {
+int write_stat_message(FILE* file, int lines) {
         char line_buffer[MAX_LINE];
         fscanf(file, "%*[^\n]");                                                /*intr überspringen*/
         fgets(line_buffer, MAX_LINE, file);
         fgets(line_buffer, MAX_LINE, file);
 
+        if (line_buffer[strlen(line_buffer) -1] != '\n') {
+                printf("File too big.\n");
+                return 1;
+         }
+
         char* token;
         token = strtok(line_buffer, " ");
         token = strtok(NULL, " ");
+        token[strlen(token) - 1] = '\0';
 
         char form[13][MAX_BUFFER] = {"proc-stat,core=cpu\0", " user=\0", ",nice=\0",
                              ",system=\0", ",idle=\0", ",iowait=\0",
@@ -113,11 +125,14 @@ void write_stat_message(FILE* file, int lines, char* btime) {
                 strcat(message, form[11]);
                 strcat(message, token);                                                 /*ctext hinzu*/
                 strcat(message, form[12]);
-                strcat(message, btime);                                                 /*btime hinzu*/
-                printf("%s", message);
+
+                if (enqueue(message) == 1)
+                        return 1;
+
                 message[0] = '\0';                                              /*message leeren und wiederverwenden*/
                 current = current->next;                                                        /*nächster kern*/
         }
+        return 0;
 }
 
 void free_list() {
@@ -130,21 +145,26 @@ void free_list() {
         }
 }
 
-void stat(char* btime) {
-        FILE* stat;
+int stat() {
+        FILE* statf;
         int lines;
 
-        if ((stat = fopen(STAT_FILE, "r")) == NULL) {
+        if ((statf = fopen(STAT_FILE, "r")) == NULL) {
                 perror("fopen");
-                exit(EXIT_FAILURE);
+                return 1;
         }
 
-        lines = line_count(stat);                               /*kernanzahl anhand von zeilenanzahl bestimmen*/
+        lines = line_count(statf);                               /*kernanzahl anhand von zeilenanzahl bestimmen*/
 
-        create_list(stat, lines);
+        if (create_list(statf, lines) == 1)
+                return 1;
+
         percentages(lines);
-        write_stat_message(stat, lines, btime);
+        if (write_stat_message(statf, lines) == 1)
+                return 1;
+
         free_list();
 
-        fclose(stat);
+        fclose(statf);
+        return 0;
 }
