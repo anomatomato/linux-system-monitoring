@@ -35,9 +35,10 @@ int inotify_pacct()
 {
     int fd, wd, len;
     char buffer[BUF_LEN];
-
+    printf("inotify_pacct running...\n");
     // Create an inotify instance
     fd = inotify_init();
+    init_mq("/inotify_pacct");
     if (fd < 0)
     {
         perror("Failed to initialize inotify");
@@ -65,7 +66,6 @@ int inotify_pacct()
         // Process each event
         for (int i = 0; i < len;)
         {
-            printf("i: %d\n", i);
             struct inotify_event* event = (struct inotify_event*)&buffer[i];
             if (event->mask & IN_MODIFY)
             {
@@ -76,6 +76,9 @@ int inotify_pacct()
                     return -1;
                 }
 
+
+                // check if the file is empty
+
                 //  moves the file position indicator to the end of the file
                 fseek(diff_file, 0, SEEK_END);
                 // returns the current value of the file position indicator
@@ -83,8 +86,7 @@ int inotify_pacct()
                 // moves the file position indicator back to the beginning of
                 // the file
                 rewind(diff_file);
-
-                // check if the file is empty
+                
                 if (filesize > 0)
                 {
                     // The file is not empty, read its content
@@ -100,10 +102,11 @@ int inotify_pacct()
 
                     printf("%s\n", message);
 
-                    // if (send_to_mq(message, MESSAGE_QUEUES[1]) == -1)
-                    // {
-                    //     perror("send_to_mq failed");
-                    // }
+                    if (send_to_mq(message, MESSAGE_QUEUES[1]) == -1)
+                    {
+                        perror("send_to_mq failed");
+                    }
+
                     free(message);
                 }
                 else
