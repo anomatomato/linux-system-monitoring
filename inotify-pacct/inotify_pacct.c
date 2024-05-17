@@ -70,7 +70,7 @@ int main()
 
                 while(fread(&account, sizeof(struct acct_v3), 1, fp) == 1)
                 {
-                    acc
+                    
                 }
 
                 snprintf(message, 1024,
