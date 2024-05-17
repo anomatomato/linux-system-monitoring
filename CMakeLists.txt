@@ -30,6 +30,7 @@ add_subdirectory(utilities)
 add_subdirectory(posix-mq-to-mqtt-bridge)
 add_subdirectory(inotify-coredump)
 add_subdirectory(inotify-pacct)
+add_subdirectory(cyclic-file-read)
 
 target_link_libraries(inotify-coredump-exec PRIVATE utilities bridge inotify-coredump)
 target_link_libraries(inotify-pacct-exec PRIVATE PRIVATE utilities bridge inotify-pacct)
