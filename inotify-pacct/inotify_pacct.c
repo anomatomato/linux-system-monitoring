@@ -19,7 +19,7 @@
     (1024 *                                                                    \
      (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 
-int main()
+int inotify_pacct()
 {
     int fd, wd, len;
     char buffer[BUF_LEN];
@@ -68,25 +68,25 @@ int main()
 
                 char message[MAX_MSG_SIZE];
 
-                while(fread(&account, sizeof(struct acct_v3), 1, fp) == 1)
+                while (fread(&account, sizeof(struct acct_v3), 1, fp) == 1)
                 {
-                    
                 }
 
-                snprintf(message, 1024,
-                         "pacct,raspi=pi-85cd "
-                         "ac_flag=%c,ac_version=%c,ac_tty=%u,ac_exitcode=%u,ac_"
-                         "uid=%u,"
-                         "ac_gid=%u,ac_pid=%u,ac_ppid=%u,ac_btime=%f,ac_etime=%d,ac_"
-                         "utime=%u,ac_stime=%u,ac_mem=%u,ac_io=%u,ac_rw=%u,ac_"
-                         "minflt=%u,ac_majflt=%u,ac_swaps=%u,ac_comm=\"%s\"",
-                         account.ac_flag, account.ac_version, account.ac_tty,
-                         account.ac_exitcode, account.ac_uid, account.ac_gid,
-                         account.ac_pid, account.ac_ppid, account.ac_btime,
-                         account.ac_etime, account.ac_utime, account.ac_stime,
-                         account.ac_mem, account.ac_io, account.ac_rw,
-                         account.ac_minflt, account.ac_majflt, account.ac_swaps,
-                         account.ac_comm);
+                snprintf(
+                    message, 1024,
+                    "pacct,raspi=pi-85cd "
+                    "ac_flag=%c,ac_version=%c,ac_tty=%u,ac_exitcode=%u,ac_"
+                    "uid=%u,"
+                    "ac_gid=%u,ac_pid=%u,ac_ppid=%u,ac_btime=%f,ac_etime=%d,ac_"
+                    "utime=%u,ac_stime=%u,ac_mem=%u,ac_io=%u,ac_rw=%u,ac_"
+                    "minflt=%u,ac_majflt=%u,ac_swaps=%u,ac_comm=\"%s\"",
+                    account.ac_flag, account.ac_version, account.ac_tty,
+                    account.ac_exitcode, account.ac_uid, account.ac_gid,
+                    account.ac_pid, account.ac_ppid, account.ac_btime,
+                    account.ac_etime, account.ac_utime, account.ac_stime,
+                    account.ac_mem, account.ac_io, account.ac_rw,
+                    account.ac_minflt, account.ac_majflt, account.ac_swaps,
+                    account.ac_comm);
                 printf("Message: %s\n", message);
                 // if (send_to_mq(message, MESSAGE_QUEUES[1]) == -1)
                 // {
