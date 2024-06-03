@@ -1,42 +1,36 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(stats-recording VERSION 0.1.0 LANGUAGES C)
 
-set(CMAKE_TOOLCHAIN_FILE "/opt/vcpkg/scripts/buildsystems/vcpkg.make" CACHE STRING "Vcpkg toolchain file")
+# Find the Paho MQTT C library
+find_path(PAHO_MQTT_C_INCLUDE_DIR NAMES MQTTAsync.h PATHS /usr/local/include /usr/include)
+find_library(PAHO_MQTT_C_LIBRARIES NAMES paho-mqtt3a paho-mqtt3c paho-mqtt3as paho-mqtt3cs PATHS /usr/local/lib /usr/lib)
 
-include(CTest)
-enable_testing()
-
-# Detect system architecture
-if(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "aarch64")
-    set(VCPKG_TARGET_TRIPLET "arm64-linux")
-elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "arm")
-    set(VCPKG_TARGET_TRIPLET "arm-linux")
-elseif(CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "x86_64")
-    set(VCPKG_TARGET_TRIPLET "x64-linux")
-else()
-    message(FATAL_ERROR "Unsupported processor: ${CMAKE_HOST_SYSTEM_PROCESSOR}")
+if(NOT PAHO_MQTT_C_INCLUDE_DIR OR NOT PAHO_MQTT_C_LIBRARIES)
+    message(FATAL_ERROR "Could not find Paho MQTT C library")
 endif()
 
-# Set the CMAKE_PREFIX_PATH based on the detected architecture
-set(CMAKE_PREFIX_PATH "/opt/vcpkg/installed/${VCPKG_TARGET_TRIPLET}/share")
+include_directories(${PAHO_MQTT_C_INCLUDE_DIR})
 
-find_package(eclipse-paho-mqtt-c CONFIG REQUIRED)
-
+# Add executables
 add_executable(bridge-exec ${CMAKE_SOURCE_DIR}/posix-mq-to-mqtt-bridge/bridge.c)
 add_executable(inotify-coredump-exec ${CMAKE_SOURCE_DIR}/testing/inotify-coredump-test.c)
 add_executable(inotify-pacct-exec ${CMAKE_SOURCE_DIR}/testing/inotify-pacct-test.c)
 
+# Add subdirectories
 add_subdirectory(utilities)
 add_subdirectory(posix-mq-to-mqtt-bridge)
 add_subdirectory(inotify-coredump)
 add_subdirectory(inotify-pacct)
 add_subdirectory(cyclic-file-read)
 
+# Link libraries
 target_link_libraries(inotify-coredump-exec PRIVATE utilities bridge inotify-coredump)
 target_link_libraries(inotify-pacct-exec PRIVATE utilities bridge inotify-pacct)
-target_link_libraries(bridge-exec PRIVATE utilities bridge inotify-coredump inotify-pacct)
-target_link_libraries(bridge-exec PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
+target_link_libraries(bridge-exec PRIVATE utilities ${PAHO_MQTT_C_LIBRARIES})
 
+# target_link_libraries(bridge-exec PRIVATE utilities bridge inotify-coredump inotify-pacct eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
+
+# Packaging
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

@@ -18,71 +18,19 @@ sudo apt-get install build-essential tar curl zip unzip
 sudo apt-get install libsensors4-dev  # for cyclic-file-read
 ```
 
-### Install vcpckg
-- Official repository: https://github.com/microsoft/vcpkg
-- For the following commands, you might need to use `sudo`, e.g. in `/opt`
-- First download and bootstrap vcpkg itself in an open terminal:
+### Install paho-mqtt library
 
 ```bash
-cd /opt
-sudo git clone https://github.com/microsoft/vcpkg
-sudo ./vcpkg/bootstrap-vcpkg.sh
+git clone git@github.com:eclipse/paho.mqtt.c.git
+cd paho.mqtt.c
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
 ```
-
-- Next install the `paho-mqtt` library:
-
-```bash
-sudo ./vcpkg/vcpkg install paho-mqtt
-```
-
-### VSCode with CMake Tools and vcpkg
-- Install the **C/C++ Extension** and the **CMake Extension** by Microsoft
-- Open `stats-recording` in vscode with *File>Open Folder* or in terminal:
-   
-  ```bash
-  cd path/to/stats-recording  #insert path/to/
-  code .
-  ```
-
-- Add the following to your workspace `settings.json` will make CMake Tools automatically use vcpkg for libraries:
-
-```json
-{
-  "cmake.configureSettings": {
-    "CMAKE_TOOLCHAIN_FILE": "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
-  },
-  "other.settings":{
-
-  }
-}
-```
-
-- `settings.json` typically in a `.vscode` folder
-
-Finally configure the include paths. This tells the IntelliSense where to look for header files:
-
-  1. **Access the Command Palette**: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
-  2. **Edit Configurations**: 
-     1. Type `C/C++:Edit configurations(UI)` scroll down to *Include Path* and insert 
-     `/opt/vcpkg/installed/x64-linux/include`. 
-     2. Alternative: Type `C/C++:Edit Configurations (JSON)` and edit the `c_cpp_properties.json` file instead.
-Example:
-     
-      ```json
-      "includePath": [
-        "${workspaceFolder}/**",
-        "/opt/vcpkg/installed/x64-linux/include"
-      ]
-      ```
 
 ## 2. Build and Run
-
-- First time with vcpkg:
-```bash
-cd path/to/stats-recording  #insert path/to/
-cmake -B build -S . "-DCMAKE_TOOLCHAIN_FILE=/opt/vcpkg/scripts/buildsystems/vcpkg.cmake"
-cmake --build build
-```
 
 - Build:
   
