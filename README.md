@@ -19,16 +19,7 @@ sudo apt-get install libsensors4-dev  # for cyclic-file-read
 ```
 
 ### Install paho-mqtt library
-
-```bash
-git clone git@github.com:eclipse/paho.mqtt.c.git
-cd paho.mqtt.c
-mkdir build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
-make
-sudo make install
-```
+:open_file_folder: [**Link**](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/paho-mqtt.md)
 
 - Now paho-mqtt is stored in `/usr/local/paho-mqtt`
 
