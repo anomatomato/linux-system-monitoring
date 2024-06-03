@@ -9,12 +9,14 @@ ulimit -c unlimited
 In order to **create an example coredump** on your system, run
 
 ```bash
+gcc -o infinite infinite.c
 ./infinite
 ```
 
 or
 
 ```bash
+gcc -o segmentation_fault segmentation_fault.c
 ./segmentation_fault
 ```
 
