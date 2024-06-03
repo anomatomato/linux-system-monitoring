@@ -25,8 +25,7 @@
 /**
  * @brief init_mq initializes a message queue with the given name and returns
  * the file descriptor or failure
- * @param mq_path: The identifying name of the message queue -1 on failure with
- * errno set appropriately
+ * @param mq_path: The identifying name of the message queue
  * @return File descriptor of the new message queue on success, -1 on failure
  * with errno set appropriately
  *     @retval  File descriptor  success
