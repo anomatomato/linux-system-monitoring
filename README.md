@@ -15,6 +15,7 @@ git clone git@gitlab.ibr.cs.tu-bs.de:cm-courses/sep/groups/ss24/cm0/stats-record
 ```bash
 sudo apt-get update && apt-get upgrade -y
 sudo apt-get install build-essential tar curl zip unzip
+sudo apt-get install libsensors4-dev  # for cyclic-file-read
 ```
 
 ### Install vcpckg
@@ -94,7 +95,7 @@ make
 
 - Run:
 ```bash
-./stats-recording
+./bridge-exec
 ```
 
 Alternatively use the **CMake-Extension** in VSCode:
@@ -114,20 +115,21 @@ Alternatively use the **CMake-Extension** in VSCode:
 
   ```bash
   cd build
-  ./stats-recording
+  ./bridge-exec
   ```
 
   **Terminal 2**:
 
   ```bash
   cd build/Testing
-  ./inotify-coredump-test
+  ./inotify-coredump-exec
   ```
 
   **Terminal 3**:
 
   ```bash
   cd testing/create_coredumps
+  gcc -o segmentation_fault segmentation_fault.c
   ./segmentation_fault
   ```
 
