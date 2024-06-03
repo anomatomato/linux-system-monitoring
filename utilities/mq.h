@@ -14,14 +14,6 @@
 #define MAX_MESSAGES 10
 #endif
 
-#ifndef NUM_QUEUES
-#define NUM_QUEUES 2
-#endif
-
-#ifndef MESSAGE_QUEUES
-#define MESSAGE_QUEUES ((char const*[]){"/inotify_coredump", "/inotify_pacct"})
-#endif
-
 /**
  * @brief init_mq initializes a message queue with the given name and returns
  * the file descriptor or failure
