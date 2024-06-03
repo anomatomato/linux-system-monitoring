@@ -6,7 +6,7 @@
 
 Queue* queue_head = NULL;
 
-int line_count(FILE* file) {
+int line_count(FILE* file) {                                                               /*zeilen einer datei zählen*/
         int lines = 0;
 
         while (!feof(file)) {
@@ -27,7 +27,7 @@ int enqueue(char* message) {
                 char placeholder[MAX_BUFFER];
 
                 strcpy(node->message, message);
-                sprintf(placeholder, "%lld", get_timestamp());
+                sprintf(placeholder, "%ld", get_timestamp());                                   /*timestamp hinzufügen*/
                 strcat(node->message, placeholder);
                 node->next = NULL;
 
@@ -37,12 +37,12 @@ int enqueue(char* message) {
                 }
 
                 Queue* current = queue_head;
-                while (current->next != NULL) {
+                while (current->next != NULL) {                                                     /*queue durchgehen*/
                         current = current->next;
                 }
                 current->next = node;
 
-        } else {
+        } else {                                                             /*falls es kein freier speicher mehr gibt*/
                 perror("malloc");
                 return 1;
         }
@@ -54,21 +54,26 @@ void dequeue() {
                 return;
 
         Queue* current;
-        while (queue_head->next != NULL) {
+        while (queue_head->next != NULL) {                                      /*queue von oben nach unten durchgehen*/
                 current = queue_head;
                 queue_head = queue_head->next;
 
-                printf("%s\n", current->message);
-                if (send_to_mq(current->message, "/cfr") == -1)
+                //printf("%s\n", current->message);
+                if (send_to_mq(current->message, "/cfr") == -1)                                     /*an die mq senden*/
                         perror("send_to_mq failed");
 
-                free(current);
+                free(current);                                                                /*alloziiertes freigeben*/
         }
         current = queue_head;
 
-        printf("%s", current->message);
+        //printf("%s\n", current->message);
         if (send_to_mq(current->message, "/cfr") == -1)
                 perror("send_to_mq failed");
 
         free(current);
+        queue_head = NULL;                                                     /*head auf NULL für den nächsten zyklus*/
+}
+
+void empty_queue() {                                                                            /*queue leeren für sys*/
+        queue_head = NULL;
 }
