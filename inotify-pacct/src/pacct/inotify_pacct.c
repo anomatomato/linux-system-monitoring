@@ -105,9 +105,9 @@ void construct_payload(struct acct_v3 *acct_record, char *payload, size_t payloa
 
     snprintf(
         payload, payload_size,
-        "process_accounting,process=%s,ppid=%u,start_time=%s,cpu_time=%.2f,system_time=%.2f,average_memory_usage=%.2f,exit_code=%d pid=%u %lld",
-        acct_record->ac_comm, acct_record->ac_ppid, start_time_str, cpu_time, sys_time, avg_mem, 
-        acct_record->ac_exitcode, acct_record->ac_pid, get_timestamp()
+        "process_accounting,pid=%u,ppid=%u,start_time=%s,cpu_time=%.2f,system_time=%.2f,average_memory_usage=%.2f,exit_code=%d process=\"%s\" %lld",
+        acct_record->ac_pid, acct_record->ac_ppid, start_time_str, cpu_time, sys_time, avg_mem, 
+        acct_record->ac_exitcode, acct_record->ac_comm, get_timestamp()
     );
 }
 
