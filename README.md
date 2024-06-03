@@ -8,13 +8,13 @@
 git clone git@gitlab.ibr.cs.tu-bs.de:cm-courses/sep/groups/ss24/cm0/stats-recording.git
 ```
 
-### Install Linux Developer Tools
+### Install essential packages
 
 - Debian, Ubuntu, popOS, and other Debian-based distributions:
   
 ```bash
 sudo apt-get update && apt-get upgrade -y
-sudo apt-get install build-essential tar curl zip unzip
+sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui libssl-dev
 sudo apt-get install libsensors4-dev  # for cyclic-file-read
 ```
 
@@ -25,10 +25,12 @@ git clone git@github.com:eclipse/paho.mqtt.c.git
 cd paho.mqtt.c
 mkdir build
 cd build
-cmake ..
+cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
 make
 sudo make install
 ```
+
+- Now paho-mqtt is stored in `/usr/local/paho-mqtt`
 
 ## 2. Build and Run
 

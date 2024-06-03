@@ -81,7 +81,7 @@ void onSendFailure(void* context, MQTTAsync_failureData* response)
 
 void onSend(void* context, MQTTAsync_successData* response)
 {
-    MQTTAsync* client                 = (MQTTAsync)context;
+    MQTTAsync* client                = (MQTTAsync)context;
     MQTTAsync_disconnectOptions opts = MQTTAsync_disconnectOptions_initializer;
     int rc;
 
@@ -105,7 +105,7 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response)
 void onConnect(client_msg_t* context, MQTTAsync_successData* response)
 {
     printf("Successfully connected to broker\n");
-    MQTTAsync* client               = (MQTTAsync)context->client;
+    MQTTAsync* client              = (MQTTAsync)context->client;
     MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
     MQTTAsync_message pubmsg       = MQTTAsync_message_initializer;
     int rc;
@@ -184,13 +184,13 @@ int connect_to_broker(MQTTAsync* client, char* received_msg)
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
     client_msg_t* cm            = (client_msg_t*)malloc(sizeof(client_msg_t));
-    cm->client                   = client;
-    cm->msg                      = received_msg;
+    cm->client                  = client;
+    cm->msg                     = received_msg;
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession      = 1;
     conn_opts.onSuccess         = onConnect;
     conn_opts.onFailure         = onConnectFailure;
-    conn_opts.context = cm;
+    conn_opts.context           = cm;
     if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
