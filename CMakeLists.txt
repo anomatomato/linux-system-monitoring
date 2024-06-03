@@ -33,7 +33,7 @@ add_subdirectory(inotify-pacct)
 add_subdirectory(cyclic-file-read)
 
 target_link_libraries(inotify-coredump-exec PRIVATE utilities bridge inotify-coredump)
-target_link_libraries(inotify-pacct-exec PRIVATE PRIVATE utilities bridge inotify-pacct)
+target_link_libraries(inotify-pacct-exec PRIVATE utilities bridge inotify-pacct)
 target_link_libraries(bridge-exec PRIVATE utilities bridge inotify-coredump inotify-pacct)
 target_link_libraries(bridge-exec PRIVATE eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
 
