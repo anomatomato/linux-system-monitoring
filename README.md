@@ -40,7 +40,8 @@ make
 ```
 
 Alternatively use the **CMake-Extension** in VSCode:
-- Open the Command Palette and try following commands:
+1. Access the Command Palette: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
+2. Try following commands:
   * *CMake:Build*
   * *CMake:Debug*
 
