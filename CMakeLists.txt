@@ -12,9 +12,12 @@ endif()
 include_directories(${PAHO_MQTT_C_INCLUDE_DIR})
 
 # Add executables
+file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/cyclic-file-read/src/*.c)
+
 add_executable(bridge-exec ${CMAKE_SOURCE_DIR}/posix-mq-to-mqtt-bridge/bridge.c)
 add_executable(inotify-coredump-exec ${CMAKE_SOURCE_DIR}/testing/inotify-coredump-test.c)
 add_executable(inotify-pacct-exec ${CMAKE_SOURCE_DIR}/testing/inotify-pacct-test.c)
+add_executable(cyclic-file-read-exec ${SRC_FILES})
 
 # Add subdirectories
 add_subdirectory(utilities)
@@ -26,6 +29,7 @@ add_subdirectory(cyclic-file-read)
 # Link libraries
 target_link_libraries(inotify-coredump-exec PRIVATE utilities bridge inotify-coredump)
 target_link_libraries(inotify-pacct-exec PRIVATE utilities bridge inotify-pacct)
+target_link_libraries(cyclic-file-read-exec PRIVATE utilities bridge cyclic-file-read sensors)
 target_link_libraries(bridge-exec PRIVATE utilities ${PAHO_MQTT_C_LIBRARIES})
 
 # target_link_libraries(bridge-exec PRIVATE utilities bridge inotify-coredump inotify-pacct eclipse-paho-mqtt-c::paho-mqtt3a-static eclipse-paho-mqtt-c::paho-mqtt3c-static eclipse-paho-mqtt-c::paho-mqtt3as-static eclipse-paho-mqtt-c::paho-mqtt3cs-static)
