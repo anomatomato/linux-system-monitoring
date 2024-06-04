@@ -117,45 +117,31 @@ int write_stat_message(FILE* file, int lines)
     token                    = strtok(NULL, " "); /*zeile unterteilen*/
     token[strlen(token) - 1] = '\0';
 
-    char form[13][MAX_BUFFER] = {"proc-stat,core=cpu\0",
-                                 " user=\0",
-                                 ",nice=\0",
-                                 ",system=\0",
-                                 ",idle=\0",
-                                 ",iowait=\0",
-                                 ",irq=\0",
-                                 ",softirq=\0",
-                                 ",steal=\0",
-                                 ",guest=\0",
-                                 ",guest_nice=\0",
-                                 ",ctext=\0",
-                                 " "}; /*fürs line protokol*/
-    char message[MAX_LINE];
-    message[0] = '\0';
+        extern char stat_form[13][MAX_BUFFER];                                                                /*fürs line protokol*/
+
+        char message[MAX_LINE];
+        message[0] = '\0';
 
     char placeholder[MAX_BUFFER]; /*für float zu string umwandlung*/
     placeholder[0] = '\0';
 
     Cpu_t* current = stat_head;
 
-    for (int i = 0; i < (lines - 7); i++)
-    {
-        strcat(message, form[0]);
-        if (i != 0)
-        { /*ersten eintrag ausschließen*/
-            current->name -= 1;
-            sprintf(placeholder, "%d", current->name);
-            strcat(message, placeholder);
-        }
-        for (int ii = 0; ii < 10; ii++)
-        { /*werte ins format bringen*/
-            strcat(message, form[ii + 1]);
-            sprintf(placeholder, "%.2f", current->stats[ii]);
-            strcat(message, placeholder);
-        }
-        strcat(message, form[11]);
-        strcat(message, token); /*ctext hinzu*/
-        strcat(message, form[12]);
+        for (int i = 0; i < (lines-7); i++) {
+                strcat(message, stat_form[0]);
+                if (i != 0) {                                                            /*ersten eintrag ausschließen*/
+                        current->name -= 1;
+                        sprintf(placeholder, "%d", current->name);
+                        strcat(message, placeholder);
+                }
+                for (int ii = 0; ii < 10; ii++) {                                           /*werte ins format bringen*/
+                        strcat(message, stat_form[ii + 1]);
+                        sprintf(placeholder, "%.2f", current->stats[ii]);
+                        strcat(message, placeholder);
+                }
+                strcat(message, stat_form[11]);
+                strcat(message, token);                                                                  /*ctext hinzu*/
+                strcat(message, stat_form[12]);
 
         if (enqueue(message) == 1) /*in die queue anreihen*/
             return 1;
