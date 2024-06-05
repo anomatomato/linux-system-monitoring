@@ -5,7 +5,6 @@ DIR="/var/log/pacct"
 
 # Files to be checked
 FILE1="$DIR/acct"
-FILE2="$DIR/acct_cursor"
 
 # Function to remove a file if it exists
 remove_file_if_exists() {
@@ -23,7 +22,6 @@ fi
 
 # Remove the files if they exist
 remove_file_if_exists "$FILE1"
-remove_file_if_exists "$FILE2"
 
 # Recreate the acct file
 sudo touch "$FILE1"
