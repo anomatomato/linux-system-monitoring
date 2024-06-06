@@ -79,13 +79,14 @@ int inotify_coredump()
         }
     }
 
-    if (inotify_rm_watch(fd, wd) == -1)
+    int ret1 = inotify_rm_watch(fd, wd);
+    int ret2 = close(fd);
+    if (ret1 == -1)
     {
         perror("inotify_rm_watch failed");
         return -1;
     }
-
-    if (close(fd) == -1)
+    if (ret2 == -1)
     {
         perror("close failed");
         return -1;
