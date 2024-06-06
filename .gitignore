@@ -72,3 +72,5 @@ build/
 .vscode/
 cmake-build-debug/
 .idea
+segmentation_fault
+infinite
