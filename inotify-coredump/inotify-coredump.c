@@ -61,7 +61,6 @@ int inotify_coredump()
                          "coredump,path=%s corefile=\"%s\" %lld", WATCH_DIR,
                          event->name, get_timestamp());
 
-
                 if (send_to_mq(message, "/inotify-coredump") == -1)
                 {
                     perror("send_to_mq failed");
