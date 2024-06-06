@@ -7,7 +7,7 @@
             "command": "cd ./build/inotify-pacct/src/app && sudo ./inotify-pacct-exec",
             "presentation": {
                 "reveal": "always", // This will always show the terminal
-                "panel": "shared"
+                "panel": "dedicated"
             },
             "problemMatcher": []
         },
