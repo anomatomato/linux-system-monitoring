@@ -3,8 +3,9 @@
 
 /** @brief Whenever a coredump is created, send a message to the message queue
  *
- * @return Returns EXIT_SUCCESS if the function executes successfully, otherwise
- * returns EXIT_FAILURE.
+ * @return 0 on success, -1 on failure with errno set appropriately
+ *     @retval  0   success
+ *     @retval -1  on failure with errno set appropriately
  */
 int inotify_coredump();
 
