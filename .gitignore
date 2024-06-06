@@ -69,7 +69,6 @@ _deps
 # Custom
 
 build/
-.vscode/
 cmake-build-debug/
 .idea
 segmentation_fault

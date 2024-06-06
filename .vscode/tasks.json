@@ -1,0 +1,39 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "run inotify-pacct",
+            "type": "shell",
+            "command": "cd ./build/inotify-pacct/src/app && sudo ./inotify-pacct-exec",
+            "presentation": {
+                "reveal": "always", // This will always show the terminal
+                "panel": "shared"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "run bridge",
+            "type": "shell",
+            "command": "cd ./build && sudo ./bridge-exec",
+            "problemMatcher": []
+        },
+        {
+            "label": "cmake[all]",
+            "type": "shell",
+            "command": "cmake -S . -B ./build && cd ./build && make",
+            "problemMatcher": []
+        },
+        {
+            "label": "remove build directory",
+            "type": "shell",
+            "command": "sudo rm -rf build/",
+            "problemMatcher": []
+        },
+        {
+            "label": "reset pacct file",
+            "type": "shell",
+            "command": "cd ./inotify-pacct && sudo ./reset.sh",
+            "problemMatcher": []
+        }
+    ]
+}
