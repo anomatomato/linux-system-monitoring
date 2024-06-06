@@ -1,4 +1,2 @@
-cd ../build
-cmake ..
-make
+cd /home/pi/repositories/stats-recording/build
 ./bridge-exec

@@ -6,6 +6,7 @@
 #include <time.h>       // For time_t, localtime, strftime, struct tm
 #include <stdint.h>     // For fixed-width integer types
 #include <string.h>     // For string manipulation functions
+#include "mq.h"         // For get_timestamp()
 
 double comp_to_double(comp_t comp);
 double time_comp_to_double(comp_t comp);

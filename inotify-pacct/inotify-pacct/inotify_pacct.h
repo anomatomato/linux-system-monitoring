@@ -7,7 +7,6 @@
 #include <sys/types.h> /*For type definitions like off_t used in fseek */
 #include <sys/inotify.h>  
 #include <mqueue.h>
-#include "../../utilities/mq.h"
 #include "pacct_to_line_protocol.h"
 
 #define EVENT_SIZE (sizeof(struct inotify_event))
