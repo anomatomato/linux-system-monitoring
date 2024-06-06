@@ -62,7 +62,7 @@ int inotify_coredump()
                          event->name, get_timestamp());
 
 
-                if (send_to_mq(message, MESSAGE_QUEUES[0]) == -1)
+                if (send_to_mq(message, "/inotify-coredump") == -1)
                 {
                     perror("send_to_mq failed");
                 }

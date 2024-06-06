@@ -1,34 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/acct.h>
-#include <sys/inotify.h>
-#include <sys/stat.h>
-#include <linux/limits.h> /* For NAME_MAX */
-#include <stdint.h>
-#include <string.h>
-#include <time.h>
-#include "mqtt.h"
+#include "inotify_pacct.h"
 
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN                                                          \
     (1024 *                                                                    \
      (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
-
-#define ACCT_FILE "/var/log/pacct/acct"
-
-const mqtt_config_t config = {
-    .host = "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/",
-    .port = 1883,
-    .topic = "linux-monitoring/stats/pacct",
-    .client_id = "pacct",
-    .qos = 1,
-    .timeout = 10000,
-};
-
-long long get_timestamp() { return (long long)time(NULL) * 1000000000; }
 
 double comp_to_double(comp_t comp) {
     int exponent = (comp >> 13) & 0x7;      // Extract the 3-bit exponent
@@ -112,6 +87,8 @@ void monitor_process_accounting() {
         exit(EXIT_FAILURE);
     }
 
+    init_mq("/inotify-pacct");
+
     watch_fd = inotify_add_watch(inotify_fd, ACCT_FILE, IN_MODIFY);
     if (watch_fd < 0) {
         perror("inotify_add_watch");
@@ -119,9 +96,7 @@ void monitor_process_accounting() {
         exit(EXIT_FAILURE);
     }
 
-    init_mqtt(&config);
-
-    printf("Monitoring process accounting log-add filter: %s\n", ACCT_FILE);
+    printf("Monitoring process accounting log-remove filter: %s\n", ACCT_FILE);
 
     FILE *acct_file = fopen(ACCT_FILE, "r");
     if (acct_file == NULL) {
@@ -146,17 +121,20 @@ void monitor_process_accounting() {
             struct inotify_event *event = (struct inotify_event *)&buffer[i];
             if (event->mask & IN_MODIFY) {
                 struct acct_v3 acct_record;
-                char payload[1024];
+                char payload[MAX_MSG_SIZE];
                 while (fread(&acct_record, sizeof(struct acct_v3), 1, acct_file) == 1) {
                     double cpu_time = time_comp_to_double(acct_record.ac_utime);
                     double sys_time = time_comp_to_double(acct_record.ac_stime);
                     double avg_mem = comp_to_double(acct_record.ac_mem);
                 
-                    if (acct_record.ac_exitcode != 0 || sys_time > 0.00 || cpu_time > 0.00 || avg_mem > 5000.00) {
-                        construct_payload(&acct_record, payload, 1024);
-                        publish_mqtt(&config, payload);
-                        printf("%s\n\n", payload);
-                    }
+                    // if (acct_record.ac_exitcode != 0 || sys_time > 0.00 || cpu_time > 0.00 || avg_mem > 5000.00) {
+                        construct_payload(&acct_record, payload, MAX_MSG_SIZE);
+                        // printf("%s\n\n", payload);
+                        if (send_to_mq(payload, "/inotify-pacct") == -1)
+                        {
+                            perror("send_to_mq failed");
+                        }
+                    // }
                 }
             }
             i += EVENT_SIZE + event->len;
@@ -165,13 +143,11 @@ void monitor_process_accounting() {
 
     inotify_rm_watch(inotify_fd, watch_fd);
     close(inotify_fd);
-    close_mqtt(&config);
-    fclose(acct_file);
-    
+    fclose(acct_file);  
 }
 
-int main() {
-    enable_process_accounting(ACCT_FILE);
-    monitor_process_accounting();
-    return 0;
-}
+// int main() {
+//     enable_process_accounting(ACCT_FILE);
+//     monitor_process_accounting();
+//     return 0;
+// }
