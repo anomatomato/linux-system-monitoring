@@ -19,7 +19,7 @@ void monitor_process_accounting() {
         exit(EXIT_FAILURE);
     }
 
-    printf("Monitoring process accounting log-remove filter: %s\n", ACCT_FILE);
+    printf("Monitoring process accounting log: %s\n", ACCT_FILE);
 
     FILE *acct_file = fopen(ACCT_FILE, "r");
     if (acct_file == NULL) {
@@ -50,14 +50,13 @@ void monitor_process_accounting() {
                     double sys_time = time_comp_to_double(acct_record.ac_stime);
                     double avg_mem = comp_to_double(acct_record.ac_mem);
                 
-                    // if (acct_record.ac_exitcode != 0 || sys_time > 0.00 || cpu_time > 0.00 || avg_mem > 5000.00) {
+                    if (acct_record.ac_exitcode != 0 || sys_time > 0.00 || cpu_time > 0.00 || avg_mem > 5000.00) {
                         construct_payload(&acct_record, payload, MAX_MSG_SIZE);
-                        // printf("%s\n\n", payload);
                         if (send_to_mq(payload, "/inotify-pacct") == -1)
                         {
                             perror("send_to_mq failed");
                         }
-                    // }
+                    }
                 }
             }
             i += EVENT_SIZE + event->len;
