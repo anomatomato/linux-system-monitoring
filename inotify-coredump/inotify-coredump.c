@@ -22,12 +22,19 @@ int inotify_coredump()
     int fd, wd, len;
     char buffer[BUF_LEN];
     printf("inotify_coredump running...\n");
+
     /* Initialize inotify instance */
     fd = inotify_init();
-    init_mq("/inotify_coredump");
-    if (fd < 0)
+    if (fd == -1)
     {
         perror("inotify_init failed");
+        return -1;
+    }
+
+    /* Initialize message queue */
+    if (init_mq("/inotify_coredump") == -1)
+    {
+        perror("init_mq failed");
         return -1;
     }
 
@@ -65,13 +72,24 @@ int inotify_coredump()
                 if (send_to_mq(message, MQ_PATH) == -1)
                 {
                     perror("send_to_mq failed");
+                    return -1;
                 }
             }
             i += EVENT_SIZE + event->len;
         }
     }
 
-    inotify_rm_watch(fd, wd);
-    close(fd);
+    if (inotify_rm_watch(fd, wd) == -1)
+    {
+        perror("inotify_rm_watch failed");
+        return -1;
+    }
+
+    if (close(fd) == -1)
+    {
+        perror("close failed");
+        return -1;
+    }
+
     return 0;
 }
