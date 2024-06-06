@@ -1,3 +1,3 @@
-add_library(inotify-pacct inotify_pacct.c inotify_pacct.h)
-
-target_include_directories(inotify-pacct PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_subdirectory(process-accounting)
+add_subdirectory(pacct-to-line-protocol)
+add_subdirectory(inotify-pacct)
