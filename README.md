@@ -45,7 +45,7 @@ Alternatively use the **CMake-Extension** in VSCode:
   * *CMake:Build*
   * *CMake:Debug*
   
-- You need [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn) in order to send stats to the server
+You need [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn) in order to send stats to the server
 
 ## 3. Testing
 
