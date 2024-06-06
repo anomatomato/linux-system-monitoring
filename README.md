@@ -51,6 +51,7 @@ Alternatively use the **CMake-Extension** in VSCode:
 
 - This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
 - First build the project
+- You need [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn) to connect to the server
 - For the following, you will need 3 terminals in `stats-recording`:
 
   **Terminal 1**:
