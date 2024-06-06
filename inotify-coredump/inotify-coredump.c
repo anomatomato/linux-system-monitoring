@@ -10,6 +10,7 @@
 #include <sys/stat.h> /* For mode constants */
 #include <unistd.h>
 
+#define MQ_PATH "/inotify_coredump"
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN                                                                \
@@ -61,8 +62,7 @@ int inotify_coredump()
                          "coredump,path=%s corefile=\"%s\" %lld", WATCH_DIR,
                          event->name, get_timestamp());
 
-
-                if (send_to_mq(message, MESSAGE_QUEUES[0]) == -1)
+                if (send_to_mq(message, MQ_PATH) == -1)
                 {
                     perror("send_to_mq failed");
                 }
