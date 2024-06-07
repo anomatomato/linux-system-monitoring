@@ -139,6 +139,12 @@ int messageArrived(void* context, char* topicName, int topicLen,
 mqd_t initialize_mq(const char* mq_path)
 {
     mqd_t new_queue = mq_open(mq_path, O_RDONLY);
+    if (new_queue == -1)
+    {
+        perror("mq_open failed in initialize_mq");
+        return -1;
+    }
+
     return new_queue;
 }
 
@@ -173,7 +179,7 @@ int register_queue(int epid, char* mq_path)
     ev.data.fd      = (int)new_queue;
     if (new_queue == -1)
     {
-        perror("mq_open failed");
+        perror("mq_open failed in register_queue");
         return -1;
     }
     epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
