@@ -34,6 +34,7 @@ void monitor_process_accounting()
 
     // seek to end of pacct file
     fseek(acct_file, 0, SEEK_END);
+    long last_position = ftell(acct_file);
 
     while (1)
     {
@@ -51,6 +52,9 @@ void monitor_process_accounting()
             struct inotify_event* event = (struct inotify_event*)&buffer[i];
             if (event->mask & IN_MODIFY)
             {
+                /* Go to the last known position */
+                fseek(acct_file, last_position, SEEK_SET);
+
                 struct acct_v3 acct_record;
                 char payload[MAX_MSG_SIZE];
                 while (fread(&acct_record, sizeof(struct acct_v3), 1,
@@ -68,6 +72,10 @@ void monitor_process_accounting()
                         perror("send_to_mq failed");
                     }
                     // }
+
+                    /* Remember the position of the file after reading the
+                     * record*/
+                    last_position = ftell(acct_file);
                 }
             }
             i += EVENT_SIZE + event->len;
