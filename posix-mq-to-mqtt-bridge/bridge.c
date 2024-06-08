@@ -175,19 +175,19 @@ int init_epoll()
     return epid;
 }
 
-int connect_to_broker(MQTTAsync client, struct epoll_event * events, int nfds)
+int connect_to_broker(MQTTAsync* client, struct epoll_event * events, int nfds)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     int rc;
-    client_msg_t cm;
-    cm.client                   = client;
-    cm.events                   = events;
-    cm.nfds                     = nfds;
+    client_msg_t* cm = (client_msg_t*)malloc(sizeof(client_msg_t));
+    cm->client                   = client;
+    cm->events                   = events;
+    cm->nfds                     = nfds;
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession      = 1;
     conn_opts.onSuccess         = onConnect;
     conn_opts.onFailure         = onConnectFailure;
-    conn_opts.context           = &cm;
+    conn_opts.context           = cm;
     if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
