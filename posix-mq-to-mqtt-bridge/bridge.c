@@ -87,14 +87,6 @@ void onSend(void* context, MQTTAsync_successData* response)
     int rc;
 
     printf("Message with token value %d delivery confirmed\n", response->token);
-    opts.onSuccess = onDisconnect;
-    opts.onFailure = onDisconnectFailure;
-    opts.context   = client;
-    if ((rc = MQTTAsync_disconnect(*client, &opts)) != MQTTASYNC_SUCCESS)
-    {
-        printf("Failed to start disconnect, return code %d\n", rc);
-        exit(EXIT_FAILURE);
-    }
 }
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response)
@@ -195,7 +187,7 @@ int connect_to_broker(MQTTAsync client, struct epoll_event * events, int nfds)
     conn_opts.cleansession      = 1;
     conn_opts.onSuccess         = onConnect;
     conn_opts.onFailure         = onConnectFailure;
-    conn_opts.context           = cm;
+    conn_opts.context           = &cm;
     if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS)
     {
         printf("Failed to start connect, return code %d\n", rc);
@@ -216,6 +208,7 @@ void receive_and_push_messages(client_epoll_t* cet)
 {
     int epollfd                = cet->epollfd;
     struct epoll_event* events = cet->events;
+    MQTTAsync* client          = cet->client;
     for (;;)
     {
         int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
