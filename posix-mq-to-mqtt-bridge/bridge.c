@@ -228,7 +228,6 @@ void receive_and_push_messages(client_epoll_t* cet)
             perror("connect_to_broker failed");
             exit(EXIT_FAILURE);
         }
-        }
     }
 }
 
