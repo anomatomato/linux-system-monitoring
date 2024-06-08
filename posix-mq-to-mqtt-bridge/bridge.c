@@ -106,12 +106,12 @@ void onConnect(client_msg_t *context, MQTTAsync_successData *response) {
                 opts.onSuccess = onSend;
                 opts.onFailure = onSendFailure;
                 opts.context = client;
-                pubmsg.payload = context->msg;
-                pubmsg.payloadlen = strlen(context->msg);
+                pubmsg.payload = &received_msg;
+                pubmsg.payloadlen = strlen(&received_msg) + 1;
                 pubmsg.qos = QOS;
                 pubmsg.retained = 0;
 
-                printf("Trying to send a message: %s\n", context->msg);
+                printf("Trying to send a message: %s\n", &received_msg);
 
                 if ((rc = MQTTAsync_sendMessage(*client, TOPIC, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
                         printf("Failed to start sendMessage, return code %d\n", rc);
@@ -168,7 +168,7 @@ int register_queue(int epid, char *mq_path) {
         epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
-int connect_to_broker(MQTTAsync *client, struct, struct epoll_event *events) {
+int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
         MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
         int rc;
         client_msg_t *cm = (client_msg_t *) malloc(sizeof(client_msg_t));
