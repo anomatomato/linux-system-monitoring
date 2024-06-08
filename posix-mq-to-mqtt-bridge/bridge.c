@@ -224,55 +224,48 @@ void receive_and_push_messages(client_epoll_t* cet)
     }
 }
 
-int inotify_mq(int* epid)
-{
-    int fd, wd, len;
-    char buffer[BUF_LEN];
-    printf("watching %s\n", WATCH_DIR);
-    /* Initialize inotify instance */
-    fd = inotify_init();
-    if (fd < 0)
-    {
-        perror("inotify_init failed");
-        exit(EXIT_FAILURE);
-    }
+int inotify_mq(int *epid) {
+        int fd, wd, len;
+        char buffer[BUF_LEN];
+        printf("watching %s\n", WATCH_DIR);
+        /* Initialize inotify instance */
+        fd = inotify_init();
+        if (fd < 0) {
+                perror("inotify_init failed");
+                exit(EXIT_FAILURE);
+        }
 
-    /* Watch WATCH_DIR for new files */
-    wd = inotify_add_watch(fd, WATCH_DIR, IN_CREATE);
-    if (wd < 0)
-    {
-        perror("inotify_add_watch failed");
+        /* Watch WATCH_DIR for new files */
+        wd = inotify_add_watch(fd, WATCH_DIR, IN_CREATE);
+        if (wd < 0) {
+                perror("inotify_add_watch failed");
+                close(fd);
+                exit(EXIT_FAILURE);
+        }
+
+        /* Event loop */
+        for (;;) {
+                /* Read events */
+                len = read(fd, buffer, BUF_LEN);
+                if (len < 0) {
+                        perror("read failed");
+                        break;
+                }
+
+                /* Process events */
+                for (int i = 0; i < len;) {
+                        struct inotify_event *event = (struct inotify_event *) &buffer[i];
+                        if (event->len && event->mask & IN_CREATE) {
+                                printf("message queue /%s added to watchlist\n", event->name);
+                                register_queue(*epid, event->name);
+                        }
+                        i += EVENT_SIZE + event->len;
+                }
+        }
+
+        inotify_rm_watch(fd, wd);
         close(fd);
-        exit(EXIT_FAILURE);
-    }
-
-    /* Event loop */
-    for (;;)
-    {
-        /* Read events */
-        len = read(fd, buffer, BUF_LEN);
-        if (len < 0)
-        {
-            perror("read failed");
-            break;
-        }
-
-        /* Process events */
-        for (int i = 0; i < len;)
-        {
-            struct inotify_event* event = (struct inotify_event*)&buffer[i];
-            if (event->len && event->mask & IN_CREATE)
-            {
-                printf("message queue /%s added to watchlist\n", event->name);
-                register_queue(*epid, event->name);
-            }
-            i += EVENT_SIZE + event->len;
-        }
-    }
-
-    inotify_rm_watch(fd, wd);
-    close(fd);
-    return 0;
+        return 0;
 }
 
 int main()
