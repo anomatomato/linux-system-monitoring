@@ -222,7 +222,6 @@ void receive_and_push_messages(client_epoll_t* cet)
 {
     int epollfd                = cet->epollfd;
     struct epoll_event* events = cet->events;
-    MQTTAsync* client          = cet->client;
     for (;;)
     {
         int nfds = epoll_wait(epollfd, events, MAX_EVENTS, -1);
@@ -231,7 +230,7 @@ void receive_and_push_messages(client_epoll_t* cet)
             perror("epoll_wait");
             exit(EXIT_FAILURE);
         }
-        if (connect_to_broker(client, events, nfds) == -1){
+        if (connect_to_broker(cet->client, events, nfds) == -1){
             perror("connect_to_broker failed");
             exit(EXIT_FAILURE);
         }
