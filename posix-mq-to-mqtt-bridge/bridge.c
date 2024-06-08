@@ -175,6 +175,20 @@ int init_epoll()
     return epid;
 }
 
+int register_queue(int epid, char *mq_path) {
+        struct epoll_event ev;
+        ev.events = EPOLLIN;
+        char slashed_path[MAX_MSG_SIZE / 2] = "/";
+        strcat(slashed_path, mq_path);
+        mqd_t new_queue = initialize_mq(slashed_path);
+        ev.data.fd = (int) new_queue;
+        if (new_queue == -1) {
+                perror("mq_open failed in register_queue");
+                return -1;
+        }
+        epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
+}
+
 int connect_to_broker(MQTTAsync* client, struct epoll_event * events, int nfds)
 {
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
