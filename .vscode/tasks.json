@@ -4,7 +4,7 @@
         {
             "label": "run inotify-pacct",
             "type": "shell",
-            "command": "cd ./build/inotify-pacct/src/app && sudo ./inotify-pacct-exec",
+            "command": "cd ./build && sudo ./inotify-pacct-exec",
             "presentation": {
                 "reveal": "always", // This will always show the terminal
                 "panel": "dedicated"
