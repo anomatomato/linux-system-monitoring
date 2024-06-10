@@ -1,6 +1,10 @@
 #ifndef _INOTIFY_COREDUMP_H_
 #define _INOTIFY_COREDUMP_H_
 
+extern volatile int keep_running;
+
+extern void handle_signal(int signal);
+
 /** @brief Whenever a coredump is created, send a message to the message queue
  *
  * @return 0 on success, -1 on failure with errno set appropriately

@@ -3,6 +3,7 @@
 #include <fcntl.h>        /* For O_* constants */
 #include <linux/limits.h> /* For NAME_MAX */
 #include <mqueue.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +15,15 @@
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
+
+
+volatile int keep_running = 1;
+
+/* Signal handler */
+void handle_signal(int signal) {
+        printf("\nReceived signal %d, stopping...\n", signal);
+        keep_running = 0;
+}
 
 int inotify_coredump() {
         int fd, wd, len;
@@ -42,7 +52,7 @@ int inotify_coredump() {
         }
 
         /* Event loop */
-        for (;;) {
+        while (keep_running) {
                 /* Read events */
                 len = read(fd, buffer, BUF_LEN);
                 if (len < 0) {

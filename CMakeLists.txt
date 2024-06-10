@@ -15,7 +15,7 @@ include_directories(${PAHO_MQTT_C_INCLUDE_DIR})
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/cyclic-file-read/src/*.c)
 
 add_executable(bridge-exec ${CMAKE_SOURCE_DIR}/posix-mq-to-mqtt-bridge/bridge.c)
-add_executable(inotify-coredump-exec ${CMAKE_SOURCE_DIR}/testing/inotify-coredump-test.c)
+add_executable(inotify-coredump-exec ${CMAKE_SOURCE_DIR}/inotify-coredump/main.c)
 add_executable(inotify-pacct-exec ${CMAKE_SOURCE_DIR}/inotify-pacct/main.c)
 add_executable(cyclic-file-read-exec ${SRC_FILES})
 
