@@ -7,11 +7,11 @@
  */
 
 #ifndef MAX_MSG_SIZE
-#define MAX_MSG_SIZE 1024
+#        define MAX_MSG_SIZE 1024
 #endif
 
 #ifndef MAX_MESSAGES
-#define MAX_MESSAGES 10
+#        define MAX_MESSAGES 10
 #endif
 
 /**
@@ -24,7 +24,7 @@
  *     @retval  File descriptor  success
  *     @retval  -1               failure, with errno set appropriately
  */
-int init_mq(const char* mq_path);
+int init_mq(const char *mq_path);
 
 /**
  * @brief send_to_mq sends the given message to the given message queue and
@@ -36,7 +36,18 @@ int init_mq(const char* mq_path);
  *     @retval  0   success
  *     @retval -1  on failure with errno set appropriately
  */
-int send_to_mq(const char* message, const char* mq_path);
+int send_to_mq(const char *message, const char *mq_path);
+
+/**
+ * @brief remove_mq immediately removes the specified message queue
+ *
+ * @param mq_path: The identifying name of the message queue
+ * @return 0 on success, -1 on failure
+ * with errno set appropriately
+ *     @retval  0                success
+ *     @retval  -1               failure, with errno set appropriately
+ */
+int remove_mq(const char *mq_path);
 
 /**
  * @brief get_timestamp returns the current time in nanoseconds
