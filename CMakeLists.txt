@@ -9,7 +9,9 @@ if(NOT PAHO_MQTT_C_INCLUDE_DIR OR NOT PAHO_MQTT_C_LIBRARIES)
     message(FATAL_ERROR "Could not find Paho MQTT C library")
 endif()
 
+# Add include directories
 include_directories(${PAHO_MQTT_C_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/utilities)
 
 # Add executables
 file(GLOB_RECURSE SRC_FILES ${CMAKE_SOURCE_DIR}/cyclic-file-read/src/*.c)

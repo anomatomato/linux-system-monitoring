@@ -1,5 +1,5 @@
 #include "inotify-coredump.h"
-#include "../utilities/mq.h"
+#include "mq.h"
 #include <fcntl.h>        /* For O_* constants */
 #include <linux/limits.h> /* For NAME_MAX */
 #include <mqueue.h>
