@@ -44,6 +44,7 @@ int send_to_mq(const char *message, const char *mq_path) {
 }
 
 int remove_mq(const char *mq_path) {
+        printf("Removing Message Queue: %s\n", mq_path);
         return mq_unlink(mq_path);
 }
 
