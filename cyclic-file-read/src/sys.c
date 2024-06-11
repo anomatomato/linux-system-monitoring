@@ -28,7 +28,7 @@ int sys() {
 
         while ((chip = sensors_get_detected_chips(0, &c)) != NULL) {                     /*loop um alle chips zu laden*/
 
-                sprintf(message, "sys-temp,chip=%s \0", chip->prefix);
+                sprintf(message, "sys-temp,chip=%s ", chip->prefix);
 
                 sensors_feature const* feat;
                 int f = 0;

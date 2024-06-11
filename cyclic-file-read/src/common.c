@@ -27,7 +27,7 @@ int enqueue(char* message) {
                 char placeholder[MAX_BUFFER];
 
                 strcpy(node->message, message);
-                sprintf(placeholder, "%ld", get_timestamp());                                   /*timestamp hinzufügen*/
+                sprintf(placeholder, "%lld", get_timestamp());                                   /*timestamp hinzufügen*/
                 strcat(node->message, placeholder);
                 node->next = NULL;
 
