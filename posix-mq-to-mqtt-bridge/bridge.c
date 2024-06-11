@@ -264,15 +264,22 @@ int main() {
                 exit(EXIT_FAILURE);
         }
 
-        pthread_t inotify_thread;
+        pthread_t inotify_thread, process_msgs_thread;
         client_epoll_t ce;
         ce.client = &client;
         ce.epollfd = epid;
         ce.events = events;
         int rc1 = pthread_create(&inotify_thread, NULL, inotify_mq, &epid);
+        if (rc1 == -1) {
+                perror("pthread_create failed");
+                exit(EXIT_FAILURE);
+        }
 
-        /* Process messages in the main thread */
-        process_messages(&ce);
+        int rc2 = pthread_create(&process_msgs_thread, NULL, process_messages, &ce);
+        if (rc2 == -1) {
+                perror("pthread_create failed");
+                exit(EXIT_FAILURE);
+        }
 
         while (!finished)
                 usleep(10000L);
