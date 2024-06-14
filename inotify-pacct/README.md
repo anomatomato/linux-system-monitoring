@@ -10,9 +10,9 @@ via MQTT.
 > **Note**: Before running inotify-pacct, you have to make sure 
 > - the component `poxis-mq-to-mqtt-bridge` is running.
 > - the acct file exists on your system. 
->   - run `sudo mkdir -p /var/log/pacct` on your terminal, then 
->   - run `cd /var/log/pacct` and `ls -l`
->     - If the file exists, `acct` should be listed in white colour because it > > > should be a normal file.
+>   - run `sudo mkdir -p /var/log/pacct` on your terminal to ensure the folder pacct exists, then 
+>   - go to the folder pacct `cd /var/log/pacct`, list all files and directories of this folder `ls -l`
+>     - If the file exists, `acct` should be listed in white colour because it should be a normal file.
 >     - If the file doensn't exist, run `sudo touch acct` to create one.
 
 You can read the detailed information for building and running the components [here](../README.md)
