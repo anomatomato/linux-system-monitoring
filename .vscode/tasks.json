@@ -30,7 +30,7 @@
             "problemMatcher": []
         },
         {
-            "label": "reset pacct file",
+            "label": "reset acct file",
             "type": "shell",
             "command": "cd ./inotify-pacct && sudo ./reset.sh",
             "problemMatcher": []
