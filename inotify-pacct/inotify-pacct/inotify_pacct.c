@@ -64,14 +64,14 @@ void monitor_process_accounting()
                     double sys_time = time_comp_to_double(acct_record.ac_stime);
                     double avg_mem  = comp_to_double(acct_record.ac_mem);
 
-                    // if (acct_record.ac_exitcode != 0 || sys_time > 0.00 ||
-                    // cpu_time > 0.00 || avg_mem > 5000.00) {
-                    construct_payload(&acct_record, payload, MAX_MSG_SIZE);
-                    if (send_to_mq(payload, "/inotify-pacct") == -1)
-                    {
-                        perror("send_to_mq failed");
+                    if (acct_record.ac_exitcode != 0 || sys_time > 0.00 ||
+                    cpu_time > 0.00 || avg_mem > 5000.00) {
+                        construct_payload(&acct_record, payload, MAX_MSG_SIZE);
+                        if (send_to_mq(payload, "/inotify-pacct") == -1)
+                        {
+                            perror("send_to_mq failed");
+                        }
                     }
-                    // }
 
                     /* Remember the position of the file after reading the
                      * record*/
