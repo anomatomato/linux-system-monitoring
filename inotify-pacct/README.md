@@ -5,7 +5,7 @@ The modification of this file will be monitored via `inotify(7)` then the releva
 modified in line protocol and sent to message queue, where they will be taken by the component `poxis-mq-to-mqtt-bridge` and sent to Influxdb
 via MQTT.
 
-# Build and run
+## Build and run
 
 > **Note**: Before running inotify-pacct, you have to make sure 
 > - the component `poxis-mq-to-mqtt-bridge` is running.
@@ -16,3 +16,9 @@ via MQTT.
 >     - If the file doensn't exist, run `sudo touch acct` to create one.
 
 You can read the detailed information for building and running the components [here](../README.md)
+
+## Note
+
+After running the system in several months or years, your acct file may contain a greate number of information.
+If you are sure that resetting the acct file don't cause the loss of needed information, you can use the predefined
+**tasks.json** to do it, type  `Ctrl+Shift+P` then `reset acct file`.
