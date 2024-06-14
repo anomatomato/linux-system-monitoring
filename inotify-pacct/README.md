@@ -1,9 +1,9 @@
 # Inotify-Pacct
 
-This component enables the process accounting and saves the report of terminated processes in the file /var/log/pacct/acct via `acct(2)`.
-The modification of this file will be monitored via `inotify(7)` then the relevant terminated processes will be extracted via `acct(5)`,
-modified in line protocol and sent to message queue, where they will be taken by the component `poxis-mq-to-mqtt-bridge` and sent to Influxdb
-via MQTT.
+This component enables the process accounting and saves the report of terminated processes in the file 
+/var/log/pacct/acct via `acct(2)`. The modification of this file will be monitored via `inotify(7)` then the 
+relevant terminated processes will be extracted via `acct(5)`, modified in line protocol and sent to message queue, 
+where they will be taken by the component `poxis-mq-to-mqtt-bridge` and sent to Influxdb via MQTT.
 
 ## Build and run
 
