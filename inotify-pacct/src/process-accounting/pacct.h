@@ -13,7 +13,7 @@
  * @param filename The name of the file to log the accounting information to.
  * @return 0 if process accounting is successfully enabled, 1 otherwise.
  */
-int enable_process_accounting(const char* filename);
+int enable_process_accounting(const char *filename);
 
 /**
  * Disables process accounting.

@@ -8,9 +8,7 @@
 #include <sys/types.h> /*For type definitions like off_t used in fseek */
 
 #define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN                                                          \
-    (1024 *                                                                    \
-     (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
+#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 
 /**
  * Monitors a process accounting log file for modifications and sends relevant data to a message queue.
