@@ -46,6 +46,22 @@ make
      * *CMake:Debug*  
 - You need [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn) in order to send stats to the server
 
+- if you even want to save time, you can use the predefined **tasks.json**:
+  1. Access the Command Palette: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
+  2. If you want to build run a specific component, type `run task`:
+     * choose *cmake[all]* to build 
+     * choose *run bridge* to activate the bridge
+     * choose *run inotify-pacct* to activate inotifying pacct
+     * choose *run inotify-coredump* to activate the inotifying coredump
+     * choose *run cyclic-file-read* to activate the cyclic-file-read
+  3. If you want to deactivate a specific component, type  `Ctrl+Shift+P` then `terminate task`:
+     * choose *run bridge* to deactivate the bridge
+     * choose *run inotify-pacct* to deactivate inotifying pacct
+     * choose *run inotify-coredump* to deactivate the inotifying coredump
+     * choose *run cyclic-file-read* to deactivate the cyclic-file-read
+  4. If you want to remove build directory, type `remove build directory`
+
+
 ## 3. Testing
 
 ### Inotify-coredump
