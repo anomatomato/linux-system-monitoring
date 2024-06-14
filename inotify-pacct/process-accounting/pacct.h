@@ -7,7 +7,7 @@
 
 #define ACCT_FILE "/var/log/pacct/acct"
 
-void enable_process_accounting(const char* filename);
-void disable_process_accounting();
+int enable_process_accounting(const char* filename);
+int disable_process_accounting();
 
 #endif

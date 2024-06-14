@@ -14,6 +14,6 @@
     (1024 *                                                                    \
      (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 
-void monitor_process_accounting();
+int monitor_process_accounting();
 
 #endif

@@ -1,6 +1,6 @@
 #include "inotify_pacct.h"
 
-void monitor_process_accounting()
+int monitor_process_accounting()
 {
     int inotify_fd, watch_fd;
     char buffer[EVENT_BUF_LEN];
@@ -9,7 +9,7 @@ void monitor_process_accounting()
     if (inotify_fd < 0)
     {
         perror("inotify_init");
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     init_mq("/inotify-pacct");
@@ -19,7 +19,7 @@ void monitor_process_accounting()
     {
         perror("inotify_add_watch");
         close(inotify_fd);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     printf("Monitoring process accounting log: %s\n", ACCT_FILE);
@@ -29,7 +29,7 @@ void monitor_process_accounting()
     {
         perror("fopen acct file failed");
         close(inotify_fd);
-        exit(EXIT_FAILURE);
+        return 1;
     }
 
     // seek to end of pacct file
@@ -43,7 +43,7 @@ void monitor_process_accounting()
         {
             perror("read failed");
             close(inotify_fd);
-            exit(EXIT_FAILURE);
+            return 1;
         }
 
         int i = 0;
@@ -85,4 +85,5 @@ void monitor_process_accounting()
     inotify_rm_watch(inotify_fd, watch_fd);
     close(inotify_fd);
     fclose(acct_file);
+    return 0;
 }
