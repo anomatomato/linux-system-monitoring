@@ -7,7 +7,7 @@ build:
     image: gcc:latest # Verwende ein geeignetes Docker-Image
     script:
         - apt-get update && apt-get install -y cmake
-        - git clone git@github.com:eclipse/paho.mqtt.c.git
+        - git clone https://github.com/eclipse/paho.mqtt.c.git
         - cd paho.mqtt.c
         - mkdir build
         - cd build
