@@ -1,23 +1,28 @@
 stages:
   - build
 
+before_script:
+  - apt-get update && apt-get install -y cmake build-essentials git
+  - git clone https://github.com/eclipse/paho.mqtt.c.git
+  - cd paho.mqtt.c
+  - mkdir build
+  - cd build
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
+  - make
+  - make install
+  - cd ../..
 
 build:
     stage: build
-    image: gcc:latest # Verwende ein geeignetes Docker-Image
-    script:
-        - apt-get update && apt-get install -y cmake
-        - git clone https://github.com/eclipse/paho.mqtt.c.git
-        - cd paho.mqtt.c
-        - mkdir build
-        - cd build
-        - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
-        - make
-        - make install
-        - cd ../..
-        - mkdir -p build && cd build
-        - cmake ..
-        - make
+    image: arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
+    allow_failure: false
+    when: always
     artifacts:
       paths:
-          - build/bridge-exec
+          - .
+      expire_in: 1 week
+
+    script:
+      - mkdir -p build && cd build
+      - cmake ..
+      - make
