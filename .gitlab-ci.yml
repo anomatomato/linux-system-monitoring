@@ -1,0 +1,26 @@
+stages:
+  - build
+
+
+build_bridge:
+    stage: build
+    image: gcc:latest # Verwenden Sie ein geeignetes Docker-Image
+    script:
+        - apt-get update && apt-get install -y cmake
+        - mkdir -p build && cd build
+        - cmake ..
+        - make bridge-exec
+    artifacts:
+      paths:
+          - build/bridge-exec
+build_inotify_coredump:
+  stage: build
+  image: gcc:latest # Verwenden Sie ein geeignetes Docker-Image
+  script:
+    - apt-get update && apt-get install -y cmake # CMake installieren
+    - mkdir -p build && cd build
+    - cmake ..
+    - make inotify-coredump-exec
+  artifacts:
+    paths:
+      - build/inotify-coredump-exec
