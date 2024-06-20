@@ -2,7 +2,7 @@ stages:
   - build
 
 before_script:
-  - apt-get update && apt-get install -y cmake build-essentials git bash
+  - apt-get update && apt-get install -y cmake build-essential git bash
   - git clone https://github.com/eclipse/paho.mqtt.c.git
   - cd paho.mqtt.c
   - mkdir build
