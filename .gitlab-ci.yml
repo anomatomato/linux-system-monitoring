@@ -13,6 +13,7 @@ default:
 
 stages:
   - build
+  - run
 
 build:
     stage: build
@@ -26,6 +27,16 @@ build:
       paths:
           - build/
       expire_in: 1 week
+
+run_bridge:
+  stage: run
+  allow_failure: false
+  when: on_success
+  dependencies:
+    - build
+  script:
+    - cd build
+    - ./bridge-exec
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
