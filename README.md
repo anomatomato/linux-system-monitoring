@@ -83,8 +83,8 @@ make
   **Terminal 2**:
 
   ```bash
-  cd build/Testing
-  ./inotify-coredump-exec
+  cd build
+  ./inotify-coredump
   ```
 
   **Terminal 3**:
