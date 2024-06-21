@@ -13,7 +13,7 @@ extern volatile int keep_running;
  * @param signal The signal number of the received signal.
  */
 void handle_signal(int signal);
-void setup_signal_handling(void);
+int setup_signal_handling();
 
 
 #endif
