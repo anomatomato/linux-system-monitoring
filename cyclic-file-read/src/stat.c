@@ -90,7 +90,7 @@ int write_stat_message(FILE* file, int lines) {
         if (line_buffer[strlen(line_buffer) -1] != '\n') {
                 printf("File too big.\n");                                                   /*falls zeile zu groß ist*/
                 return 1;
-         }
+        }
 
         char* token;
         token = strtok(line_buffer, " ");

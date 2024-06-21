@@ -18,26 +18,29 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
 
-        if (strcmp(argv[1], "-h") == 0) {
-                printf("Usage: ./cyclic-file-read-exec [FLAG]\n");
-                printf("  %s         Send CPU metric\n", flag[0]);
-                printf("  %s      Send Networktraffic metric\n", flag[1]);
-                printf("  %s    Send Drive metric\n", flag[2]);
-                printf("  %s     Send Prozess-Stat metric\n", flag[3]);
-                printf("  %s    Send Prozess-Statm metric\n", flag[4]);
-                printf("  %s       Send Prozess-IO metric\n", flag[5]);
-                printf("  %s             Send Chip-Temperatures\n", flag[6]);
-                printf("  %s               Send all System metric\n", flag[7]);
-                printf("  %s               Send all Prozess metric\n", flag[8]);
-                return 1;
-        }
-
-        for (int i = 0; i < 9; i++) {
-                if (strcmp(argv[1], flag[i]) == 0)
-                        break;
-                if (i == 8) {
-                        printf("Try `./cyclic-file-read-exec -h` for more information");
+        if (argc == 2) {
+                if (strcmp(argv[1], "-h") == 0) {
+                        printf("Usage: ./cyclic-file-read-exec [FLAG]\n");
+                        printf("  %s         Send CPU metric\n", flag[0]);
+                        printf("  %s      Send Networktraffic metric\n", flag[1]);
+                        printf("  %s    Send Drive metric\n", flag[2]);
+                        printf("  %s     Send Prozess-Stat metric\n", flag[3]);
+                        printf("  %s    Send Prozess-Statm metric\n", flag[4]);
+                        printf("  %s       Send Prozess-IO metric\n", flag[5]);
+                        printf("  %s             Send Chip-Temperatures\n", flag[6]);
+                        printf("  %s               Send all System metric\n", flag[7]);
+                        printf("  %s               Send all Prozess metric\n", flag[8]);
                         return 1;
+                }
+
+
+                for (int i = 0; i < 9; i++) {
+                        if (strcmp(argv[1], flag[i]) == 0)
+                                break;
+                        if (i == 8) {
+                                printf("Try `./cyclic-file-read-exec -h` for more information");
+                                return 1;
+                        }
                 }
         }
 
