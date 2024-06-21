@@ -1,36 +1,42 @@
 image: gcc:latest #arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
 
 stages:
+  - prepare
   - build
 
-before_script:
-  - cd ..
-  - apt-get update && apt-get install -y cmake libsensors4-dev
-  - git clone https://github.com/eclipse/paho.mqtt.c.git
-  - cd paho.mqtt.c
-  - mkdir build
-  - cd build
-  - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
-  - make
-  - make install
-  - cd ../../stats-recording
+prepare:
+  stage: prepare
+  script:
+    - apt-get update && apt-get install -y cmake libsensors4-dev
+    - git clone https://github.com/eclipse/paho.mqtt.c.git
+    - cd paho.mqtt.c
+    - mkdir build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
+    - make
+    - make install
+  artifacts:
+    paths:
+      - usr/local/paho-mqtt
+    expire_in: 1 week
 
 build:
     stage: build
+    dependencies:
+      - prepare
     allow_failure: false
     when: always
     only:
       changes:
         - ./**/*
         - .gitlab-ci.yml
+    script:
+      - mkdir -p build && cd build
+      - cmake ..
+      - make
     artifacts:
       paths:
           - .
       exclude:
         - .git/**
       expire_in: 1 week
-
-    script:
-      - mkdir -p build && cd build
-      - cmake ..
-      - make
