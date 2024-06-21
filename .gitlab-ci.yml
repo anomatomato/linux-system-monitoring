@@ -1,9 +1,10 @@
-image: gcc:latest #arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
+image: dtcooper/raspberrypi-os:latest #arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
 
 stages:
   - build
 
 before_script:
+  - cd ..
   - apt-get update && apt-get install -y cmake git libsensors4-dev
   - git clone https://github.com/eclipse/paho.mqtt.c.git
   - cd paho.mqtt.c
@@ -12,7 +13,7 @@ before_script:
   - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
   - make
   - make install
-  - cd ../..
+  - cd ../../stats-recording
 
 build:
     stage: build
