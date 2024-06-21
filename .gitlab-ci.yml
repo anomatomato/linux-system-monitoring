@@ -1,4 +1,4 @@
-image: debian:latest #arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
+image: ubuntu:latest #arm32v7/debian:latest # Simulate an ARM environment similar to Raspberry Pi OS Lite.
 
 stages:
   - build
