@@ -18,10 +18,6 @@ build:
     stage: build
     allow_failure: false
     when: always
-    only:
-      changes:
-        - ./**/*
-        - .gitlab-ci.yml
     script:
       - mkdir -p build && cd build
       - cmake ..
