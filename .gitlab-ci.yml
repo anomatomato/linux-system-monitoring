@@ -20,6 +20,8 @@ build:
     artifacts:
       paths:
           - .
+      exclude:
+        - .git
       expire_in: 1 week
 
     script:
