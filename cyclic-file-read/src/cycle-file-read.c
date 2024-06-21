@@ -1,17 +1,17 @@
+#include "common.h"
+#include "disk.h"
+#include "mq.h"
+#include "net.h"
+#include "pid.h"
+#include "stat.h"
+#include "sys.h"
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
-#include <sys/timerfd.h>
 #include <sys/select.h>
-#include "stat.h"
-#include "net.h"
-#include "disk.h"
-#include "pid.h"
-#include "sys.h"
-#include "common.h"
-#include "../../utilities/mq.h"
+#include <sys/timerfd.h>
+#include <time.h>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
         extern char flag[9][MAX_BUFFER];
         if (argc > 2) {
                 printf("Try `./cyclic-file-read-exec -h` for more information");
@@ -41,23 +41,26 @@ int main(int argc, char* argv[]) {
                 }
         }
 
-        if (init_mq("/cfr") == -1)                                                       /*mq für die bridge erstellen*/
+        if (init_mq("/cfr") == -1) /*mq für die bridge erstellen*/
                 return 1;
 
         int timer;
-        if ((timer = timerfd_create(CLOCK_REALTIME, 0)) <= 0) {                                 /*timer initialisieren*/
+        if ((timer = timerfd_create(CLOCK_REALTIME, 0)) <= 0) { /*timer initialisieren*/
                 perror("timerfd_create");
                 return 1;
         }
-        struct itimerspec timerValue = {{5, 0}, {5, 0}};
-        timerfd_settime(timer,  0, &timerValue, NULL);                                           /*timer scharf machen*/
+        struct itimerspec timerValue = {
+                { 5, 0 },
+                { 5, 0 }
+        };
+        timerfd_settime(timer, 0, &timerValue, NULL); /*timer scharf machen*/
 
-        fd_set rfds;                                                                            /*den timer beobachten*/
+        fd_set rfds; /*den timer beobachten*/
         FD_ZERO(&rfds);
         FD_SET(0, &rfds);
         FD_SET(timer, &rfds);
 
-        while(1) {                                                                          /*kontinuierliches sammeln*/
+        while (1) { /*kontinuierliches sammeln*/
                 if (argc == 1 || strcmp(argv[1], flag[0]) == 0 || strcmp(argv[1], flag[7]) == 0) {
                         if (stat() == 1) {
                                 perror("stat");
@@ -110,7 +113,7 @@ int main(int argc, char* argv[]) {
                         dequeue();
                 }
 
-                select(timer+1, &rfds, NULL, NULL, NULL);                                           /*auf timer warten*/
-                timerfd_settime(timer,  0, &timerValue, NULL);                                   /*timer neu aufsetzen*/
+                select(timer + 1, &rfds, NULL, NULL, NULL);   /*auf timer warten*/
+                timerfd_settime(timer, 0, &timerValue, NULL); /*timer neu aufsetzen*/
         }
 }
