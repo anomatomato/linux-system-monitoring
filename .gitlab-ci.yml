@@ -27,7 +27,7 @@ build:
       paths:
           - .
       exclude:
-        - .git
+        - .git/**
       expire_in: 1 week
 
     script:
