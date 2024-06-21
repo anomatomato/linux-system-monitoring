@@ -64,9 +64,9 @@ make
 
 
 
-## 3. Testing
+## 3. Components
 
-### Inotify-coredump
+### Inotify-Coredump
 
 - This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
 - First build the project
@@ -84,7 +84,7 @@ make
 
   ```bash
   cd build
-  ./inotify-coredump
+  ./inotify-coredump-exec
   ```
 
   **Terminal 3**:
@@ -98,5 +98,13 @@ make
 - Now you should see the output in *Terminal 1* and *Terminal 2*
 
 - For more information [read](/testing/create_coredumps/README.md) the `README.md` in `testing/create_coredumps`
+
+### Inotify-Pacct
+
+- Read [here](/src/inotify-pacct/README.md)
+
+### Cyclic-File-Read
+
+- Read [here](/src/cyclic-file-read/README.md)
 
 ***Good luck*** :sunglasses:
