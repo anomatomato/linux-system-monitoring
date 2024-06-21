@@ -155,7 +155,8 @@ int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
         return rc;
 }
 
-void process_messages(client_epoll_t *cet) {
+void *process_messages(void *arg) {
+        client_epoll_t *cet = (client_epoll_t *) arg;
         int epollfd = cet->epollfd;
         struct epoll_event *events = cet->events;
         MQTTAsync *client = cet->client;
@@ -194,7 +195,8 @@ void process_messages(client_epoll_t *cet) {
         }
 }
 
-int inotify_mq(int *epid) {
+void *inotify_mq(void *arg) {
+        int *epid = (int *) arg;
         int fd, wd, len;
         char buffer[BUF_LEN];
         printf("watching %s\n", WATCH_DIR);
@@ -235,7 +237,7 @@ int inotify_mq(int *epid) {
 
         inotify_rm_watch(fd, wd);
         close(fd);
-        return 0;
+        return NULL;
 }
 
 int main() {
@@ -269,14 +271,14 @@ int main() {
         ce.client = &client;
         ce.epollfd = epid;
         ce.events = events;
-        int rc1 = pthread_create(&inotify_thread, NULL, inotify_mq, &epid);
-        if (rc1 == -1) {
+        int rc1 = pthread_create(&inotify_thread, NULL, inotify_mq, (void *) &epid);
+        if (rc1 != 0) {
                 perror("pthread_create failed");
                 exit(EXIT_FAILURE);
         }
 
-        int rc2 = pthread_create(&process_msgs_thread, NULL, process_messages, &ce);
-        if (rc2 == -1) {
+        int rc2 = pthread_create(&process_msgs_thread, NULL, process_messages, (void *) &ce);
+        if (rc2 != 0) {
                 perror("pthread_create failed");
                 exit(EXIT_FAILURE);
         }
