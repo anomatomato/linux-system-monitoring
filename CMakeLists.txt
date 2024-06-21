@@ -9,6 +9,9 @@ if(NOT PAHO_MQTT_C_INCLUDE_DIR OR NOT PAHO_MQTT_C_LIBRARIES)
     message(FATAL_ERROR "Could not find Paho MQTT C library")
 endif()
 
+message("PAHO_MQTT_C_INCLUDE_DIR: ${PAHO_MQTT_C_INCLUDE_DIR}")
+message("PAHO_MQTT_C_LIBRARIES: ${PAHO_MQTT_C_LIBRARIES}")
+
 # Add subdirectories
 add_subdirectory(src)
 
