@@ -17,7 +17,7 @@ prepare:
     - make install
   artifacts:
     paths:
-      - usr/local/paho-mqtt
+      - /usr/local/paho-mqtt
     expire_in: 1 week
 
 build:
