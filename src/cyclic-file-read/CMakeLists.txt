@@ -1,4 +1,4 @@
-add_executable(cyclic-file-read
+add_executable(cyclic-file-read-exec
     common.c
     cyclic-file-read.c
     disk.c
@@ -7,5 +7,5 @@ add_executable(cyclic-file-read
     stat.c
     sys.c)
 
-target_link_libraries(cyclic-file-read PUBLIC utilities sensors)
-target_include_directories(cyclic-file-read PUBLIC ${CMAKE_SOURCE_DIR}/include/cyclic-file-read)
+target_link_libraries(cyclic-file-read-exec PUBLIC utilities sensors)
+target_include_directories(cyclic-file-read-exec PUBLIC ${CMAKE_SOURCE_DIR}/include/cyclic-file-read)
