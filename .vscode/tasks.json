@@ -4,7 +4,7 @@
         {
             "label": "run inotify-pacct",
             "type": "shell",
-            "command": "cd ./build && sudo ./inotify-pacct-exec",
+            "command": "cd ./build && sudo ./inotify-pacct",
             "presentation": {
                 "reveal": "always", // This will always show the terminal
                 "panel": "dedicated"
@@ -14,7 +14,7 @@
         {
             "label": "run bridge",
             "type": "shell",
-            "command": "cd ./build && sudo ./bridge-exec",
+            "command": "cd ./build && sudo ./bridge",
             "problemMatcher": []
         },
         {
