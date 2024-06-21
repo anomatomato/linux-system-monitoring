@@ -9,6 +9,7 @@ default:
     - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
     - make
     - make install
+    - cd ../..
 
 stages:
   - build
