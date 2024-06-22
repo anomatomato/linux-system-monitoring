@@ -36,7 +36,7 @@ struct client_epoll {
 } typedef client_epoll_t;
 
 void connlost(void *context, char *cause) {
-        MQTTAsync client = (MQTTAsync) context;
+        MQTTAsync *client = (MQTTAsync *) context;
         MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
         int rc;
 
@@ -47,7 +47,7 @@ void connlost(void *context, char *cause) {
         printf("Reconnecting\n");
         conn_opts.keepAliveInterval = 20;
         conn_opts.cleansession = 1;
-        if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
+        if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to start connect, return code %d\n", rc);
                 finished = 1;
         }
@@ -253,7 +253,8 @@ int main() {
                 exit(EXIT_FAILURE);
         }
 
-        if ((rc = MQTTAsync_setCallbacks(client, &client, connlost, messageArrived, NULL)) != MQTTASYNC_SUCCESS) {
+        if ((rc = MQTTAsync_setCallbacks(client, &client, connlost, messageArrived, NULL)) !=
+            MQTTASYNC_SUCCESS) {
                 printf("Failed to set callback, return code %d\n", rc);
                 exit(EXIT_FAILURE);
         }
