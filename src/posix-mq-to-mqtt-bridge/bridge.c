@@ -41,7 +41,8 @@ void connlost(void *context, char *cause) {
         int rc;
 
         printf("\nConnection lost\n");
-        printf("     cause: %s\n", cause);
+        if (cause != NULL)
+                printf("     cause: %s\n", cause);
 
         printf("Reconnecting\n");
         conn_opts.keepAliveInterval = 20;
