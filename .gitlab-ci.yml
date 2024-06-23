@@ -13,7 +13,7 @@ default:
 
 stages:
   - build
-  - test
+  - run
 
 build:
   stage: build
