@@ -1,7 +1,7 @@
 default:
   image: gcc:latest
   before_script:
-    - apt-get update && apt-get install -y cmake libsensors4-dev
+    - apt-get update && apt-get install -y cmake libsensors4-dev systemd-coredump
     - git clone https://github.com/eclipse/paho.mqtt.c.git
     - cd paho.mqtt.c
     - mkdir build
@@ -13,20 +13,30 @@ default:
 
 stages:
   - build
-#  - run
+  - test
 
 build:
-    stage: build
-    allow_failure: false
-    when: always
-    script:
-      - mkdir -p build && cd build
-      - cmake ..
-      - make
-    artifacts:
-      paths:
-          - build/
-      expire_in: 1 week
+  stage: build
+  allow_failure: false
+  when: always
+  script:
+    - mkdir -p build && cd build
+    - cmake ..
+    - make
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 week
+
+test_inotify_coredump:
+  stage: run
+  allow_failure: false
+  when: on_success
+  dependencies:
+    - build
+  script:
+    - cd test/unit
+    - ./inotify-coredump-test
 
 # run_bridge:
 #   stage: run
