@@ -41,6 +41,7 @@ int init_inotify(int *fd, int *wd) {
                 close(*fd);
                 return -1;
         }
+        return 0;
 }
 
 void process_events(int fd) {
@@ -92,7 +93,7 @@ int cleanup(int fd, int wd) {
         return (ret1 == -1 || ret2 == -1 || ret3 == -1) ? -1 : 0;
 }
 
-int inotify_coredump() {
+int inotify_coredump(int test, int verbose) {
         int fd = -1, wd = -1;
         printf("inotify_coredump running...\n");
 

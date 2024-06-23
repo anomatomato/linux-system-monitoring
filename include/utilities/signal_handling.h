@@ -1,7 +1,9 @@
 #ifndef SIGNAL_HANDLING_H
 #define SIGNAL_HANDLING_H
 
-extern volatile int keep_running;
+#include <signal.h>
+
+extern volatile sig_atomic_t keep_running;
 
 /**
  * @brief Signal handler function for gracefully shutting down the program.
@@ -13,6 +15,13 @@ extern volatile int keep_running;
  * @param signal The signal number of the received signal.
  */
 void handle_signal(int signal);
+
+/**
+ * @brief Setup the signal handlers for SIGINT and SIGTERM and other signals,
+ * to ensure, the program can gracefully shut down when these signals are received.
+ *
+ * @return 0 on success, -1 on failure.
+ */
 int setup_signal_handling();
 
 
