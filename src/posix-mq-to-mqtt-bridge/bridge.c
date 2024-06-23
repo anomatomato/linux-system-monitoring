@@ -134,7 +134,7 @@ int register_queue(int epid, char *mq_path) {
                 perror("mq_open failed in register_queue");
                 return -1;
         }
-        epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
+        return epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
 int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
@@ -151,6 +151,27 @@ int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
         if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to start connect, return code %d\n", rc);
                 free(cm);
+                exit(EXIT_FAILURE);
+        }
+        return rc;
+}
+
+int send_message_to_broker(MQTTAsync *client, char *received_msg){
+        MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
+        MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
+        opts.onSuccess = onSend;
+        opts.onFailure = onSendFailure;
+        opts.context = client;
+        pubmsg.payload = received_msg;
+        pubmsg.payloadlen = strlen(received_msg);
+        pubmsg.qos = QOS;
+        pubmsg.retained = 0;
+
+        printf("Trying to send a message: %s\n", received_msg);
+
+        int rc;
+        if ((rc = MQTTAsync_sendMessage(*client, TOPIC, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
+                printf("Failed to start sendMessage, return code %d\n", rc);
                 exit(EXIT_FAILURE);
         }
         return rc;
@@ -175,22 +196,9 @@ void *process_messages(void *arg) {
                                 perror("In mq_receive ");
                                 exit(-1);
                         }
-                        MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-                        MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
-                        opts.onSuccess = onSend;
-                        opts.onFailure = onSendFailure;
-                        opts.context = client;
-                        pubmsg.payload = received_msg;
-                        pubmsg.payloadlen = strlen(received_msg);
-                        pubmsg.qos = QOS;
-                        pubmsg.retained = 0;
-
-                        printf("Trying to send a message: %s\n", received_msg);
-
-                        int rc;
-                        if ((rc = MQTTAsync_sendMessage(*client, TOPIC, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
-                                printf("Failed to start sendMessage, return code %d\n", rc);
-                                exit(EXIT_FAILURE);
+                        if (send_message_to_broker(client, received_msg)){
+                                perror("In send_message_to_broker");
+                                exit(-1);
                         }
                 }
         }
@@ -230,7 +238,8 @@ void *inotify_mq(void *arg) {
                         struct inotify_event *event = (struct inotify_event *) &buffer[i];
                         if (event->len && event->mask & IN_CREATE) {
                                 printf("message queue /%s added to watchlist\n", event->name);
-                                register_queue(*epid, event->name);
+                                if (register_queue(*epid, event->name) == -1)
+                                        exit(EXIT_FAILURE);
                         }
                         i += EVENT_SIZE + event->len;
                 }
