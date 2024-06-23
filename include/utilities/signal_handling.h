@@ -3,8 +3,6 @@
 
 #include <signal.h>
 
-extern volatile sig_atomic_t keep_running;
-
 /**
  * @brief Signal handler function for gracefully shutting down the program.
  *
