@@ -7,7 +7,7 @@
 #include <time.h>
 
 int init_mq(const char *mq_path) {
-        mq_unlink(mq_path);
+        printf("Creating message queue: %s\n", mq_path);
 
         /* Set attributes for the message queue*/
         struct mq_attr attr;
@@ -20,7 +20,6 @@ int init_mq(const char *mq_path) {
                 perror("mq_open failed");
                 return -1;
         }
-
         return mq;
 }
 
