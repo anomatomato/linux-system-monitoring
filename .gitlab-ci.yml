@@ -36,7 +36,7 @@ test_inotify_coredump:
     - build
   script:
     - cd test/unit
-    - ./inotify-coredump-test
+    - ./inotify-coredump-test.sh
 
 # run_bridge:
 #   stage: run
@@ -52,3 +52,4 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - build/
+    - paho.mqtt.c
