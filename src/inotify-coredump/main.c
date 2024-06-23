@@ -1,5 +1,6 @@
 #define _XOPEN_SOURCE 700
 
+#include "colored_output.h"
 #include "inotify-coredump.h"
 #include "signal_handling.h"
 #include <stdio.h>
@@ -8,7 +9,7 @@
 
 void print_usage(const char *prog) {
         printf("Usage: %s [FLAG]\n", prog);
-        printf("  -t    test mode\n");
+        printf("  -t    test mode, tests for max. one coredump\n");
         printf("  -v    verbose, print Line Protocol lines\n");
         printf("  -h    display this help message\n");
 }
@@ -22,19 +23,19 @@ int main(int argc, char *argv[]) {
                 switch (opt) {
                 case 't':
                         test = 1;
-                        printf("Test\n");
+                        printf("Test-mode\n");
                         break;
                 case 'v':
                         verbose = 1;
-                        printf("Verbose\n");
+                        printf("Verbose-mode\n");
                         break;
                 case 'h':
                         print_usage(argv[0]);
-                        exit(EXIT_SUCCESS);
+                        return 0;
 
                 case '?':
                         print_usage(argv[0]);
-                        exit(EXIT_FAILURE);
+                        return -1;
                 default:
                         break;
                 }
@@ -42,15 +43,18 @@ int main(int argc, char *argv[]) {
 
         if (setup_signal_handling() == -1) {
                 fprintf(stderr, "setup_signal_handling failed\n");
-                exit(EXIT_FAILURE);
+                return -1;
         }
 
         /* Start inotify_coredump */
         if (inotify_coredump(test, verbose) == -1) {
-                fprintf(stderr, "inotify_coredump failed\n");
-                exit(EXIT_FAILURE);
+                if (test)
+                        fprintf(stderr, COLOR_RED STYLE_BOLD "Test failed" RESET_ALL "\n");
+                else
+                        fprintf(stderr, "inotify_coredump failed\n");
+                return -1;
         }
 
-        printf("inotify-coredump exited successfully.\n");
+        printf(COLOR_GREEN STYLE_BOLD "inotify-coredump exited successfully." RESET_ALL "\n");
         return 0;
 }
