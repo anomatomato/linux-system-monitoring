@@ -3,7 +3,6 @@
 #include <fcntl.h>
 #include <mqueue.h>
 #include <pthread.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -106,12 +105,21 @@ mqd_t initialize_mq(const char *mq_path) {
 }
 
 void add_hostname_to_msg(char *msg) {
-        char hostname[20];
+        char hostname[64];
         gethostname(hostname, sizeof(hostname));
-        char tag[6 + sizeof(hostname)] = "host=";
-        strcat(tag, hostname);
-        strcat(msg, " ");
-        strcat(msg, tag);
+
+        char tag[7 + sizeof(hostname)];
+        snprintf(tag, sizeof(tag), ",host=%s", hostname);
+
+        char buffer[MAX_MSG_SIZE];
+        char *whitespace = strchr(msg, ' ');
+
+        if (whitespace != NULL) {
+                int prefix_len = whitespace - msg;
+                snprintf(buffer, sizeof(buffer), "%.*s%s%s", prefix_len, msg, tag, whitespace);
+                strncpy(msg, buffer, MAX_MSG_SIZE - 1);
+                msg[MAX_MSG_SIZE] = '\0';
+        }
 }
 
 int init_epoll() {
@@ -156,7 +164,7 @@ int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
         return rc;
 }
 
-int send_message_to_broker(MQTTAsync *client, char *received_msg){
+int send_message_to_broker(MQTTAsync *client, char *received_msg) {
         MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
         MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
         opts.onSuccess = onSend;
@@ -196,7 +204,8 @@ void *process_messages(void *arg) {
                                 perror("In mq_receive ");
                                 exit(-1);
                         }
-                        if (send_message_to_broker(client, received_msg)){
+                        add_hostname_to_msg(received_msg);
+                        if (send_message_to_broker(client, received_msg)) {
                                 perror("In send_message_to_broker");
                                 exit(-1);
                         }
