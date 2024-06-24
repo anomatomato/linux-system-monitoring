@@ -3,9 +3,6 @@ stages:
   - build
   - run
 
-variables:
-  DOCKER_IMAGE_TAG: "v1.0.0"
-
 build-docker-job:
   stage: build-docker
   tags:
@@ -17,18 +14,19 @@ build-docker-job:
     - docker info
   script:
     - echo "Building Docker image"
-    - docker build -t $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG .
+    - docker build -t $CI_REGISTRY_IMAGE/debian:latest .
     - echo "Pushing Docker image"
-    - docker push $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
+    - docker push $CI_REGISTRY_IMAGE/debian:latest
   rules:
     - changes:
         - Dockerfile
-        - .gitlab-ci.yml
 
 build:
   stage: build
-  image: $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
+  image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
+  before_script:
+    - docker pull $CI_REGISTRY_IMAGE/debian:latest
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -45,11 +43,14 @@ build:
         - src/
         - include/
         - .gitlab-ci.yml
+        - Dockerfile
 
 test_inotify_coredump:
   stage: run
-  image: $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
+  image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
+  before_script:
+    - docker pull $CI_REGISTRY_IMAGE/debian:latest
   needs:
     - job: build
   dependencies:
@@ -64,6 +65,7 @@ test_inotify_coredump:
         - include/
         - test/unit/
         - .gitlab-ci.yml
+        - Dockerfile
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
