@@ -489,3 +489,31 @@ int LP_check(const char *line) {
 }
 
 #endif
+
+void test_line(const char *line) {
+        int status = LP_check(line);
+        printf("Line: \"%s\"\nStatus: %d\n\n", line, status);
+}
+
+int LP_main() {
+        const char *edge_cases[] = { "",
+                                     "measurement field=1",
+                                     "measurement,tag=value field=1",
+                                     "measur\\ement,tag=value field=1 1234567890",
+                                     "measurement,tag=value  field=1 1234567890",
+                                     "measurement,tag1=value1,tag2=val  ue2 field=1 1234567890",
+                                     "measurement field  key=1 1234567890",
+                                     "measurement,tag1=value1,tag2 field=1 1234567890",
+                                     "measurement,tag=value field1=1,field2 field3=3 1234567890",
+                                     "measurement,tag=value field=some\"unescaped\"value 1234567890",
+                                     "measurement,tag=value field=1 abcdefgh",
+                                     "measurement,tag=val=ue field=1 1234567890",
+                                     "measurement field=\"some,unescaped,value\" 1234567890",
+                                     ",tag=value field=1 1234567890",
+                                     "measurement,tag=value  1234567890" };
+
+        int num_cases = sizeof(edge_cases) / sizeof(edge_cases[0]);
+        for (int i = 0; i < num_cases; ++i) {
+                test_line(edge_cases[i]);
+        }
+}
