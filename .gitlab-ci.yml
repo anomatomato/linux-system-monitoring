@@ -24,6 +24,7 @@ build-docker-job:
 build:
   stage: build
   image: $CI_REGISTRY_IMAGE/debian:latest
+  when: on_success
   allow_failure: false
   script:
     - mkdir -p build && cd build
@@ -33,8 +34,6 @@ build:
     paths:
       - build/
     expire_in: 1 week
-  needs:
-    - job: build-docker-job
   rules:
     - changes:
         - CMakeLists.txt
@@ -47,8 +46,6 @@ test_inotify_coredump:
   stage: run
   image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  needs:
-    - job: build
   dependencies:
     - build
   script:
