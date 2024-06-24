@@ -12,11 +12,6 @@ build-docker-job:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker info
-    - cd extern/paho.mqtt.c
-    - mkdir -p build && cd build
-    - cmake ..
-    - make install
-    - cd ../../..
   script:
     - docker build -t $CI_REGISTRY_IMAGE/debian .
     - docker push $CI_REGISTRY_IMAGE/debian
