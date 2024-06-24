@@ -70,8 +70,3 @@ test_inotify_coredump:
       - test/unit/
       - .gitlab-ci.yml
       - Dockerfile
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - build/
