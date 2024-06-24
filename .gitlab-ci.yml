@@ -55,6 +55,7 @@ test_inotify_coredump:
     - make
     - cd ..
     - cd test/unit
+    - sudo sysctl -n kernel.core_pattern
     - ./inotify-coredump-test.sh
   rules:
     - changes:
