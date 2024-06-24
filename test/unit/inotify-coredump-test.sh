@@ -2,6 +2,8 @@
 
 ./../../build/inotify-coredump-exec -t &
 sleep 1
-gcc -o segmentation_fault ../create_coredumps/segmentation_fault.c
-./../create_coredumps/segmentation_fault
+
+cd ../create_coredump
+gcc -o segmentation_fault segmentation_fault.c
+./segmentation_fault
 killall inotify-coredump-exec
