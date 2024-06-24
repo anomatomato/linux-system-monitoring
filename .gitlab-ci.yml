@@ -49,9 +49,9 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
-    - ulimit -c unlimited
-    - echo kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e >> /etc/sysctl.d/50-coredump.conf
-    - sysctl -p /etc/sysctl.d/50-coredump.conf
+    - sudo sh -c 'ulimit -c unlimited'
+    - sudo sh -c 'echo "kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e" >> /etc/sysctl.d/50-coredump.conf'
+    - sudo sysctl -p /etc/sysctl.d/50-coredump.conf
     - cd test/unit
     - ./inotify-coredump-test.sh
   # rules:
