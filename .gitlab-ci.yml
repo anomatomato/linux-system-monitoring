@@ -1,15 +1,5 @@
 default:
-  image: gcc:latest
-  before_script:
-    - apt-get update && apt-get install -y cmake libsensors4-dev systemd-coredump
-    - git clone https://github.com/eclipse/paho.mqtt.c.git
-    - cd paho.mqtt.c
-    - mkdir build
-    - cd build
-    - cmake -DCMAKE_INSTALL_PREFIX=/usr/local/paho-mqtt ..
-    - make
-    - make install
-    - cd ../..
+  image: anotomato/gcc-cmake:latest
 
 stages:
   - build
@@ -52,4 +42,3 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - build/
-    - paho.mqtt.c
