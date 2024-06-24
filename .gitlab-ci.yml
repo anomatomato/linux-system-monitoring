@@ -39,7 +39,7 @@ build:
         - CMakeLists.txt
         - src/
         - include/
-        - .gitlab-ci.yml
+        # - .gitlab-ci.yml
         - Dockerfile
 
 test_inotify_coredump:
@@ -49,16 +49,20 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
+    - apt-get install sudo
+    # - sudo sh -c 'ulimit -c unlimited'
+    - sudo sh -c 'echo "kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e" >> /etc/sysctl.d/50-coredump.conf'
+    - sudo sysctl -p /etc/sysctl.d/50-coredump.conf
     - cd test/unit
     - ./inotify-coredump-test.sh
-  rules:
-    - changes:
-        - CMakeLists.txt
-        - src/
-        - include/
-        - test/unit/
-        - .gitlab-ci.yml
-        - Dockerfile
+  # rules:
+  #   - changes:
+  #       - CMakeLists.txt
+  #       - src/
+  #       - include/
+  #       - test/unit/
+  #       - .gitlab-ci.yml
+  #       - Dockerfile
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
