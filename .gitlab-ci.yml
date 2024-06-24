@@ -52,6 +52,8 @@ test_inotify_coredump:
     - sysctl -n kernel.core_pattern
     - ulimit -c
     - cd test/unit
+    - sleep 500 &
+    - kill -s SIGTRAP $(pgrep sleep)
     - coredumpctl list
     - ./inotify-coredump-test.sh
   rules:
