@@ -49,6 +49,7 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
+    - apt install sudo
     - mkdir -p build && cd build
     - cmake ..
     - make
