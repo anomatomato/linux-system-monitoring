@@ -58,7 +58,7 @@ test_inotify_coredump:
     - sleep 3
     - ls /var/lib/systemd/coredump
     - ls /lib/systemd/coredump
-    - coredumpctl list
+    - coredumpctl
     - ./inotify-coredump-test.sh
   rules:
     - changes:
