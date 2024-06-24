@@ -54,7 +54,7 @@ test_inotify_coredump:
     - cd test/unit
     - sleep 500 &
     - kill -s SIGTRAP $(pgrep sleep)
-    - sleep(3)
+    - sleep 3
     - coredumpctl list
     - ./inotify-coredump-test.sh
   rules:
