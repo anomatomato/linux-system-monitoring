@@ -50,8 +50,8 @@ test_inotify_coredump:
     - build
   script:
     - ulimit -c unlimited
-    - cat 'kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e' >> /etc/sysctl.d/50-coredump.conf
-    - sudo sysctl -p /etc/sysctl.d/50-coredump.conf
+    - echo kernel.core_pattern=|/usr/lib/systemd/systemd-coredump %P %u %g %s %t %e >> /etc/sysctl.d/50-coredump.conf
+    - sysctl -p /etc/sysctl.d/50-coredump.conf
     - cd test/unit
     - ./inotify-coredump-test.sh
   # rules:
