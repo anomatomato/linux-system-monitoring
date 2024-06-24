@@ -50,13 +50,9 @@ test_inotify_coredump:
     - build
   script:
     - set +e
+    - sysctl -w kernel.core_pattern='/var/lib/systemd/coredump/core.%e.%p.%h.%t'
     - sysctl -n kernel.core_pattern
     - ulimit -c
-    - cat /etc/systemd/coredump.conf
-    - echo -e "[Coredump]\nStorage=external\nCompress=yes" | tee /etc/systemd/coredump.conf
-    - systemctl daemon-reload
-    - systemctl restart systemd-coredump
-    - systemctl show --property=Environment systemd-coredump
     - sleep 500 &
     - kill -s SIGTRAP $(pgrep sleep)
     - sleep 3
