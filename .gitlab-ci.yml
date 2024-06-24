@@ -39,7 +39,7 @@ build:
         - CMakeLists.txt
         - src/
         - include/
-        - .gitlab-ci.yml
+        # - .gitlab-ci.yml
         - Dockerfile
 
 test_inotify_coredump:
@@ -49,6 +49,8 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
+    - sysctl -n kernel.core_pattern
+    - ulimit -c
     - cd test/unit
     - ./inotify-coredump-test.sh
   rules:
