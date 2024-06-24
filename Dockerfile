@@ -9,6 +9,7 @@ RUN apt-get update \
     cmake \
     libsensors4-dev \
     systemd-coredump \
+    git \
     && apt-get clean && rm -rf /var/lib/lists/*
 
 # Clone and install paho.mqtt.c
