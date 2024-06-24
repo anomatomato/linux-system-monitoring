@@ -73,7 +73,7 @@ int process_events(int fd, int test, int verbose) {
                                          get_timestamp());
 
                                 if (verbose)
-                                        printf("%s\n", message);
+                                        printf("Message:\n%s\n", message);
 
                                 if (test) {
                                         int status = LP_check(message);
@@ -86,7 +86,8 @@ int process_events(int fd, int test, int verbose) {
                                         }
                                         printf(COLOR_GREEN STYLE_BOLD
                                                "Message is in InfluxDB Line Protocol" RESET_ALL "\n");
-                                        return 0;
+                                        printf("Raising SIGTERM...\n");
+                                        raise(SIGTERM);
                                 }
 
                                 /* Send message to message queue */
@@ -131,5 +132,9 @@ int inotify_coredump(int test, int verbose) {
 
         int ret1 = process_events(fd, test, verbose);
         int ret2 = cleanup(fd, wd);
+        if (test)
+                printf(STYLE_BOLD "%s" RESET_ALL "\n",
+                       ret2 == 0 ? COLOR_GREEN "cleanup successful" : COLOR_RED "cleanup failed");
+
         return (ret1 == -1 || ret2 == -1) ? -1 : 0;
 }

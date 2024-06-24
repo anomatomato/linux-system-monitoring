@@ -13,6 +13,7 @@ void print_usage(const char *prog) {
         printf("  -v    verbose, print Line Protocol lines\n");
         printf("  -h    display this help message\n");
 }
+
 int main(int argc, char *argv[]) {
         int opt;
         int test = 0;
@@ -23,11 +24,9 @@ int main(int argc, char *argv[]) {
                 switch (opt) {
                 case 't':
                         test = 1;
-                        printf("Test-mode\n");
                         break;
                 case 'v':
                         verbose = 1;
-                        printf("Verbose-mode\n");
                         break;
                 case 'h':
                         print_usage(argv[0]);
