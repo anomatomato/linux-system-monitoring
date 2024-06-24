@@ -59,7 +59,6 @@ test_inotify_coredump:
     - changes:
       - CMakeLists.txt
       - src/
-      - include/
       - test/unit/
       - .gitlab-ci.yml
       - Dockerfile
