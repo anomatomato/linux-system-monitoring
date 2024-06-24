@@ -23,6 +23,7 @@ build-docker-job:
   rules:
     - changes:
         - Dockerfile
+        - .gitlab-ci.yml
 
 build:
   stage: build
