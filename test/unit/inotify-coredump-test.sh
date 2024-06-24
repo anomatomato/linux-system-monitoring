@@ -16,6 +16,7 @@ echo "Generating coredump..."
 sleep 500 &
 kill -s SIGTRAP $(pgrep sleep)
 
+sleep 4
 # Wait for inotify-coredump to finish and capture the exit status
 wait $INOTIFY_PID
 EXIT_STATUS=$?
