@@ -1,14 +1,33 @@
-default:
-  image: anotomato/gcc-cmake:latest
-
 stages:
+  - build-docker
   - build
   - run
 
+build-docker-job:
+  stage: build-docker
+  tags:
+    - dind
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker info
+    - cd extern/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make install
+    - cd ../../..
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE/debian .
+    - docker push $CI_REGISTRY_IMAGE/debian
+  rules:
+    - changes:
+        - Dockerfile
+
 build:
   stage: build
+  image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  when: always
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -17,16 +36,34 @@ build:
     paths:
       - build/
     expire_in: 1 week
+  needs:
+    - job: build-docker-job
+      optional: true
+  rules:
+    - changes:
+        - CMakeLists.txt
+        - src/
+        - include/
+        - .gitlab-ci.yml
 
 test_inotify_coredump:
   stage: run
+  image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  when: on_success
+  needs:
+    - job: build
   dependencies:
     - build
   script:
     - cd test/unit
     - ./inotify-coredump-test.sh
+  rules:
+    - changes:
+        - CMakeLists.txt
+        - src/
+        - include/
+        - test/unit/
+        - .gitlab-ci.yml
 
 # run_bridge:
 #   stage: run
