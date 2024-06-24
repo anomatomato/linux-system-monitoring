@@ -52,13 +52,19 @@ test_inotify_coredump:
     - set +e
     - sysctl -n kernel.core_pattern
     - ulimit -c
-    - cd test/unit
+    - cat /etc/systemd/coredump.conf
+    - cat<<EOF >/etc/systemd/coredump.conf
+      [Coredump]
+      Storage=external
+      Compress=yes
+      EOF
+    - echo 
     - sleep 500 &
     - kill -s SIGTRAP $(pgrep sleep)
     - sleep 3
     - ls /var/lib/systemd/coredump
-    - ls /lib/systemd/coredump
     - coredumpctl
+    - cd test/unit
     - ./inotify-coredump-test.sh
   rules:
     - changes:
