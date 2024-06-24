@@ -30,6 +30,7 @@ build:
     - mkdir -p build && cd build
     - cmake ..
     - make
+    - sysctl -n kernel.core_pattern
   artifacts:
     paths:
       - build/
