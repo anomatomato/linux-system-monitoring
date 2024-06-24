@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo sysctl -w kernel.core_pattern='|/lib/systemd/systemd-coredump %P %u %g %s %t 9223372036854775808 %h'
+sysctl -w kernel.core_pattern='|/lib/systemd/systemd-coredump %P %u %g %s %t 9223372036854775808 %h' # >/dev/null 2>&1
 
 printf "Starting Unit test for inotify-coredump...\n\n"
 
