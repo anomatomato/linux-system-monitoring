@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo sysctl -w kernel.core_pattern='|/lib/systemd/systemd-coredump %P %u %g %s %t 9223372036854775808 %h'
+
 printf "Starting Unit test for inotify-coredump...\n\n"
 
 # Start inotify-coredump in test mode
@@ -14,13 +16,10 @@ echo "Generating coredump..."
 sleep 500 &
 kill -s SIGTRAP $(pgrep sleep)
 
-touch /var/lib/systemd/coredump/test-coredump
-
 # Wait for inotify-coredump to finish and capture the exit status
 wait $INOTIFY_PID
 EXIT_STATUS=$?
 
-rm -f /var/lib/systemd/coredump/test-coredump
 # Test result
 if [ $EXIT_STATUS -ne 0 ]; then
     printf "\nUnit test failed with exit status %s\n" $EXIT_STATUS
