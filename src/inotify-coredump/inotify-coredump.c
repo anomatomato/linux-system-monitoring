@@ -75,6 +75,12 @@ int process_events(int fd, int test, int verbose) {
                                 if (verbose)
                                         printf("Message:\n%s\n", message);
 
+                                /* Send message to message queue */
+                                if (send_to_mq(message, MQ_PATH) == -1) {
+                                        perror("send_to_mq failed");
+                                        return -1;
+                                }
+
                                 if (test) {
                                         int status = LP_check(message);
                                         if (status != 0) {
@@ -88,12 +94,6 @@ int process_events(int fd, int test, int verbose) {
                                                "Message is in InfluxDB Line Protocol" RESET_ALL "\n");
                                         printf("Raising SIGTERM...\n");
                                         raise(SIGTERM);
-                                }
-
-                                /* Send message to message queue */
-                                if (send_to_mq(message, MQ_PATH) == -1) {
-                                        perror("send_to_mq failed");
-                                        return -1;
                                 }
                         }
                         i += EVENT_SIZE + event->len;

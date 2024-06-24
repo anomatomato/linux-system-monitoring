@@ -11,7 +11,6 @@ volatile sig_atomic_t keep_running = 1;
 void print_signal(int signal) {
         char msg1[] = "\nReceived signal ";
         char msg2[] = ", stopping...\n";
-        int length = 0;
 
         /* Write first part of the message */
         write(STDOUT_FILENO, msg1, sizeof(msg1) - 1);
@@ -22,16 +21,16 @@ void print_signal(int signal) {
                 write(STDOUT_FILENO, "SIGINT", sizeof("SIGINT") - 1);
                 break;
         case SIGTERM:
-                write(STDIN_FILENO, "SIGTERM", sizeof("SIGTERM") - 1);
+                write(STDOUT_FILENO, "SIGTERM", sizeof("SIGTERM") - 1);
                 break;
         case SIGHUP:
-                write(STDIN_FILENO, "SIGHUP", sizeof("SIGHUP") - 1);
+                write(STDOUT_FILENO, "SIGHUP", sizeof("SIGHUP") - 1);
                 break;
         case SIGQUIT:
-                write(STDIN_FILENO, "SIGQUIT", sizeof("SIGQUIT") - 1);
+                write(STDOUT_FILENO, "SIGQUIT", sizeof("SIGQUIT") - 1);
                 break;
         default:
-                write(STDIN_FILENO, "UNKNOWN", sizeof("UNKNOWN") - 1);
+                write(STDOUT_FILENO, "UNKNOWN", sizeof("UNKNOWN") - 1);
                 break;
         }
 
