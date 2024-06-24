@@ -16,6 +16,6 @@ RUN apt-get update \
 RUN git clone https://github.com/eclipse/paho.mqtt.c.git && \
     cd paho.mqtt.c && \
     mkdir build && cd build && \
-    cmake && \
+    cmake.. && \
     make && make install && \
     cd ../.. && rm -rf paho.mqtt.c
