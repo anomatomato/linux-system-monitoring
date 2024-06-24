@@ -11,23 +11,30 @@ volatile sig_atomic_t keep_running = 1;
 void print_signal(int signal) {
         char msg1[] = "\nReceived signal ";
         char msg2[] = ", stopping...\n";
-        char num[10];
         int length = 0;
 
         /* Write first part of the message */
         write(STDOUT_FILENO, msg1, sizeof(msg1) - 1);
 
-        /* Convert reversed signal number to string */
-        int sig = signal;
-        do {
-                num[length++] = '0' + (signal % 10);
-                sig /= 10;
-        } while (sig > 0);
-
-        /* Write the signal number in right order */
-        for (int i = length - 1; i >= 0; i--) {
-                write(STDOUT_FILENO, &num[i], 1);
+        /* Write signal */
+        switch (signal) {
+        case SIGINT:
+                write(STDOUT_FILENO, "SIGINT", sizeof("SIGINT") - 1);
+                break;
+        case SIGTERM:
+                write(STDIN_FILENO, "SIGTERM", sizeof("SIGTERM") - 1);
+                break;
+        case SIGHUP:
+                write(STDIN_FILENO, "SIGHUP", sizeof("SIGHUP") - 1);
+                break;
+        case SIGQUIT:
+                write(STDIN_FILENO, "SIGQUIT", sizeof("SIGQUIT") - 1);
+                break;
+        default:
+                write(STDIN_FILENO, "UNKNOWN", sizeof("UNKNOWN") - 1);
+                break;
         }
+
 
         /* Write the final part of the message */
         write(STDOUT_FILENO, msg2, sizeof(msg2) - 1);
