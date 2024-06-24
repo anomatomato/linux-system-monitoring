@@ -39,26 +39,28 @@ build:
         - CMakeLists.txt
         - src/
         - include/
-        - .gitlab-ci.yml
+        # - .gitlab-ci.yml
         - Dockerfile
 
-  # test_inotify_coredump:
-  #   stage: run
-  #   image: $CI_REGISTRY_IMAGE/debian:latest
-  #   allow_failure: false
-  #   dependencies:
-  #     - build
-  #   script:
-  #     - cd test/unit
-  #     - ./inotify-coredump-test.sh
-  # rules:
-  #   - changes:
-  #       - CMakeLists.txt
-  #       - src/
-  #       - include/
-  #       - test/unit/
-  #       - .gitlab-ci.yml
-  #       - Dockerfile
+test_inotify_coredump:
+  stage: run
+  image: $CI_REGISTRY_IMAGE/debian:latest
+  allow_failure: false
+  dependencies:
+    - build
+  script:
+    - sysctl -n kernel.core_pattern
+    - ulimit -c
+    - cd test/unit
+    - ./inotify-coredump-test.sh
+  rules:
+    - changes:
+      - CMakeLists.txt
+      - src/
+      - include/
+      - test/unit/
+      - .gitlab-ci.yml
+      - Dockerfile
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
