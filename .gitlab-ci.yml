@@ -53,11 +53,7 @@ test_inotify_coredump:
     - sysctl -n kernel.core_pattern
     - ulimit -c
     - cat /etc/systemd/coredump.conf
-    - cat<<EOF >/etc/systemd/coredump.conf
-      [Coredump]
-      Storage=external
-      Compress=yes
-      EOF
+    - echo -e "[Coredump]\nStorage=external\nCompress=yes" | tee /etc/systemd/coredump.conf
     - echo 
     - sleep 500 &
     - kill -s SIGTRAP $(pgrep sleep)
