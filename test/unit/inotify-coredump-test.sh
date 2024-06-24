@@ -6,12 +6,15 @@ printf "Starting Unit test for inotify-coredump...\n\n"
 ./../../build/inotify-coredump-exec -t -v &
 INOTIFY_PID=$!
 sleep 1
+ps $INOTIFY_PID
 
 # Create coredump file
 echo "Generating coredump..."
 
 sleep 500 &
 kill -s SIGTRAP $(pgrep sleep)
+
+ps $INOTIFY_PID
 
 # Wait for inotify-coredump to finish and capture the exit status
 wait $INOTIFY_PID
