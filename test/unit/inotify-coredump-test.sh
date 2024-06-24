@@ -5,7 +5,12 @@
 printf "Starting Unit test for inotify-coredump...\n\n"
 
 # Start inotify-coredump in test mode
-./../../build/inotify-coredump-exec -t &
+mkdir -p ../../build
+cd ../../build
+cmake .. 1>/dev/null
+make 1>/dev/null
+./inotify-coredump-exec -t &
+cd ../test/unit
 INOTIFY_PID=$!
 sleep 2
 
