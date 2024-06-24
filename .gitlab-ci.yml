@@ -20,14 +20,11 @@ build-docker-job:
   rules:
     - changes:
         - Dockerfile
-        - .gitlab-ci.yml
 
 build:
   stage: build
   image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  before_script:
-    - docker pull $CI_REGISTRY_IMAGE/debian:latest
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -50,8 +47,6 @@ test_inotify_coredump:
   stage: run
   image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  before_script:
-    - docker pull $CI_REGISTRY_IMAGE/debian:latest
   needs:
     - job: build
   dependencies:
