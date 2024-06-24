@@ -49,6 +49,10 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
+    - mkdir -p build && cd build
+    - cmake ..
+    - make
+    - cd ..
     - set +e
     - sysctl -w kernel.core_pattern='/var/lib/systemd/coredump/core.%e.%p.%h.%t'
     - sysctl -n kernel.core_pattern
