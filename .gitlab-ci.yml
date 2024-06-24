@@ -52,6 +52,7 @@ test_inotify_coredump:
     - sysctl -n kernel.core_pattern
     - ulimit -c
     - cd test/unit
+    - coredumpctl list
     - ./inotify-coredump-test.sh
   rules:
     - changes:
