@@ -49,6 +49,7 @@ test_inotify_coredump:
   dependencies:
     - build
   script:
+    - systemctl start systemd-coredump
     - cd test/unit
     - ./inotify-coredump-test.sh
   # rules:
