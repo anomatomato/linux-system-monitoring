@@ -3,6 +3,9 @@ stages:
   - build
   - run
 
+variables:
+  DOCKER_IMAGE_TAG: "v1.0.0"
+
 build-docker-job:
   stage: build-docker
   tags:
@@ -12,21 +15,19 @@ build-docker-job:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
     - docker info
-    - cd extern/paho.mqtt.c
-    - mkdir -p build && cd build
-    - cmake ..
-    - make install
-    - cd ../../..
   script:
-    - docker build -t $CI_REGISTRY_IMAGE/debian .
-    - docker push $CI_REGISTRY_IMAGE/debian
+    - echo "Building Docker image"
+    - docker build -t $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG .
+    - echo "Pushing Docker image"
+    - docker push $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
   rules:
     - changes:
         - Dockerfile
+        - .gitlab-ci.yml
 
 build:
   stage: build
-  image: $CI_REGISTRY_IMAGE/debian:latest
+  image: $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
   allow_failure: false
   script:
     - mkdir -p build && cd build
@@ -38,7 +39,6 @@ build:
     expire_in: 1 week
   needs:
     - job: build-docker-job
-      optional: true
   rules:
     - changes:
         - CMakeLists.txt
@@ -48,7 +48,7 @@ build:
 
 test_inotify_coredump:
   stage: run
-  image: $CI_REGISTRY_IMAGE/debian:latest
+  image: $CI_REGISTRY_IMAGE/debian:$DOCKER_IMAGE_TAG
   allow_failure: false
   needs:
     - job: build
@@ -64,16 +64,6 @@ test_inotify_coredump:
         - include/
         - test/unit/
         - .gitlab-ci.yml
-
-# run_bridge:
-#   stage: run
-#   allow_failure: false
-#   when: on_success
-#   dependencies:
-#     - build
-#   script:
-#     - cd build
-#     - ./bridge-exec
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
