@@ -51,14 +51,14 @@ test_inotify_coredump:
   script:
     - cd test/unit
     - ./inotify-coredump-test.sh
-  rules:
-    - changes:
-        - CMakeLists.txt
-        - src/
-        - include/
-        - test/unit/
-        - .gitlab-ci.yml
-        - Dockerfile
+  # rules:
+  #   - changes:
+  #       - CMakeLists.txt
+  #       - src/
+  #       - include/
+  #       - test/unit/
+  #       - .gitlab-ci.yml
+  #       - Dockerfile
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
