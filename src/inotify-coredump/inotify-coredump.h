@@ -1,5 +1,6 @@
 #ifndef _INOTIFY_COREDUMP_H_
 #define _INOTIFY_COREDUMP_H_
+
 #define VERBOSE 1
 
 typedef struct coredump_monitor_t {
