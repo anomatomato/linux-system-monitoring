@@ -14,14 +14,12 @@ void print_usage(const char *prog) {
 }
 
 int main(int argc, char *argv[]) {
-        coredump_monitor_t monitor;
+        coredump_monitor_t monitor = {};
         int opt;
 
         /* Loop over all flag options */
-        while ((opt = getopt(argc, argv, "tvh")) != -1) {
+        while ((opt = getopt(argc, argv, "vh")) != -1) {
                 switch (opt) {
-                case 't':
-                        break;
                 case 'v':
                         monitor.flags = VERBOSE;
                         break;
@@ -43,7 +41,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Start inotify_coredump */
-        if (inotify_coredump(&monitor) == -1) {
+        if (run_inotify_coredump(&monitor) == -1) {
                 fprintf(stderr, COLOR_RED STYLE_BOLD "Test failed" RESET_ALL "\n");
                 return -1;
         }
