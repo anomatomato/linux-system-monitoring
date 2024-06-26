@@ -42,12 +42,8 @@ int send_to_mq(const char *message, const char *mq_path);
  * @brief remove_mq immediately removes the specified message queue
  *
  * @param mq_path: The identifying name of the message queue
- * @return 0 on success, -1 on failure
- * with errno set appropriately
- *     @retval  0                success
- *     @retval  -1               failure, with errno set appropriately
  */
-int remove_mq(const char *mq_path);
+void remove_mq(const char *mq_path);
 
 /**
  * @brief get_timestamp returns the current time in nanoseconds
