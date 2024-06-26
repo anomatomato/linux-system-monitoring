@@ -1,3 +1,9 @@
 [submodule "extern/paho.mqtt.c"]
 path = extern/paho.mqtt.c
 url = https://github.com/eclipse/paho.mqtt.c.git
+[submodule "external/external/rktest"]
+	path = external/external/rktest
+	url = https://github.com/Warwolt/rktest.git
+[submodule "external/rktest"]
+	path = external/rktest
+	url = https://github.com/Warwolt/rktest.git
