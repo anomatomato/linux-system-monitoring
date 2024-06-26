@@ -18,14 +18,13 @@
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
 
-
 /* Helper functions */
 /*------------------------------------------------------------------------------------------------------*/
 
-int init_inotify(int *fd, int *wd) {
+int init_inotify(coredump_monitor_t *monitor) {
         /* Initialize inotify instance */
-        *fd = inotify_init();
-        if (*fd == -1) {
+        monitor->fd = inotify_init();
+        if (monitor->fd == -1) {
                 perror("inotify_init failed");
                 return -1;
         }
@@ -33,15 +32,15 @@ int init_inotify(int *fd, int *wd) {
         /* Initialize message queue */
         if (init_mq(MQ_PATH) == -1) {
                 perror("init_mq failed");
-                close(*fd);
+                close(monitor->fd);
                 return -1;
         }
 
         /* Watch WATCH_DIR for new files */
-        *wd = inotify_add_watch(*fd, WATCH_DIR, IN_CREATE);
-        if (*wd < 0) {
+        monitor->wd = inotify_add_watch(monitor->fd, WATCH_DIR, IN_CREATE);
+        if (monitor->wd < 0) {
                 perror("inotify_add_watch failed");
-                close(*fd);
+                close(monitor->fd);
                 return -1;
         }
         return 0;
@@ -56,14 +55,14 @@ int coredump_to_line_protocol(char *buffer, const char *coredump_name) {
                         get_timestamp());
 }
 
-int process_events(char *buffer, int len, int verbose) {
+int process_events(char *buffer, int len, coredump_monitor_t *monitor) {
         for (int i = 0; i < len;) {
                 struct inotify_event *event = (struct inotify_event *) &buffer[i];
                 if (event->len && event->mask & IN_CREATE) {
                         char message[MAX_MSG_SIZE];
                         coredump_to_line_protocol(message, event->name);
 
-                        if (verbose)
+                        if (monitor->flags = VERBOSE)
                                 printf("Message:\n%s\n", message);
 
                         /* Send message to message queue */
@@ -77,12 +76,12 @@ int process_events(char *buffer, int len, int verbose) {
         return 0;
 }
 
-int event_loop(int fd, int test, int verbose) {
+int event_loop(coredump_monitor_t *monitor) {
         char buffer[BUF_LEN];
         /* Event loop */
         while (keep_running) {
                 /* Read events */
-                int len = read(fd, buffer, BUF_LEN);
+                int len = read(monitor->fd, buffer, BUF_LEN);
                 if (len < 0) {
                         if (errno == EINTR && !keep_running)
                                 break;
@@ -90,14 +89,14 @@ int event_loop(int fd, int test, int verbose) {
                         return -1;
                 }
                 /* Process events */
-                int pe = process_events(buffer, len, verbose);
+                int pe = process_events(buffer, len, monitor);
         }
         return 0;
 }
 
-int cleanup(int fd, int wd) {
-        int ret1 = inotify_rm_watch(fd, wd);
-        int ret2 = close(fd);
+int cleanup(coredump_monitor_t *monitor) {
+        int ret1 = inotify_rm_watch(monitor->fd, monitor->wd);
+        int ret2 = close(monitor->fd);
         int ret3 = remove_mq(MQ_PATH);
         if (ret1 == -1)
                 perror("inotify_rm_watch failed");
@@ -111,22 +110,21 @@ int cleanup(int fd, int wd) {
         return (ret1 == -1 || ret2 == -1 || ret3 == -1) ? -1 : 0;
 }
 
-int inotify_coredump(int test, int verbose) {
-        int fd = -1, wd = -1;
+int inotify_coredump(coredump_monitor_t *monitor) {
+        int fd = monitor->fd;
+        int wd = monitor->wd;
         printf("inotify_coredump running...\n");
 
-        if (init_inotify(&fd, &wd) == -1)
+        if (init_inotify(monitor) == -1)
                 return -1;
 
-        if (test)
-                printf(COLOR_GREEN STYLE_BOLD "inotify_coredump successfully initialized" RESET_ALL "\n");
+        printf(COLOR_GREEN STYLE_BOLD "inotify_coredump successfully initialized" RESET_ALL "\n");
 
 
-        int ret1 = event_loop(fd, test, verbose);
-        int ret2 = cleanup(fd, wd);
-        if (test)
-                printf(STYLE_BOLD "%s" RESET_ALL "\n",
-                       ret2 == 0 ? COLOR_GREEN "cleanup successful" : COLOR_RED "cleanup failed");
+        int ret1 = event_loop(monitor);
+        int ret2 = cleanup(monitor);
+        printf(STYLE_BOLD "%s" RESET_ALL "\n",
+               ret2 == 0 ? COLOR_GREEN "cleanup successful" : COLOR_RED "cleanup failed");
 
         return (ret1 == -1 || ret2 == -1) ? -1 : 0;
 }
