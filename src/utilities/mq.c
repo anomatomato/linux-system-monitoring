@@ -43,9 +43,10 @@ int send_to_mq(const char *message, const char *mq_path) {
         return 0;
 }
 
-int remove_mq(const char *mq_path) {
+void remove_mq(const char *mq_path) {
         printf("Removing Message Queue: %s\n", mq_path);
-        return mq_unlink(mq_path);
+        (void) mq_unlink(mq_path);
+        return;
 }
 
 long long get_timestamp() {

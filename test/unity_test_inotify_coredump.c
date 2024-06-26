@@ -1,7 +1,6 @@
 #include "inotify-coredump.h"
 #include "line_protocol_parser.h"
 #include <errno.h>
-#include <rktest/rktest.h>
 #include <unistd.h>
 
 void setUp(void) {
