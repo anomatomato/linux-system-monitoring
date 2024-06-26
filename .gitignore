@@ -73,3 +73,4 @@ cmake-build-debug/
 .idea
 segmentation_fault
 infinite
+.vscode/settings.json

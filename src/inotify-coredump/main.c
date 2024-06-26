@@ -9,24 +9,21 @@
 
 void print_usage(const char *prog) {
         printf("Usage: %s [FLAG]\n", prog);
-        printf("  -t    test mode, tests for max. one coredump\n");
         printf("  -v    verbose, print Line Protocol lines\n");
         printf("  -h    display this help message\n");
 }
 
 int main(int argc, char *argv[]) {
+        coredump_monitor_t monitor;
         int opt;
-        int test = 0;
-        int verbose = 0;
 
         /* Loop over all flag options */
         while ((opt = getopt(argc, argv, "tvh")) != -1) {
                 switch (opt) {
                 case 't':
-                        test = 1;
                         break;
                 case 'v':
-                        verbose = 1;
+                        monitor.flags = VERBOSE;
                         break;
                 case 'h':
                         print_usage(argv[0]);
@@ -46,11 +43,8 @@ int main(int argc, char *argv[]) {
         }
 
         /* Start inotify_coredump */
-        if (inotify_coredump(test, verbose) == -1) {
-                if (test)
-                        fprintf(stderr, COLOR_RED STYLE_BOLD "Test failed" RESET_ALL "\n");
-                else
-                        fprintf(stderr, "inotify_coredump failed\n");
+        if (inotify_coredump(&monitor) == -1) {
+                fprintf(stderr, COLOR_RED STYLE_BOLD "Test failed" RESET_ALL "\n");
                 return -1;
         }
 
