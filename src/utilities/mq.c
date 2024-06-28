@@ -38,7 +38,7 @@ int send_to_mq(const char *message, const char *mq_path) {
                 return -1;
         }
 
-        printf("Sent message to MQ %s: %s\n", mq_path, message);
+        //printf("Sent message to MQ %s: %s\n", mq_path, message);
         mq_close(mq);
         return 0;
 }

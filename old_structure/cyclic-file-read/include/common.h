@@ -15,7 +15,7 @@ int line_count(FILE* file);
 
 int enqueue(char* message);
 
-void dequeue();
+void dequeue(int v);
 
 void empty_queue();
 
