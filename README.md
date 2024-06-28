@@ -70,6 +70,7 @@ make
 
 - This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
 - First build the project
+- For Unit Testing run `ctest -V inotify-coredump-test`
 - Enable [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn)
 - For the following, you will need 3 terminals in `stats-recording`:
 
