@@ -6,15 +6,6 @@
 #define WATCH_DIR "/var/lib/systemd/coredump"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
-
-typedef struct coredump_monitor_t {
-        int fd;
-        int wd;
-        int flags;
-} coredump_monitor_t;
-
-#define VERBOSE 1
-
 typedef struct coredump_monitor_t {
         int fd;
         int wd;
