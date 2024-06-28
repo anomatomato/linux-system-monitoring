@@ -26,7 +26,7 @@ build:
   image: $CI_REGISTRY_IMAGE/debian:latest
   when: on_success
   allow_failure: false
-  before_sript:
+  before_script:
     - git submodule update --init --recursive external/paho.mqtt.c
     - cd external/paho.mqtt.c
     - mkdir -p build && cd build
