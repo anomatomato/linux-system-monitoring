@@ -1,9 +1,6 @@
 #include "fixture/InotifyCoredumpFixture.h"
 #include "mock/MockMQ.h"
-#include <chrono>
-#include <fstream>
 #include <gtest/gtest.h>
-#include <mqueue.h>
 #include <sys/inotify.h>
 
 extern "C" {
@@ -12,25 +9,26 @@ extern "C" {
 }
 
 /* Initialize the mock instance */
-MockMQ *mock_mq = nullptr;
+std::unique_ptr< MockMQ > mock_mq;
 
-void read_file_into_buffer(const char *filename, char *buffer, size_t buffer_size) {
+int read_file_into_buffer(const char *filename, char *buffer, size_t buffer_size) {
         FILE *file = fopen(filename, "r");
         if (!file) {
                 perror("Failed to open file");
-                exit(EXIT_FAILURE);
+                return -1;
         }
 
         size_t bytesRead = fread(buffer, 1, buffer_size, file);
         if (bytesRead == 0 && ferror(file)) {
                 perror("Failed to read from file");
                 fclose(file);
-                exit(EXIT_FAILURE);
+                return -1;
         }
 
         buffer[bytesRead] = '\0'; // Null-terminate the buffer
 
         fclose(file);
+        return 0;
 }
 
 
@@ -46,20 +44,21 @@ TEST_F(InotifyCoredumpFixture, CoredumpToLineProtocol) {
 }
 
 TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
-        MockMQ mq;
-        mock_mq = &mq;
+        mock_mq = std::make_unique< MockMQ >();
 
         /* Mock function */
-        EXPECT_CALL(mq, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
+        EXPECT_CALL(*mock_mq, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
 
-        read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
+        int rt = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
+        EXPECT_EQ(rt, 0);
+
         struct inotify_event *event = (struct inotify_event *) buffer;
         EXPECT_NE(event, nullptr);
 
         EXPECT_GE(event->mask & IN_CREATE, 0);
         EXPECT_EQ(send_coredump(buffer, 96, &monitor), 0);
 
-        mock_mq = nullptr;
+        mock_mq.reset();
 }
 
 /*TEST_F(InotifyCoredumpFixture, ReceiveCoredump) {

@@ -7,5 +7,6 @@ target_link_options(inotify-coredump-test PRIVATE -Wl,--wrap=send_to_mq)
 set_target_properties(inotify-coredump-test PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-add_test(NAME inotify-coredump-test COMMAND inotify-coredump-test)
-set_tests_properties(inotify-coredump-test PROPERTIES WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+gtest_discover_tests(inotify-coredump-test
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    EXTRA_ARGS --gtest_color=yes)
