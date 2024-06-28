@@ -55,6 +55,13 @@ test_inotify_coredump:
   allow_failure: false
   dependencies:
     - build
+  before_script:
+    - git submodule update --init --recursive external/paho.mqtt.c
+    - cd external/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make && make install
+    - cd ../../..
   script:
     - mkdir -p build && cd build
     - cmake ..
