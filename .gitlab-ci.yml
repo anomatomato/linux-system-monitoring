@@ -32,6 +32,7 @@ build:
     - mkdir -p build && cd build
     - cmake ..
     - make && make install
+    - cd ../../..
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -45,7 +46,7 @@ build:
         - CMakeLists.txt
         - src/
         - include/
-        # - .gitlab-ci.yml
+        - .gitlab-ci.yml
         - Dockerfile
 
 test_inotify_coredump:
