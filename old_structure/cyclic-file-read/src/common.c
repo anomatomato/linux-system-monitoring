@@ -49,7 +49,7 @@ int enqueue(char *message) {
         return 0;
 }
 
-void dequeue() {
+void dequeue(int v) {
         if (queue_head == NULL)
                 return;
 
@@ -58,7 +58,9 @@ void dequeue() {
                 current = queue_head;
                 queue_head = queue_head->next;
 
-                // printf("%s\n", current->message);
+                if (v)
+                        printf("%s\n", current->message);
+
                 if (send_to_mq(current->message, "/cfr") == -1) /*an die mq senden*/
                         perror("send_to_mq failed");
 
@@ -66,7 +68,8 @@ void dequeue() {
         }
         current = queue_head;
 
-        // printf("%s\n", current->message);
+        if (v)
+                printf("%s\n", current->message);
         if (send_to_mq(current->message, "/cfr") == -1)
                 perror("send_to_mq failed");
 
