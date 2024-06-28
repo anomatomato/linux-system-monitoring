@@ -9,7 +9,7 @@ class MockMQ {
 };
 
 /* Declare an instance of the mock class */
-extern MockMQ *mock_mq;
+extern std::unique_ptr< MockMQ > mock_mq;
 
 extern "C" {
 
