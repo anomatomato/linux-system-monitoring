@@ -3,21 +3,15 @@ stages:
   - build
   - run
 
-before_script:
-  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-  - docker info
-  - git submodule update --init --recursive external/paho.mqtt.c
-  - cd external/paho.mqtt.c
-  - mkdir -p build && cd build
-  - cmake ..
-  - make && make install
-
 build-docker-job:
   stage: build-docker
   tags:
     - dind
   services:
     - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker info
   script:
     - echo "Building Docker image"
     - docker build -t $CI_REGISTRY_IMAGE/debian:latest .
@@ -32,6 +26,12 @@ build:
   image: $CI_REGISTRY_IMAGE/debian:latest
   when: on_success
   allow_failure: false
+  before_sript:
+    - git submodule update --init --recursive external/paho.mqtt.c
+    - cd external/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make && make install
   script:
     - mkdir -p build && cd build
     - cmake ..
