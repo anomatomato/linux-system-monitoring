@@ -6,11 +6,11 @@ stages:
 before_script:
   - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
   - docker info
-  - git submodule update --init -- recursive external/paho.mqtt.c
+  - git submodule update --init --recursive external/paho.mqtt.c
   - cd external/paho.mqtt.c
-  - mkdir -p build && cd build &&
+  - mkdir -p build && cd build
   - cmake ..
-  - make && make install && \
+  - make && make install
 
 build-docker-job:
   stage: build-docker
