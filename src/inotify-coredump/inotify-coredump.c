@@ -13,11 +13,6 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-#define MQ_PATH "/inotify_coredump"
-#define WATCH_DIR "/var/lib/systemd/coredump"
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define BUF_LEN (1024 * (EVENT_SIZE + NAME_MAX + 1)) /* enough for 1024 events in the buffer */
-
 /* Helper functions */
 /*------------------------------------------------------------------------------------------------------*/
 
@@ -60,26 +55,28 @@ int coredump_to_line_protocol(char *buffer, const char *coredump_name) {
                         get_timestamp());
 }
 
-int send_coredump(char *buffer, coredump_monitor_t *monitor) {
+int send_coredump(char *buffer, int len, coredump_monitor_t *monitor) {
         if (!monitor) {
                 fprintf(stderr, "monitor not initialized\n");
                 return -1;
         }
 
+        int i = 0;
+        while (i < len) {
+                struct inotify_event *event = (struct inotify_event *) &buffer[i];
+                if (event->len && event->mask & IN_CREATE) {
+                        char message[MAX_MSG_SIZE];
+                        coredump_to_line_protocol(message, event->name);
 
-        struct inotify_event *event = (struct inotify_event *) &buffer;
-        if (event->len && event->mask & IN_CREATE) {
-                char message[MAX_MSG_SIZE];
-                coredump_to_line_protocol(message, event->name);
-
-                if (monitor->flags == VERBOSE)
-                        printf("Message:\n%s\n", message);
-
-                /* Send message to message queue */
-                if (send_to_mq(message, MQ_PATH) == -1) {
-                        perror("send_to_mq failed");
-                        return -1;
+                        if (monitor->flags == VERBOSE)
+                                printf("Message:\n%s\n", message);
+                        /* Send message to message queue */
+                        if (send_to_mq(message, MQ_PATH) == -1) {
+                                perror("send_to_mq failed");
+                                return -1;
+                        }
                 }
+                i += EVENT_SIZE + event->len;
         }
         return 0;
 }
@@ -97,7 +94,8 @@ int receive_coredump(char *buffer, coredump_monitor_t *monitor) {
                 perror("read failed");
                 return -1;
         }
-        return 0;
+        printf("%ld", sizeof(struct inotify_event));
+        return len;
 }
 
 int event_loop(coredump_monitor_t *monitor) {
@@ -110,12 +108,12 @@ int event_loop(coredump_monitor_t *monitor) {
         /* Event loop */
         while (keep_running) {
                 /* Read events */
-                int rc = receive_coredump(buffer, monitor);
-                if (rc == -1)
+                int len = receive_coredump(buffer, monitor);
+                if (len == -1)
                         return -1;
 
                 /* Process events */
-                int pe = send_coredump(buffer, monitor);
+                int pe = send_coredump(buffer, len, monitor);
                 if (pe == -1)
                         return -1;
         }
@@ -127,10 +125,9 @@ int cleanup(coredump_monitor_t *monitor) {
                 fprintf(stderr, "monitor not initialized\n");
                 return -1;
         }
-
-        inotify_rm_watch(monitor->fd, monitor->wd);
-        close(monitor->fd);
-        remove_mq(MQ_PATH);
+        (void) inotify_rm_watch(monitor->fd, monitor->wd);
+        (void) close(monitor->fd);
+        (void) remove_mq(MQ_PATH);
         return 0;
 }
 

@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
         /* Start inotify_coredump */
         if (run_inotify_coredump(&monitor) == -1) {
-                fprintf(stderr, COLOR_RED STYLE_BOLD "Test failed" RESET_ALL "\n");
+                fprintf(stderr, COLOR_RED STYLE_BOLD "inotify-coredump failed" RESET_ALL "\n");
                 return -1;
         }
 
