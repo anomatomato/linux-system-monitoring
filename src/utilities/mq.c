@@ -37,7 +37,7 @@ int send_to_mq(const char *message, const char *mq_path) {
                 mq_close(mq);
                 return -1;
         }
-
+        printf("Following message was successfully sent: %s\n", message);
         mq_close(mq);
         return 0;
 }
