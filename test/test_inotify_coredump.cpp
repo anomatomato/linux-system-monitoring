@@ -1,10 +1,10 @@
 #include "fixture/InotifyCoredumpFixture.h"
 #include "mock/MockInotifyCoredump.h"
-#include "test_utils/test_utils.h"
 #include <gtest/gtest.h>
 #include <sys/inotify.h>
 
 extern "C" {
+#include "file_utils.h"
 #include "line_protocol_parser.h"
 #include "mq.h"
 }
