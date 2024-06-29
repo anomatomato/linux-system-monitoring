@@ -28,7 +28,7 @@ int read_file_into_buffer(const char *filename, char *buffer, size_t buffer_size
         buffer[bytesRead] = '\0'; // Null-terminate the buffer
 
         fclose(file);
-        return 0;
+        return bytesRead;
 }
 
 
@@ -49,14 +49,31 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         /* Mock function */
         EXPECT_CALL(*mock_mq, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
 
-        int rt = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
-        EXPECT_EQ(rt, 0);
+        int bytesRead = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
+        EXPECT_GE(bytesRead, 0);
+        std::cout << "Bytes read: " << bytesRead << std::endl;
 
         struct inotify_event *event = (struct inotify_event *) buffer;
         EXPECT_NE(event, nullptr);
 
         EXPECT_GE(event->mask & IN_CREATE, 0);
-        EXPECT_EQ(send_coredump(buffer, 96, &monitor), 0);
+        EXPECT_EQ(send_coredump(buffer, bytesRead, &monitor), 0);
+
+        mock_mq.reset();
+}
+
+TEST_F(InotifyCoredumpFixture, SendCoredumpFailure) {
+        mock_mq = std::make_unique< MockMQ >();
+
+        /* Mock function */
+        EXPECT_CALL(*mock_mq, send_to_mq(testing::_, testing::_)).Times(0);
+
+        struct inotify_event invalid_event;
+        invalid_event.len = 0;
+        invalid_event.mask = 0;
+        memcpy(buffer, &invalid_event, sizeof(invalid_event));
+
+        EXPECT_EQ(send_coredump(buffer, sizeof(buffer), &monitor), 0);
 
         mock_mq.reset();
 }
