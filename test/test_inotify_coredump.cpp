@@ -15,13 +15,13 @@ std::unique_ptr< MockInotifyCoredump > mock_ic;
 
 TEST(InotifyCoredumpInit, InotifyCoredumpInitSuccess) {
         struct coredump_monitor_t monitor = { 0 };
-        ASSERT_EQ(init_inotify(&monitor), 0);
+        ASSERT_EQ(init_inotify(&monitor), 0) << "Initializing inotify-coredump failed";
 }
 
 TEST_F(InotifyCoredumpFixture, CoredumpToLineProtocolSuccess) {
         char message[] = "test_coredump";
         EXPECT_GE(coredump_to_line_protocol(buffer, message), 0);
-        EXPECT_EQ(LP_check(buffer), 0);
+        EXPECT_EQ(LP_check(buffer), 0) << "coredump_to_line_protocol doesn't convert into Line Protocol";
 }
 
 TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
@@ -37,12 +37,12 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         EXPECT_NE(event, nullptr);
 
         EXPECT_GE(event->mask & IN_CREATE, 0);
-        EXPECT_EQ(send_coredump(buffer, bytesRead, &monitor), 0);
+        EXPECT_EQ(send_coredump(buffer, bytesRead, &monitor), 0) << "send_coredump failed";
 
         mock_ic.reset();
 }
 
-TEST_F(InotifyCoredumpFixture, SendCoredumpFailure) {
+TEST_F(InotifyCoredumpFixture, SendCoredumpInvalid) {
         mock_ic = std::make_unique< MockInotifyCoredump >();
         /* Mock function */
         EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).Times(0);
@@ -52,7 +52,7 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpFailure) {
         invalid_event.mask = 0;
         memcpy(buffer, &invalid_event, sizeof(invalid_event));
 
-        EXPECT_EQ(send_coredump(buffer, sizeof(buffer), &monitor), 0);
+        EXPECT_EQ(send_coredump(buffer, sizeof(buffer), &monitor), 0) << "send_coredump failed";
 
         mock_ic.reset();
 }
@@ -61,7 +61,7 @@ TEST_F(InotifyCoredumpFixture, ReceiveCoredumpSuccess) {
         mock_ic = std::make_unique< MockInotifyCoredump >();
 
         EXPECT_CALL(*mock_ic, read(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
-        EXPECT_EQ(receive_coredump(buffer, &monitor), 0);
+        EXPECT_EQ(receive_coredump(buffer, &monitor), 0) << "receive_coredump failed";
 
         mock_ic.reset();
 }
