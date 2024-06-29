@@ -26,6 +26,13 @@ build:
   image: $CI_REGISTRY_IMAGE/debian:latest
   when: on_success
   allow_failure: false
+  before_script:
+    - git submodule update --init --recursive external/paho.mqtt.c
+    - cd external/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make && make install
+    - cd ../../..
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -39,7 +46,7 @@ build:
         - CMakeLists.txt
         - src/
         - include/
-        # - .gitlab-ci.yml
+        - .gitlab-ci.yml
         - Dockerfile
 
 test_inotify_coredump:
@@ -48,24 +55,28 @@ test_inotify_coredump:
   allow_failure: false
   dependencies:
     - build
+  before_script:
+    - git submodule update --init --recursive external/paho.mqtt.c
+    - cd external/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make && make install
+    - cd ../../..
   script:
-    - apt install sudo
     - mkdir -p build && cd build
     - cmake ..
     - make
-    - cd ..
-    - cd test/unit
-    - sudo sysctl -n kernel.core_pattern
-    - ./inotify-coredump-test.sh
+    - ctest -V inotify-coredump-test
   rules:
     - changes:
-      - CMakeLists.txt
-      - src/
-      - test/unit/
-      - .gitlab-ci.yml
-      - Dockerfile
+        - CMakeLists.txt
+        - src/
+        - test/
+        - .gitlab-ci.yml
+        - Dockerfile
 
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - build/
+    - external/paho.mqtt.c
