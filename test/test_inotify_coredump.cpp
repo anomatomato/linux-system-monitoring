@@ -1,5 +1,6 @@
 #include "fixture/InotifyCoredumpFixture.h"
-#include "mock/MockMQ.h"
+#include "mock/MockInotifyCoredump.h"
+#include "test_utils/test_utils.h"
 #include <gtest/gtest.h>
 #include <sys/inotify.h>
 
@@ -9,27 +10,7 @@ extern "C" {
 }
 
 /* Initialize the mock instance */
-std::unique_ptr< MockMQ > mock_mq;
-
-int read_file_into_buffer(const char *filename, char *buffer, size_t buffer_size) {
-        FILE *file = fopen(filename, "r");
-        if (!file) {
-                perror("Failed to open file");
-                return -1;
-        }
-
-        size_t bytesRead = fread(buffer, 1, buffer_size, file);
-        if (bytesRead == 0 && ferror(file)) {
-                perror("Failed to read from file");
-                fclose(file);
-                return -1;
-        }
-
-        buffer[bytesRead] = '\0'; // Null-terminate the buffer
-
-        fclose(file);
-        return bytesRead;
-}
+std::unique_ptr< MockInotifyCoredump > mock_ic;
 
 
 TEST(InotifyCoredumpInit, InotifyCoredumpInitSuccess) {
@@ -37,17 +18,16 @@ TEST(InotifyCoredumpInit, InotifyCoredumpInitSuccess) {
         ASSERT_EQ(init_inotify(&monitor), 0);
 }
 
-TEST_F(InotifyCoredumpFixture, CoredumpToLineProtocol) {
+TEST_F(InotifyCoredumpFixture, CoredumpToLineProtocolSuccess) {
         char message[] = "test_coredump";
         EXPECT_GE(coredump_to_line_protocol(buffer, message), 0);
         EXPECT_EQ(LP_check(buffer), 0);
 }
 
 TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
-        mock_mq = std::make_unique< MockMQ >();
-
+        mock_ic = std::make_unique< MockInotifyCoredump >();
         /* Mock function */
-        EXPECT_CALL(*mock_mq, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
+        EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
 
         int bytesRead = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
         EXPECT_GE(bytesRead, 0);
@@ -59,14 +39,13 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         EXPECT_GE(event->mask & IN_CREATE, 0);
         EXPECT_EQ(send_coredump(buffer, bytesRead, &monitor), 0);
 
-        mock_mq.reset();
+        mock_ic.reset();
 }
 
 TEST_F(InotifyCoredumpFixture, SendCoredumpFailure) {
-        mock_mq = std::make_unique< MockMQ >();
-
+        mock_ic = std::make_unique< MockInotifyCoredump >();
         /* Mock function */
-        EXPECT_CALL(*mock_mq, send_to_mq(testing::_, testing::_)).Times(0);
+        EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).Times(0);
 
         struct inotify_event invalid_event;
         invalid_event.len = 0;
@@ -75,8 +54,18 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpFailure) {
 
         EXPECT_EQ(send_coredump(buffer, sizeof(buffer), &monitor), 0);
 
-        mock_mq.reset();
+        mock_ic.reset();
 }
+
+TEST_F(InotifyCoredumpFixture, ReceiveCoredumpSuccess) {
+        mock_ic = std::make_unique< MockInotifyCoredump >();
+
+        EXPECT_CALL(*mock_ic, read(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
+        EXPECT_EQ(receive_coredump(buffer, &monitor), 0);
+
+        mock_ic.reset();
+}
+
 
 /*TEST_F(InotifyCoredumpFixture, ReceiveCoredump) {
         auto triggerThread = std::async(std::launch::async, trigger_coredump);
