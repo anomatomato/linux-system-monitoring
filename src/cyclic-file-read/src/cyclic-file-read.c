@@ -5,26 +5,26 @@
 #include "pid.h"
 #include "stat.h"
 #include "sys.h"
+#include <getopt.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/select.h>
 #include <sys/timerfd.h>
 #include <time.h>
 #include <unistd.h>
-#include <getopt.h>
 
 int main(int argc, char *argv[]) {
         static struct option long_options[] = {
-                   {"proc-stat",      0, 0,  1 },
-                   {"proc-net-dev",   0, 0,  2 },
-                   {"proc-diskstats", 0, 0,  3 },
-                   {"proc-pid-stat",  0, 0,  4 },
-                   {"proc-pid-statm", 0, 0,  5 },
-                   {"proc-pid-io",    0, 0,  6 },
-                   {"hwmon",          0, 0,  7 },
-                   {"sys",            0, 0,  8 },
-                   {"pid",            0, 0,  9 },
-                   {0,                0, 0,  0 }
+                {      "proc-stat", 0, 0, 1 },
+                {   "proc-net-dev", 0, 0, 2 },
+                { "proc-diskstats", 0, 0, 3 },
+                {  "proc-pid-stat", 0, 0, 4 },
+                { "proc-pid-statm", 0, 0, 5 },
+                {    "proc-pid-io", 0, 0, 6 },
+                {          "hwmon", 0, 0, 7 },
+                {            "sys", 0, 0, 8 },
+                {            "pid", 0, 0, 9 },
+                {                0, 0, 0, 0 }
         };
 
         int arg = 0;
@@ -35,30 +35,29 @@ int main(int argc, char *argv[]) {
                 int rv = 0;
                 int option_index = 0;
 
-                rv = getopt_long(argc, argv, "cvh",
-                                long_options, &option_index);
+                rv = getopt_long(argc, argv, "cvh", long_options, &option_index);
                 if (rv == -1)
                         break;
 
                 switch (rv) {
-                        case 99:
-                                c = 1;
-                                break;
-                        case 118:
-                                v = 1;
-                                break;
-                        case 104:
-                                h = 1;
-                                break;
-                        default:
-                                if (rv > 9) {
-                                        printf("Try ./cyclic-file-read-exec -h for help\n");
-                                        return 1;
-                                }
-                                arg = rv;
-                                break;
+                case 99:
+                        c = 1;
+                        break;
+                case 118:
+                        v = 1;
+                        break;
+                case 104:
+                        h = 1;
+                        break;
+                default:
+                        if (rv > 9) {
+                                printf("Try ./cyclic-file-read-exec -h for help\n");
+                                return 1;
+                        }
+                        arg = rv;
+                        break;
                 }
-        }/*c=99, v=118*/
+        } /*c=99, v=118*/
 
         if (h) {
                 extern char flag[9][MAX_BUFFER];

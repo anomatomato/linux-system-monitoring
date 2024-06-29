@@ -1,8 +1,6 @@
-add_executable(inotify-pacct-exec
-    main.c
-    inotify-pacct.c
-    pacct_to_line_protocol.c
-    pacct.c)
+file(GLOB_RECURSE SRC_IP src/*.c)
 
-target_include_directories(inotify-pacct-exec PUBLIC ${CMAKE_SOURCE_DIR}/include/inotify-pacct)
+add_executable(inotify-pacct-exec ${SRC_IP})
+
+target_include_directories(inotify-pacct-exec PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(inotify-pacct-exec PUBLIC utilities)
