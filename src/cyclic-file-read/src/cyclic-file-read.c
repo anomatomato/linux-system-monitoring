@@ -14,7 +14,7 @@
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-        static struct option long_options[] = {
+        static struct option long_options[] = { /*struct für die langen flags*/
                 {      "proc-stat", 0, 0, 1 },
                 {   "proc-net-dev", 0, 0, 2 },
                 { "proc-diskstats", 0, 0, 3 },
@@ -27,15 +27,15 @@ int main(int argc, char *argv[]) {
                 {                0, 0, 0, 0 }
         };
 
-        int arg = 0;
-        int c = 0;
-        int v = 0;
-        int h = 0;
+        int arg = 0; /*flag für die funktionen*/
+        int c = 0; /*duty cycle flag*/
+        int v = 0; /*verbose flag*/
+        int h = 0; /*help flag*/
         while (1) {
                 int rv = 0;
                 int option_index = 0;
 
-                rv = getopt_long(argc, argv, "cvh", long_options, &option_index);
+                rv = getopt_long(argc, argv, "cvh", long_options, &option_index); /*ermittlung der flags*/
                 if (rv == -1)
                         break;
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
                 }
         } /*c=99, v=118*/
 
-        if (h) {
+        if (h) { /*wenn -h getippt wurde*/
                 extern char flag[9][MAX_BUFFER];
 
                 printf("Usage: ./cyclic-file-read-exec [FLAG]\n");
@@ -146,6 +146,9 @@ int main(int argc, char *argv[]) {
                         }
                         dequeue(v);
                 }
+
+                if (!c) /*wenn c==0, wird das alles nur einmal gemacht*/
+                        return 0;
 
                 select(timer + 1, &rfds, NULL, NULL, NULL);   /*auf timer warten*/
                 timerfd_settime(timer, 0, &timerValue, NULL); /*timer neu aufsetzen*/
