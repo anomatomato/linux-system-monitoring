@@ -27,7 +27,7 @@ struct client_epoll {
 void add_hostname_to_msg(char *msg);
 void *inotify_mq(void *arg);
 void *process_messages(void *arg);
-int register_queue(int epid, char *mq_path);
+int register_queue(int epid, const char *mq_path);
 mqd_t initialize_mq(const char *mq_path);
 int init_epoll();
 MQTTAsync init_MQTT_client();

@@ -109,7 +109,7 @@ int init_epoll() {
         return epid;
 }
 
-int register_queue(int epid, char *mq_path) {
+int register_queue(int epid, const char *mq_path) {
         struct epoll_event ev;
         ev.events = EPOLLIN;
         char slashed_path[MAX_MSG_SIZE / 2] = "/";
