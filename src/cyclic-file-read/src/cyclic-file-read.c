@@ -50,12 +50,13 @@ int main(int argc, char *argv[]) {
                         h = 1;
                         break;
                 default:
-                        if (rv > 9) {
-                                printf("Try ./cyclic-file-read-exec -h for help\n");
-                                return 1;
+                        if (rv > 0 && rv < 10) {
+                                arg = rv;
+                                break;
                         }
-                        arg = rv;
-                        break;
+                        printf("Try ./cyclic-file-read-exec -h for help\n");
+                        return 1;
+
                 }
         } /*c=99, v=118*/
 
