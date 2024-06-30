@@ -1,8 +1,6 @@
 #include "bridge.h"
 #include "mq.h"
 #include <fcntl.h>
-#include <mqueue.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

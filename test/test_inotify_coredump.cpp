@@ -5,6 +5,7 @@
 
 extern "C" {
 #include "file_utils.h"
+#include "inotify-coredump.h"
 #include "line_protocol_parser.h"
 #include "mq.h"
 }
@@ -31,9 +32,22 @@ TEST_F(InotifyCoredumpFixture, CoredumpToLineProtocolSuccess) {
         EXPECT_EQ(LP_check(buffer), 0) << "coredump_to_line_protocol doesn't convert into Line Protocol";
 }
 
+TEST_F(InotifyCoredumpFixture, ReceiveCoredumpSuccess) {
+        /* Arrange */
+        mock_ic = std::make_unique< MockInotifyCoredump >();
+        EXPECT_CALL(*mock_ic, read(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
+        /* Act */
+        int result = receive_coredump(buffer, &monitor);
+        /* Assert */
+        EXPECT_EQ(result, 0) << "receive_coredump failed";
+
+        mock_ic.reset();
+}
+
 TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         /* Arrange */
         mock_ic = std::make_unique< MockInotifyCoredump >();
+        EXPECT_CALL(*mock_ic, coredump_to_line_protocol(testing::_, testing::_)).Times(1);
         EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
 
         int bytesRead = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
@@ -43,6 +57,8 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         EXPECT_NE(event, nullptr);
         EXPECT_GE(event->mask & IN_CREATE, 0);
         /* Act */
+        // char buf[MAX_MSG_SIZE];
+        // coredump_to_line_protocol(buf, "test");
         int result = send_coredump(buffer, bytesRead, &monitor);
         /* Assert */
         EXPECT_EQ(result, 0) << "send_coredump failed";
@@ -54,6 +70,7 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpInvalid) {
         /* Arrange */
         mock_ic = std::make_unique< MockInotifyCoredump >();
         EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).Times(0);
+        EXPECT_CALL(*mock_ic, coredump_to_line_protocol(testing::_, testing::_)).Times(0);
 
         struct inotify_event invalid_event;
         invalid_event.len = 0;
@@ -63,18 +80,6 @@ TEST_F(InotifyCoredumpFixture, SendCoredumpInvalid) {
         int result = send_coredump(buffer, sizeof(buffer), &monitor);
         /* Assert */
         EXPECT_EQ(result, 0) << "send_coredump failed";
-
-        mock_ic.reset();
-}
-
-TEST_F(InotifyCoredumpFixture, ReceiveCoredumpSuccess) {
-        /* Arrange */
-        mock_ic = std::make_unique< MockInotifyCoredump >();
-        EXPECT_CALL(*mock_ic, read(testing::_, testing::_, testing::_)).WillOnce(testing::Return(0));
-        /* Act */
-        int result = receive_coredump(buffer, &monitor);
-        /* Assert */
-        EXPECT_EQ(result, 0) << "receive_coredump failed";
 
         mock_ic.reset();
 }
