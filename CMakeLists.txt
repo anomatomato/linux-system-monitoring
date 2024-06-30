@@ -3,7 +3,7 @@ project(stats-recording VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(eclipse-paho-mqtt-c REQUIRED PATHS /usr/local/paho-mqtt/lib/cmake/eclipse-paho-mqtt-c)
+find_package(eclipse-paho-mqtt-c REQUIRED PATHS /usr/local/lib/cmake/eclipse-paho-mqtt-c /usr/local/paho-mqtt/lib/cmake/eclipse-paho-mqtt-c)
 
 # Enable Google test
 include(FetchContent)
