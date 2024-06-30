@@ -23,14 +23,12 @@ int __real_coredump_to_line_protocol(char *buffer, const char *coredump_msg);
 
 int __wrap_send_to_mq(const char *message, const char *mq_path) {
         if (mock_ic) {
-                std::cout << "Mock send_to_mq called" << std::endl;
                 return mock_ic->send_to_mq(message, mq_path);
         }
         return __real_send_to_mq(message, mq_path);
 }
 ssize_t __wrap_read(int fd, void *buf, size_t count) {
         if (mock_ic) {
-                std::cout << "Mock read called" << std::endl;
                 return mock_ic->read(fd, buf, count);
         }
         return __real_read(fd, buf, count);

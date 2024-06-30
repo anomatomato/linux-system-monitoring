@@ -2,10 +2,9 @@ add_executable(inotify-coredump-test test_inotify_coredump.cpp)
 add_executable(bridge-test test_bridge.cpp)
 
 target_link_libraries(inotify-coredump-test PUBLIC
-    gtest_main
-    gmock_main
     inotify-coredump
-    utilities)
+    gtest_main
+    gmock_main)
 target_link_libraries(bridge-test PUBLIC
     gtest_main
     gmock_main

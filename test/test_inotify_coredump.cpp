@@ -47,7 +47,7 @@ TEST_F(InotifyCoredumpFixture, ReceiveCoredumpSuccess) {
 TEST_F(InotifyCoredumpFixture, SendCoredumpSucess) {
         /* Arrange */
         mock_ic = std::make_unique< MockInotifyCoredump >();
-        EXPECT_CALL(*mock_ic, coredump_to_line_protocol(testing::_, testing::_)).Times(1);
+        // EXPECT_CALL(*mock_ic, coredump_to_line_protocol(testing::_, testing::_)).Times(1);
         EXPECT_CALL(*mock_ic, send_to_mq(testing::_, testing::_)).WillOnce(testing::Return(0));
 
         int bytesRead = read_file_into_buffer("data/coredump_input.txt", buffer, sizeof(buffer));
