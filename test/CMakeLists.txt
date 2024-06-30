@@ -1,4 +1,4 @@
-add_executable(inotify-coredump-test test_inotify_coredump.cpp)
+add_executable(inotify-coredump-test test_inotify_coredump.cpp ${CMAKE_SOURCE_DIR}/src/inotify-coredump/inotify-coredump.c)
 add_executable(bridge-test test_bridge.cpp)
 
 target_link_libraries(inotify-coredump-test PUBLIC
@@ -25,5 +25,8 @@ gtest_discover_tests(bridge-test
     EXTRA_ARGS --gtest_color=yes)
 
 target_link_options(inotify-coredump-test PRIVATE
-    -Wl,--wrap=coredump_to_line_protocol -Wl,--wrap=send_to_mq -Wl,--wrap=read
+    -Wl,--wrap=coredump_to_line_protocol
+    -Wl,--wrap=init_mq
+    -Wl,--wrap=send_to_mq
+    -Wl,--wrap=read
 )
