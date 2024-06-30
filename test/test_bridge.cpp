@@ -30,4 +30,16 @@ TEST(BridgeTest, InitialiseMqTest) {
 TEST(BridgeTest, ConnectToBrokerTest) {
         MQTTAsync client = init_MQTT_client();
         ASSERT_EQ(connect_to_broker(&client), MQTTASYNC_SUCCESS);
+        MQTTAsync_destroy(&client);
+}
+
+TEST(BridgeTest, SendMessageToBrokerTest) {
+        MQTTAsync client = init_MQTT_client();
+        if (connect_to_broker(&client) != MQTTASYNC_SUCCESS) {
+                FAIL()<< "Connection was not established succesfully";
+                MQTTAsync_destroy(&client);
+        }
+        char msg[MAX_MSG_SIZE] = "weather,location=us-midwest temperature=82,humidity=71 1465839830100400200";
+        ASSERT_EQ(send_message_to_broker(&client, msg), MQTTASYNC_SUCCESS);
+        MQTTAsync_destroy(&client);
 }
