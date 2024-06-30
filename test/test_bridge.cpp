@@ -52,7 +52,6 @@ TEST(BridgeTest, SendMessageToBrokerTest) {
                 MQTTAsync_destroy(&client);
         }
         char msg[MAX_MSG_SIZE] = "weather,location=us-midwest temperature=82,humidity=71 1465839830100400200";
-        SUCCEED();
-        // ASSERT_EQ(send_message_to_broker(&client, msg), MQTTASYNC_SUCCESS);
+        ASSERT_EQ(send_message_to_broker(&client, msg), MQTTASYNC_SUCCESS);
         MQTTAsync_destroy(&client);
 }
