@@ -75,6 +75,32 @@ test_inotify_coredump:
         - .gitlab-ci.yml
         - Dockerfile
 
+test_bridge:
+  stage: run
+  image: $CI_REGISTRY_IMAGE/debian:latest
+  allow_failure: false
+  dependencies:
+    - build
+  before_script:
+    - git submodule update --init --recursive external/paho.mqtt.c
+    - cd external/paho.mqtt.c
+    - mkdir -p build && cd build
+    - cmake ..
+    - make && make install
+    - cd ../../..
+  script:
+    - mkdir -p build && cd build
+    - cmake ..
+    - make
+    - ctest -V bridge-test
+  rules:
+    - changes:
+        - CMakeLists.txt
+        - src/
+        - test/
+        - .gitlab-ci.yml
+        - Dockerfile
+
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
