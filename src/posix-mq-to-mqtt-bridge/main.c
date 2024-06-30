@@ -1,3 +1,11 @@
+#include "bridge.h"
+#include "mq.h"
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <unistd.h>
+
 int main() {
         struct epoll_event events[MAX_EVENTS];
         int epid = init_epoll();
@@ -41,7 +49,7 @@ int main() {
                 exit(EXIT_FAILURE);
         }
 
-        while (!finished)
+        while (1)
                 usleep(10000L);
 
         MQTTAsync_destroy(&client);

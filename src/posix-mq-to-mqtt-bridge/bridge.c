@@ -1,4 +1,4 @@
-#include "MQTTAsync.h"
+#include "bridge.h"
 #include "mq.h"
 #include <fcntl.h>
 #include <mqueue.h>
@@ -11,28 +11,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
-#define CLIENTID "bridge"
-#define TOPIC "linux-monitoring/stats"
-#define QOS 2
-#define TIMEOUT 10000L
-#define MAX_EVENTS 10
-#define WATCH_DIR "/dev/mqueue"
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define BUF_LEN (1024 * (EVENT_SIZE + 255 + 1)) /* enough for 1024 events in the buffer */
-
 int finished = 0;
 
-struct client_msg {
-        MQTTAsync *client;
-        struct epoll_event *events;
-} typedef client_msg_t;
-
-struct client_epoll {
-        MQTTAsync *client;
-        int epollfd;
-        struct epoll_event *events;
-} typedef client_epoll_t;
 
 void connlost(void *context, char *cause) {
         MQTTAsync *client = (MQTTAsync *) context;
@@ -259,7 +239,7 @@ void *inotify_mq(void *arg) {
         return NULL;
 }
 
-int main() {
+/*int main() {
         struct epoll_event events[MAX_EVENTS];
         int epid = init_epoll();
         printf("bridge is running...\n");
@@ -278,34 +258,35 @@ int main() {
         }
 
         /* Connect to the broker once */
-        client_msg_t context;
-        context.client = &client;
-        context.events = events;
-        if ((rc = connect_to_broker(&client, events)) != MQTTASYNC_SUCCESS) {
-                printf("Failed to connect to broker, return code %d\n", rc);
-                exit(EXIT_FAILURE);
-        }
-
-        pthread_t inotify_thread, process_msgs_thread;
-        client_epoll_t ce;
-        ce.client = &client;
-        ce.epollfd = epid;
-        ce.events = events;
-        int rc1 = pthread_create(&inotify_thread, NULL, inotify_mq, (void *) &epid);
-        if (rc1 != 0) {
-                perror("pthread_create failed");
-                exit(EXIT_FAILURE);
-        }
-
-        int rc2 = pthread_create(&process_msgs_thread, NULL, process_messages, (void *) &ce);
-        if (rc2 != 0) {
-                perror("pthread_create failed");
-                exit(EXIT_FAILURE);
-        }
-
-        while (!finished)
-                usleep(10000L);
-
-        MQTTAsync_destroy(&client);
-        return 0;
+/*
+client_msg_t context;
+context.client = &client;
+context.events = events;
+if ((rc = connect_to_broker(&client, events)) != MQTTASYNC_SUCCESS) {
+        printf("Failed to connect to broker, return code %d\n", rc);
+        exit(EXIT_FAILURE);
 }
+
+pthread_t inotify_thread, process_msgs_thread;
+client_epoll_t ce;
+ce.client = &client;
+ce.epollfd = epid;
+ce.events = events;
+int rc1 = pthread_create(&inotify_thread, NULL, inotify_mq, (void *) &epid);
+if (rc1 != 0) {
+        perror("pthread_create failed");
+        exit(EXIT_FAILURE);
+}
+
+int rc2 = pthread_create(&process_msgs_thread, NULL, process_messages, (void *) &ce);
+if (rc2 != 0) {
+        perror("pthread_create failed");
+        exit(EXIT_FAILURE);
+}
+
+while (!finished)
+        usleep(10000L);
+
+MQTTAsync_destroy(&client);
+return 0;
+}*/
