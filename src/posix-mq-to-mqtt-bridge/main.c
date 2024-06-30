@@ -10,14 +10,8 @@ int main() {
         struct epoll_event events[MAX_EVENTS];
         int epid = init_epoll();
         printf("bridge is running...\n");
-        MQTTAsync client;
+        MQTTAsync client = init_MQTT_client();
         int rc;
-        if ((rc = MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=
-            MQTTASYNC_SUCCESS) {
-                printf("Failed to create client object, return code %d\n", rc);
-                exit(EXIT_FAILURE);
-        }
-
         if ((rc = MQTTAsync_setCallbacks(client, NULL, connlost, messageArrived, NULL)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to set callback, return code %d\n", rc);
                 exit(EXIT_FAILURE);
@@ -27,7 +21,7 @@ int main() {
         client_msg_t context;
         context.client = &client;
         context.events = events;
-        if ((rc = connect_to_broker(&client, events)) != MQTTASYNC_SUCCESS) {
+        if ((rc = connect_to_broker(&client)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to connect to broker, return code %d\n", rc);
                 exit(EXIT_FAILURE);
         }

@@ -19,3 +19,15 @@ TEST(BridgeTest, AddHostnameToMsgSuccess) {
         add_hostname_to_msg(msg);
         ASSERT_STREQ(msg, assert_str) << "Adding hostname failed";
 }
+
+TEST(BridgeTest, InitialiseMqTest) {
+        std::string mq_path = "/test_mq";
+        int rc = init_mq(mq_path.c_str());
+        ASSERT_NE(initialize_mq(mq_path.c_str()), -1);
+        remove_mq(mq_path.c_str());
+}
+
+TEST(BridgeTest, ConnectToBrokerTest) {
+        MQTTAsync client = init_MQTT_client();
+        ASSERT_EQ(connect_to_broker(&client), MQTTASYNC_SUCCESS);
+}

@@ -2,7 +2,6 @@
 #define BRIDGE_H
 
 #define ADDRESS "tcp://sep-cm0-server.ibr.cs.tu-bs.de:1883/"
-#define CLIENTID "bridge"
 #define TOPIC "linux-monitoring/stats"
 #define QOS 2
 #define TIMEOUT 10000L
@@ -31,7 +30,8 @@ void *process_messages(void *arg);
 int register_queue(int epid, char *mq_path);
 mqd_t initialize_mq(const char *mq_path);
 int init_epoll();
-int connect_to_broker(MQTTAsync *client, struct epoll_event *events);
+MQTTAsync init_MQTT_client();
+int connect_to_broker(MQTTAsync *client);
 int send_message_to_broker(MQTTAsync *client, char *received_msg);
 void *process_messages(void *arg);
 

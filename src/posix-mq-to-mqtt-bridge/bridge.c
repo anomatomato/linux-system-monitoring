@@ -123,20 +123,16 @@ int register_queue(int epid, char *mq_path) {
         return epoll_ctl(epid, EPOLL_CTL_ADD, new_queue, &ev);
 }
 
-int connect_to_broker(MQTTAsync *client, struct epoll_event *events) {
+int connect_to_broker(MQTTAsync *client) {
         MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
         int rc;
-        client_msg_t *cm = (client_msg_t *) malloc(sizeof(client_msg_t));
-        cm->client = client;
-        cm->events = events;
         conn_opts.keepAliveInterval = 20;
         conn_opts.cleansession = 1;
         conn_opts.onSuccess = (void (*)(void *, MQTTAsync_successData *)) onConnect;
         conn_opts.onFailure = onConnectFailure;
-        conn_opts.context = cm;
+        conn_opts.context = client;
         if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to start connect, return code %d\n", rc);
-                free(cm);
                 exit(EXIT_FAILURE);
         }
         return rc;
@@ -235,6 +231,19 @@ void *inotify_mq(void *arg) {
         inotify_rm_watch(fd, wd);
         close(fd);
         return NULL;
+}
+
+MQTTAsync init_MQTT_client() {
+        MQTTAsync client;
+        int rc;
+        char hostname[64];
+        gethostname(hostname, sizeof(hostname));
+        if ((rc = MQTTAsync_create(&client, ADDRESS, hostname, MQTTCLIENT_PERSISTENCE_NONE, NULL)) !=
+            MQTTASYNC_SUCCESS) {
+                printf("Failed to create client object, return code %d\n", rc);
+                exit(EXIT_FAILURE);
+        }
+        return client;
 }
 
 /*int main() {
