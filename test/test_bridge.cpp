@@ -1,17 +1,21 @@
 #include <gtest/gtest.h>
-
+#include <string>
 extern "C" {
 #include "bridge.h"
+#include "mq.h"
 #include "unistd.h"
 }
 
 TEST(BridgeTest, AddHostnameToMsgSuccess) {
-        char *msg = "weather,location=us-midwest temperature=82,humidity=71 1465839830100400200";
-        char* hostname;
+        char hostname[64];
         gethostname(hostname, sizeof(hostname));
+
+        std::string str_hostname = hostname;
+        std::string line = "weather,location=us-midwest,host=" + str_hostname +
+                        " temperature=82,humidity=71 1465839830100400200";
+        const char *assert_str = line.c_str();
+
+        char msg[MAX_MSG_SIZE] = "weather,location=us-midwest temperature=82,humidity=71 1465839830100400200";
         add_hostname_to_msg(msg);
-        char *str1 = "weather,location=us-midwest,host=";
-        strcpy(str1, hostname);
-        strcpy(str1, "temperature=82,humidity=71 1465839830100400200")
-        ASSERT_STREQ(msg,str1) << "Adding hostname failed";
+        ASSERT_STREQ(msg, assert_str) << "Adding hostname failed";
 }
