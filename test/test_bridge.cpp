@@ -48,7 +48,7 @@ TEST(BridgeTest, RegisterMqTest) {
 TEST(BridgeTest, SendMessageToBrokerTest) {
         MQTTAsync client = init_MQTT_client();
         if (connect_to_broker(&client) != MQTTASYNC_SUCCESS) {
-                FAIL()<< "Connection was not established succesfully";
+                FAIL() << "Connection was not established succesfully";
                 MQTTAsync_destroy(&client);
         }
         char msg[MAX_MSG_SIZE] = "weather,location=us-midwest temperature=82,humidity=71 1465839830100400200";

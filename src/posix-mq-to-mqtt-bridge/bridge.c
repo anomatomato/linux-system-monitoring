@@ -86,17 +86,21 @@ void add_hostname_to_msg(char *msg) {
         char hostname[64];
         gethostname(hostname, sizeof(hostname));
 
-        char tag[7 + sizeof(hostname)];
+        char tag[7 + strlen(hostname)];
         snprintf(tag, sizeof(tag), ",host=%s", hostname);
 
-        char buffer[MAX_MSG_SIZE];
+        /* Not enough space for hostname tag */
+        if (strlen(msg) + strlen(tag) >= MAX_MSG_SIZE)
+                return;
+
         char *whitespace = strchr(msg, ' ');
 
         if (whitespace != NULL) {
                 int prefix_len = whitespace - msg;
+                char buffer[MAX_MSG_SIZE];
                 snprintf(buffer, sizeof(buffer), "%.*s%s%s", prefix_len, msg, tag, whitespace);
                 strncpy(msg, buffer, MAX_MSG_SIZE - 1);
-                msg[MAX_MSG_SIZE] = '\0';
+                msg[MAX_MSG_SIZE - 1] = '\0';
         }
 }
 
