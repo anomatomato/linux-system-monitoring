@@ -226,7 +226,7 @@ void *inotify_mq(void *arg) {
                         if (event->len && event->mask & IN_CREATE) {
                                 printf("message queue /%s added to watchlist\n", event->name);
                                 if (register_queue(*epid, event->name) == -1)
-                                        exit(EXIT_FAILURE);
+                                        break;
                         }
                         i += EVENT_SIZE + event->len;
                 }
