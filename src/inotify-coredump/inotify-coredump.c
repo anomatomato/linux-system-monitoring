@@ -66,9 +66,11 @@ int send_coredump(char *buffer, int len, coredump_monitor_t *monitor) {
                 struct inotify_event *event = (struct inotify_event *) &buffer[i];
                 if (event->len && event->mask & IN_CREATE) {
                         char message[MAX_MSG_SIZE];
-                        printf("before to line protocol\n");
                         int ret = coredump_to_line_protocol(message, event->name);
-                        printf("After to line protocol\n");
+                        if (ret < 0) {
+                                perror("coredump_to_line_protocol failed");
+                                return -1;
+                        }
 
                         if (monitor->flags == VERBOSE)
                                 printf("Message:\n%s\n", message);
