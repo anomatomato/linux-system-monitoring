@@ -91,4 +91,3 @@ cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - build/
-    - external/paho.mqtt.c
