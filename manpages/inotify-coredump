@@ -1,0 +1,25 @@
+.\" Manpage for inotify-coredump.
+.\" Contact an.hoang@tu-braunschweig.de to correct errors or typos.
+.TH INOTIFY-COREDUMP(8) "05 Juli 2024" "1.0" "inotify-coredump man page"
+.SH NAME
+inotify-coredump \- Send a message to an own message queue, whenever a coredump is created.
+.SH SYNOPSIS
+.B ./inotify-coredump-exec
+.B ./inotify-coredump-exec -v
+.SH DESCRIPTION
+.B inotify-coredump
+is a utility designed to monitor the system for core dumps and automatically dispatch these events to a dedicated POSIX message queue using mq_overview(7). It leverages the Linux API inotify(7) to watch for file creation events in specified directories that are configured to store core dumps. 
+
+When a core dump occurs, 
+.B inotify-coredump
+captures relevant information and sends a message in InfluxDB Line Protocol to its own message queue. This can be particularly useful in environments where immediate awareness and handling of crashes is critical, such as in production systems or during intensive testing phases.
+.SH OPTIONS
+No options. 
+.SH "SEE ALSO"
+.B mq_overview(7),
+.B inotify(7),
+.B systemd-coredump(8)
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+An Hoang (an.hoang@tu-braunschweig.de)
