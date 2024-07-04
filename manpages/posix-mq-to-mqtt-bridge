@@ -1,0 +1,15 @@
+.\" Manpage for nuseradd.
+.\" Contact k.meliksetian@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "03 Juli 2024" "1.0" "posix-mq-to-mqtt-bridge man page"
+.SH NAME
+posix-mq-to-mqtt-bridge - start sending metrics to the server.
+.SH SYNOPSIS
+/bridge-exec
+.SH DESCRIPTION
+This component is responsible for sending all the metrics other components have collected to the database.
+.SH OPTIONS
+No options.
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Karen Meliksetian (k.meliksetian@tu-braunschweig.de)
