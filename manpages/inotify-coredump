@@ -14,7 +14,7 @@ When a core dump occurs,
 .B inotify-coredump
 captures relevant information and sends a message in InfluxDB Line Protocol to its own message queue. This can be particularly useful in environments where immediate awareness and handling of crashes is critical, such as in production systems or during intensive testing phases.
 .SH OPTIONS
-No options. 
+-v                       Verbose, the message in Line Protocol to the message queue gets printed 
 .SH "SEE ALSO"
 .B mq_overview(7),
 .B inotify(7),
