@@ -1,0 +1,44 @@
+.\" Manpage for cyclic-file-read.
+.\" Contact e.onbasiogullari@tu-braunschweig.de to correct errors or typos.
+.TH man 1 "03 Juli 2024" "1.0" "cyclic-file-read man page"
+.SH NAME
+cyclic-file-read - Ermittlung von Systemstatistiken.
+.SH SYNOPSIS
+cyclic-file-read-exec [OPTIONS]
+.SH DESCRIPTION
+cyclic-file-read nutzt das procfs- and sysfs-Dateisystem um Systemstatistiken zu sammeln. Das Programm trägt seine ermittelten Werte in eine Message-Queue ein, welche posix-mq-to-mqtt-bridge(1) nutzen kann. Ist posix-mq-to-mqtt-bridge(1) ebenfalls aktiv, landen die Werte auf InfluxDB und können auf Grafana graphish dargestellt werden.
+
+Es werden Statistiken über Prozessor, Netzwerk, Festplatten, Prozesse und Chip-Temperaturen ermittelt.
+.SH OPTIONS
+-c                       Die Statistiken werden kontinuierlich alle 5 Sekunden ermittelt.
+
+-v                       Die gesammelten Statistiken werden im Line-Protokol auf der Konsole geprinted.
+
+--proc-stat              CPU-Metriken werden ermittelt. Die Werte jedes Prozessorkernes sind prozentuale Anteile jeder Metrik.
+
+--proc-net-dev           Netzwerk-Metriken werden ermittelt.
+
+--proc-diskstats         Festplatten-Metriken werden ermittelt.
+
+--proc-pid-stat          stat-Metriken von Prozessen werden ermittelt.
+
+--proc-pid-statm         statm-Metriken von Prozessen werden ermittelt.
+
+--proc-pid-io            IO-Metriken von Prozessen werden ermittelt.
+
+--hwmon                  Chip-Temperaturen werden ermittelt.
+
+--pid                    Alle Prozess-Metriken werden ermittelt.
+
+--sys                    Alle Statistiken der Systemebene werden ermittelt.
+.SH ARGUMENTS
+Werden keine langen Optionen angegeben (--optionen), werden alle Metriken ermittelt.
+Falls dem Programm untersteht wird keine Berechtigungen zu haben, muss das Programm mit 'sudo' gestartet werden.
+.SH BUGS
+Während das Programm durch die Prozesse iteriert, können Prozesse beendet werden und neue anfangen. Daher ist es nicht garantiert, dass die Metriken aller Prozesse zu einer gegeben Zeit gelesen werden.
+
+Das lesen von Chip-Temperaturen geschieht durch Funktionen von libsensors(3). Die Funktion sensors_get_value() kann fehlschlagen und es werden Temperaturen von 0°C wiedergegeben. Ist dies der Fall muss das System solange neugestartet werden bis Temperaturen über 0 ermittelt werden.
+.SH SEE ALSO
+libsensors(3), posix-mq-to-mqtt-bridge(1)
+.SH AUTHOR
+Emre Onbasiogullari (e.onbasiogullari@tu-braunschweig.de)
