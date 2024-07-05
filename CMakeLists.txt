@@ -37,31 +37,17 @@ install(FILES systemd-services/argconfigs/inotify-coredump.conf DESTINATION /etc
 include(FetchContent)
 
 # Enable Google test and paho-mqtt-c
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24.0")
-    FetchContent_Declare(
-        googletest
+FetchContent_Declare(
+    googletest
 
-        # Specify the commit you depend on and update it regularly.
-        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-    )
+    # Specify the commit you depend on and update it regularly.
+    URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
+)
 
-    FetchContent_Declare(
-        paho-mqtt-c
-        URL https://github.com/eclipse/paho.mqtt.c/archive/refs/tags/v1.3.13.zip
-    )
-else()
-    FetchContent_Declare(
-        googletest
-
-        # Specify the commit you depend on and update it regularly.
-        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip
-    )
-
-    FetchContent_Declare(
-        paho-mqtt-c
-        URL https://github.com/eclipse/paho.mqtt.c/archive/refs/tags/v1.3.13.zip
-    )
-endif()
+FetchContent_Declare(
+    paho-mqtt-c
+    URL https://github.com/eclipse/paho.mqtt.c/archive/refs/tags/v1.3.13.zip
+)
 
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
