@@ -127,7 +127,7 @@ char net_form2[10][MAX_BUFFER] = { "proc-net-dev,interface=\0",
                                    ",compressed=\0",
                                    " \0" };
 
-char disk_form[15][MAX_BUFFER] = { "proc-diskstats,major=\0",
+char disk_form[21][MAX_BUFFER] = { "proc-diskstats,major=\0",
                                    ",minor=\0",
                                    ",name=\0",
                                    " reads_completed=\0",
@@ -141,6 +141,12 @@ char disk_form[15][MAX_BUFFER] = { "proc-diskstats,major=\0",
                                    ",i/os_currently_in_progress=\0",
                                    ",time_spent_doing_i/os=\0",
                                    ",weighted_time_spent_doing_i/os=\0",
+                                   ",successful_discards=\0",
+                                   ",merged_discards=\0",
+                                   ",sectors_discarded=\0",
+                                   ",time_spent_discarding=\0",
+                                   ",successful_flush_requests=\0",
+                                   ",time_spent_flushing=\0",
                                    " \0" };
 
 char pstat_form[53][MAX_BUFFER] = { "proc-pid-stat,pid=\0",

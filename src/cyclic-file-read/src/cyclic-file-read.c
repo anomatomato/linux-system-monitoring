@@ -148,8 +148,10 @@ int main(int argc, char *argv[]) {
                         dequeue(v);
                 }
 
-                if (!c) /*wenn c==0, wird das alles nur einmal gemacht*/
+                if (!c) {/*wenn c==0, wird das alles nur einmal gemacht*/
+                        close(timer);
                         return 0;
+                }
 
                 select(timer + 1, &rfds, NULL, NULL, NULL);   /*auf timer warten*/
                 timerfd_settime(timer, 0, &timerValue, NULL); /*timer neu aufsetzen*/

@@ -34,8 +34,8 @@ int write_pid_stat(char *path) {
                 return 1;
         }
 
-        char line_buffer[MAX_LINE];
-        fgets(line_buffer, MAX_LINE, pidf);
+        char line_buffer[2048];
+        fgets(line_buffer, 2048, pidf);
         if (line_buffer[strlen(line_buffer) - 1] != '\n') {
                 printf("File too big.\n"); /*falls zeile zu groß ist*/
                 return 1;
@@ -43,8 +43,12 @@ int write_pid_stat(char *path) {
 
         fclose(pidf);
 
-        char message[MAX_LINE];
+        char message[2048];
         message[0] = '\0';
+
+        char placeholder1[MAX_BUFFER];
+        char placeholder2[MAX_BUFFER];
+        char escape[2] = "\"\0";
 
         char *token;
         token = strtok(line_buffer, " "); /*zeile unterteilen*/
@@ -55,6 +59,20 @@ int write_pid_stat(char *path) {
                 strcat(message, pstat_form[i]);
                 strcat(message, token);
                 token = strtok(NULL, " ");
+                if (i == 0 ) {
+                        for (int ii = 1; ii < 3; ii++) { /*zweiter und dritter eintrag sind string/char; müssen escaped werden*/
+                                strcat(message, pstat_form[ii]);
+                                strcpy(placeholder1, escape);
+                                strcpy(placeholder2, token);
+                                strcat(placeholder1, placeholder2);
+                                strcat(placeholder1, escape);
+                                strcat(message, placeholder1);
+                                placeholder1[0] = '\0';
+                                placeholder2[0] = '\0';
+                                token = strtok(NULL, " ");
+                        }
+                        i = i+2;
+                }
         }
         strcat(message, pstat_form[51]);
         token[strlen(token) - 1] = '\0'; /*'\n' entfernen*/

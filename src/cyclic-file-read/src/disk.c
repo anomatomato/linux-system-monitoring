@@ -6,7 +6,7 @@
 int write_disk_message(FILE *file, int lines) {
         char line_buffer[MAX_LINE];
 
-        extern char disk_form[15][MAX_BUFFER];
+        extern char disk_form[21][MAX_BUFFER];
         /*fürs line protokol*/
         char message[MAX_LINE];
         message[0] = '\0';
@@ -22,15 +22,15 @@ int write_disk_message(FILE *file, int lines) {
 
                 token = strtok(line_buffer, " "); /*zeile unterteilen*/
 
-                for (int ii = 0; ii < 14; ii++) { /*gelesene werte ins format legen*/
+                for (int ii = 0; ii < 19; ii++) { /*gelesene werte ins format legen*/
                         strcat(message, disk_form[ii]);
                         strcat(message, token);
                         token = strtok(NULL, " ");
                 }
-                if (line_buffer[strlen(line_buffer) - 1] == '\n') /*'\n' entfernen*/
-                        line_buffer[strlen(line_buffer) - 1] = '\0';
-
-                strcat(message, disk_form[14]);
+                strcat(message, disk_form[19]);
+                token[strlen(token) - 1] = '\0'; /*'\n' entfernen*/
+                strcat(message, token);
+                strcat(message, disk_form[20]);
 
                 if (enqueue(message) == 1) /*in die queue anreihen*/
                         return 1;
