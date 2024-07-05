@@ -26,13 +26,6 @@ build:
   image: $CI_REGISTRY_IMAGE/debian:latest
   when: on_success
   allow_failure: false
-  before_script:
-    - git submodule update --init --recursive external/paho.mqtt.c
-    - cd external/paho.mqtt.c
-    - mkdir -p build && cd build
-    - cmake ..
-    - make && make install
-    - cd ../../..
   script:
     - mkdir -p build && cd build
     - cmake ..
@@ -40,7 +33,7 @@ build:
   artifacts:
     paths:
       - build/
-    expire_in: 1 week
+    expire_in: 3 days
   rules:
     - changes:
         - CMakeLists.txt
@@ -55,13 +48,6 @@ test_inotify_coredump:
   allow_failure: false
   dependencies:
     - build
-  before_script:
-    - git submodule update --init --recursive external/paho.mqtt.c
-    - cd external/paho.mqtt.c
-    - mkdir -p build && cd build
-    - cmake ..
-    - make && make install
-    - cd ../../..
   script:
     - mkdir -p build && cd build
     - cmake ..
