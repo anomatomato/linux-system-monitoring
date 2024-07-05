@@ -1,0 +1,61 @@
+.\" Manpage for inotify\-coredump.
+.\" Contact an.hoang@tu\-braunschweig.de to correct errors or typos.
+.TH "INOTIFY\-COREDUMP" "1" "05 Juli 2024" "1.0" "inotify-coredump man page"
+.SH NAME
+inotify-coredump \- Send a message to a message queue, whenever a coredump is created.
+.SH SYNOPSIS
+.PP
+.B /var/lib/systemd/coredump
+.PP
+.B inotify\-coredump@\&.service
+.PP
+.B ./inotify\-coredump\-exec [\fI\,OPTION\/\fR]...
+.PP
+.SH DESCRIPTION
+.PP
+\fIinotify\-coredump\fR is a utility designed to monitor 
+.I /var/lib/systemd/coredump
+with
+.BR inotify (7) 
+for core dumps\&. It will send a summary of the core dump event to 
+the POSIX message queue \fI/inotify\-coredump\fR with
+, including the coredump file name and a timestamp\&. This message is in 
+.B InfluxDB\-Line\-Protocol,
+and the message queue is managed by
+.BR mq_overview (7)\&. 
+.PP
+.BR posix\-mq\-to\-mqtt\-bridge (1) 
+can then send the messages to a MQTT Broker\&.
+.PP
+.I /var/lib/systemd/coredump 
+is configured by default to store core dumps by 
+.BR systemd\-coredump (8)\&.
+To ensure that core dumps are saved to the file system, make sure the 
+.I /etc/systemd/coredump\&.conf
+is configured with:
+.PP
+.RS
+.nf
+\fBStorage=external\fR
+.fi
+.RE
+.PP
+For more configuration see 
+.BR coredump\&.conf (5)\&.
+.SH OPTIONS
+.TP
+\fB\-v\fR                       
+Verbose mode: print the message in Line Protocol to the message queue 
+.TP
+\fB\-h\fR
+print help message
+.SH "SEE ALSO"
+.BR posix\-mq\-to\-mqtt\-bridge (1),
+.BR coredump\&.config (5)
+.BR mq_overview (7),
+.BR inotify (7),
+.BR systemd\-coredump (8)
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+An Hoang (an.hoang@tu\-braunschweig.de)
