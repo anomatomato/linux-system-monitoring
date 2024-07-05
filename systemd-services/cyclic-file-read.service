@@ -1,0 +1,10 @@
+[Unit]
+Description=cyclic-file-read
+
+[Service]
+EnvironmentFile=/etc/cyclic-file-read.conf
+ExecStart=/usr/local/bin/cyclic-file-read-exec $ARG1
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

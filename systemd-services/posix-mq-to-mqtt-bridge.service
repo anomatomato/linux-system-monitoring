@@ -1,0 +1,9 @@
+[Unit]
+Description=posix-mq-to-mqtt-bridge
+
+[Service]
+ExecStart=/usr/local/bin/bridge-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
