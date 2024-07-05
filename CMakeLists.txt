@@ -6,13 +6,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Set the default CMP0048 policy to NEW for all subprojects to surpress warnings
 set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
+
 install(FILES build/bridge-exec DESTINATION /usr/local/bin
  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 install(FILES build/cyclic-file-read-exec DESTINATION /usr/local/bin
  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) 
+install(FILES build/inotify-coredump DESTINATION /usr/local/bin
+ PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) 
+
 install(FILES systemd-services/posix-mq-to-mqtt-bridge.service DESTINATION /etc/systemd/system) 
-install(FILES systemd-services/cyclic-file-read.service DESTINATION /etc/systemd/system) 
+install(FILES systemd-services/cyclic-file-read.service DESTINATION /etc/systemd/system)
+install(FILES systemd-services/inotify-coredump.service DESTINATION /etc/systemd/system)
+
 install(FILES systemd-services/argconfigs/cyclic-file-read.conf DESTINATION /etc) 
+install(FILES systemd-services/argconfigs/inotify-coredump.conf DESTINATION /etc) 
 # find_package(eclipse-paho-mqtt-c REQUIRED PATHS /usr/local/lib/cmake/eclipse-paho-mqtt-c /usr/local/paho-mqtt/lib/cmake/eclipse-paho-mqtt-c)
 include(FetchContent)
 
