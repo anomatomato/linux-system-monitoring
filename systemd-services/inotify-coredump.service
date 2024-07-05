@@ -3,7 +3,7 @@ Description=inotify-coredump
 
 [Service]
 EnvironmentFile=/etc/inotify-coredump.conf
-ExecStart=/usr/local/bin/inotify-coredump $ARG1
+ExecStart=/usr/local/bin/inotify-coredump-exec $ARG1
 Type=simple
 
 [Install]

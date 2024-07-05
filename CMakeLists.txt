@@ -11,7 +11,7 @@ install(FILES build/bridge-exec DESTINATION /usr/local/bin
  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 install(FILES build/cyclic-file-read-exec DESTINATION /usr/local/bin
  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) 
-install(FILES build/inotify-coredump DESTINATION /usr/local/bin
+install(FILES build/inotify-coredump-exec DESTINATION /usr/local/bin
  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE) 
 
 install(FILES systemd-services/posix-mq-to-mqtt-bridge.service DESTINATION /etc/systemd/system) 
