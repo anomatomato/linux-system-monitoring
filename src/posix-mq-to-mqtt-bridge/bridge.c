@@ -55,7 +55,7 @@ void onSendFailure(void *context, MQTTAsync_failureData *response) {
 }
 
 void onSend(void *context, MQTTAsync_successData *response) {
-        printf("Message with token value %d delivery confirmed\n", response->token);
+        //printf("Message with token value %d delivery confirmed\n", response->token);
 }
 
 void onConnectFailure(void *context, MQTTAsync_failureData *response) {
