@@ -36,6 +36,7 @@ install(FILES
 
 install(FILES
     manpages/inotify-coredump.8
+    manpages/inotify-pacct.8
     DESTINATION /usr/local/share/man/man8
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
