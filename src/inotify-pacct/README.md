@@ -29,7 +29,7 @@ navigate to ./build directory and run:
 ## with flags
 
 ```bash
-./cyclic-file-read-exec <flag>
+./inotify-pacct-exec <flag>
 ```
 
 ### -v
