@@ -1,0 +1,26 @@
+.\" Manpage for sd-journal-to-influxdb.
+.\" Contact b.pham@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "06 Juli 2024" "1.0" "sd-journal-to-influxdb man page"
+.SH NAME
+sd-journal-to-influxdb - Send the filtered Systemd-Journals to server.
+.SH SYNOPSIS
+journal-to-influxdb server
+.SH DESCRIPTION
+
+sd-journal-to-influxdb liest Journaleinträge aus einer Journaldatei im Verzeichnis /var/log/journal/remote des
+Docker-Containers systemd-journal-remote über sd-journal(3) und konvertiert sie in das Line-Protokoll.
+Anschließend werden die Journallogs per MQTT an InfluxDB gesendet.
+
+Um direkt Journaldateien im Verzeichnis /var/log/journal/remote des Docker-Containers systemd-journal-remote lesen
+zu können, muss sd-journal-to-influxdb auf der gleichen Umgebung wie sd-journal-filter laufen.
+Deswegen wird es auf einem Docker-Container namens metrics-to-influxdb() mit der gewünschten Umgebung ausgeführt
+(zusammen mit der Komponente coredump-to-influxdb). In diesem Container teilen sich die beiden Docker-Container
+metrics-to-influxdb und systemd-journal-remote das gleiche Volume systemd-journal-data, dessen Wert
+/var/log/journal/remote ist.
+
+.SH SEE ALSO
+.BR sd-journal-filter (1),
+.BR sd-journal(3),
+.BR https://eclipse.github.io/paho.mqtt.c/MQTTClient/html/
+.SH AUTHOR
+Bao Ngoc Pham (b.pham@tu-braunschweig.de)
