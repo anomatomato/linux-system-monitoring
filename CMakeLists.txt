@@ -29,6 +29,7 @@ install(FILES build/inotify-coredump-exec DESTINATION /usr/local/bin
 install(FILES systemd-services/posix-mq-to-mqtt-bridge.service DESTINATION /etc/systemd/system)
 install(FILES systemd-services/cyclic-file-read.service DESTINATION /etc/systemd/system)
 install(FILES systemd-services/inotify-coredump.service DESTINATION /etc/systemd/system)
+install(FILES systemd-services/inotify-pacct.service DESTINATION /etc/systemd/system)
 
 install(FILES systemd-services/argconfigs/cyclic-file-read.conf DESTINATION /etc)
 install(FILES systemd-services/argconfigs/inotify-coredump.conf DESTINATION /etc)

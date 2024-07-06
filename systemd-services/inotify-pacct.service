@@ -1,0 +1,9 @@
+[Unit]
+Description=inotify-pacct
+
+[Service]
+ExecStart=/usr/local/bin/inotify-pacct-exec $ARG1
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
