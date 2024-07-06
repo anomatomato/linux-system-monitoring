@@ -7,16 +7,9 @@ sd-journal-to-influxdb - Send the filtered Systemd-Journals to server.
 journal-to-influxdb server
 .SH DESCRIPTION
 
-sd-journal-to-influxdb liest Journaleinträge aus einer Journaldatei im Verzeichnis /var/log/journal/remote des
-Docker-Containers systemd-journal-remote über sd-journal(3) und konvertiert sie in das Line-Protokoll.
-Anschließend werden die Journallogs per MQTT an InfluxDB gesendet.
+sd-journal-to-influxdb reads journal entries from a journal file in the /var/log/journal/remote directory of the Docker container systemd-journal-remote via sd-journal(3) and converts them into the Line Protocol. Subsequently, the journal logs are sent to InfluxDB via MQTT.
 
-Um direkt Journaldateien im Verzeichnis /var/log/journal/remote des Docker-Containers systemd-journal-remote lesen
-zu können, muss sd-journal-to-influxdb auf der gleichen Umgebung wie sd-journal-filter laufen.
-Deswegen wird es auf einem Docker-Container namens metrics-to-influxdb() mit der gewünschten Umgebung ausgeführt
-(zusammen mit der Komponente coredump-to-influxdb). In diesem Container teilen sich die beiden Docker-Container
-metrics-to-influxdb und systemd-journal-remote das gleiche Volume systemd-journal-data, dessen Wert
-/var/log/journal/remote ist.
+To be able to directly read journal files in the /var/log/journal/remote directory of the Docker container systemd-journal-remote, sd-journal-to-influxdb must run in the same environment as sd-journal-filter. Therefore, it is executed in a Docker container named metrics-to-influxdb() with the desired environment (together with the component coredump-to-influxdb). In this container, the two Docker containers metrics-to-influxdb and systemd-journal-remote share the same volume systemd-journal-data, whose value is /var/log/journal/remote.
 
 .SH SEE ALSO
 .BR sd-journal-filter (1),

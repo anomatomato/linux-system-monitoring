@@ -40,6 +40,8 @@ print help message
 .BR inotify (7),
 .BR acct(2),
 .BR acct(5)
+.SH ARGUMENTS
+The program must be started with 'sudo'.
 .SH BUGS
 No known bugs.
 .SH AUTHOR
