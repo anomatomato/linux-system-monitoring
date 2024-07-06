@@ -25,6 +25,7 @@ navigate to ./build directory and run:
 ./inotify-pacct-exec
 ```
 - All metrics are collected and sent to message queue without printing out to terminal.
+- Run with sudo
 
 ## with flags
 
@@ -35,9 +36,10 @@ navigate to ./build directory and run:
 ### -v
 
 - Verbose mode: print the message in Line Protocol to the message queue
+- Run with sudo
 
 ### -h
-- print help message
+- Print help message
 
 ## Note
 
