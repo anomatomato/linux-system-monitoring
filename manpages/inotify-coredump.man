@@ -28,7 +28,7 @@ and the message queue is managed by
 can then send the messages to a MQTT Broker\&.
 .PP
 .I /var/lib/systemd/coredump 
-is configured by default to store core dumps by 
+is configured to store core dumps by default by 
 .BR systemd\-coredump (8)\&.
 To ensure that core dumps are saved to the file system, make sure the 
 .I /etc/systemd/coredump\&.conf
