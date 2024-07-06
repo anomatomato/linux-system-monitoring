@@ -18,7 +18,7 @@ inotify-pacct \- Send a message to a message queue, whenever a process is termin
 with
 .BR inotify (7) 
 for terminated processes\&. It will send relevant information about terminated processes to 
-the POSIX message queue \fI/inotifyq_pacct\fR with
+the POSIX message queue \fI/inotify_pacct\fR with
 . This message is in 
 .B InfluxDB\-Line\-Protocol,
 and the message queue is managed by
@@ -38,7 +38,7 @@ print help message
 .BR posix\-mq\-to\-mqtt\-bridge (1),
 .BR mq_overview (7),
 .BR inotify (7),
-.BR acct(2)
+.BR acct(2),
 .BR acct(5)
 .SH BUGS
 No known bugs.
