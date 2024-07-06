@@ -5,7 +5,7 @@ This component enables the process accounting and saves the report of terminated
 relevant terminated processes will be extracted via `acct(5)`, modified in line protocol and sent to message queue, 
 where they will be taken by the component `poxis-mq-to-mqtt-bridge` and sent to Influxdb via MQTT.
 
-## Build and run
+## Build 
 
 > **Note**: Before running inotify-pacct, you have to make sure 
 > - the component `poxis-mq-to-mqtt-bridge` is running.
@@ -15,7 +15,29 @@ where they will be taken by the component `poxis-mq-to-mqtt-bridge` and sent to 
 >     - If the file exists, `acct` should be listed in white colour because it should be a normal file.
 >     - If the file doensn't exist, run `sudo touch acct` to create one.
 
-You can read the detailed information for building and running the components [here](../../README.md)
+You can read the detailed information for building the components [here](../../README.md)
+
+## Normal run
+
+navigate to ./build directory and run:
+
+```bash
+./inotify-pacct-exec
+```
+- All metrics are collected and sent to message queue without printing out to terminal.
+
+## with flags
+
+```bash
+./cyclic-file-read-exec <flag>
+```
+
+### -v
+
+- Verbose mode: print the message in Line Protocol to the message queue
+
+### -h
+- print help message
 
 ## Note
 
