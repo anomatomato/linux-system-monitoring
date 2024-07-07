@@ -17,7 +17,6 @@
 #include <mqueue.h> /* For POSIX message queues */
 
 #define MQ_PATH "/sysinfo" /* Path for the message queue */
-#define MAX_MSG_SIZE 150 /* Maximum message size that can be sent to the message queue */
 #define CYCLE_INTERVAL 5 /* Interval in seconds to periodically gather system info */
 #define MAX_EVENTS 10 /* Max number of events the epoll instance can report in one go */
 
