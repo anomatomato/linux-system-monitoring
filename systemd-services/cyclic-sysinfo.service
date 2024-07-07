@@ -1,0 +1,9 @@
+[Unit]
+Description=cyclic-sysinfo
+
+[Service]
+ExecStart=/usr/local/bin/cyclic-sysinfo-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

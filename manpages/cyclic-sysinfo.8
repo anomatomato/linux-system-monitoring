@@ -1,0 +1,35 @@
+.\" Manpage for cyclic-sysinfo.
+.\" Contact k.meliksetian@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "07 Juli 2024" "1.0" "cyclic-sysinfo man page"
+.SH NAME
+cyclic\-sysinfo \- Cyclic reading of statistics reported by sysinfo (2)
+.SH SYNOPSIS
+.PP
+.B cyclic\-sysinfo@\&.service
+.PP
+.B ./cyclic\-sysinfo\-exec
+.PP
+.SH DESCRIPTION
+.PP
+\fIcyclic-sysinfo\fR is a utility designed to read statistics reported by sysinfo(2).
+It will send the events to 
+the POSIX message queue \fI/sysinfo\fR.
+This message is in 
+.B InfluxDB\-Line\-Protocol,
+and the message queue is managed by
+.BR mq_overview (7)\&. 
+.PP
+.BR posix\-mq\-to\-mqtt\-bridge (8)  
+can then send the messages to a MQTT Broker\&.
+.PP
+.SH OPTIONS
+ No options.
+.SH "SEE ALSO"
+.BR posix\-mq\-to\-mqtt\-bridge (8),
+.BR mq_overview (7),
+.SH ARGUMENTS
+The program must be started with 'sudo'.
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Karen Meliksetian (k.meliksetian@tu\-braunschweig.de)
