@@ -20,21 +20,13 @@ void monitor_and_report_systemd_events() {
         if (mq == -1) {
                 exit(1); // Beende, falls MQ-Initialisierung fehlschlägt
         }
+
         conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
         if (dbus_error_is_set(&err)) {
                 fprintf(stderr, "Verbindungsfehler (%s)\n", err.message);
                 dbus_error_free(&err);
         }
         if (conn == NULL) {
-                exit(1);
-        }
-
-        ret = dbus_bus_request_name(conn, "test.signal.sink", DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
-        if (dbus_error_is_set(&err)) {
-                fprintf(stderr, "Namensfehler (%s)\n", err.message);
-                dbus_error_free(&err);
-        }
-        if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
                 exit(1);
         }
 
