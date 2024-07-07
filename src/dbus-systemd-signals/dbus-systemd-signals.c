@@ -1,4 +1,5 @@
-#include "dbus_systemd_signals.h"
+#include "dbus-systemd-signals.h"
+#include <systemd/sd-bus.h>
 
 static int on_systemd_signal(sd_bus_message* m, void* userdata, sd_bus_error* ret_error)
 {
