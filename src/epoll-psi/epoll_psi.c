@@ -8,10 +8,10 @@
 #include <time.h>               /* Zeitfunktionen */
 #include <unistd.h>             /* POSIX Betriebssystem API */
 
-//#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
+#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
 #define BUFFER_SIZE 1024        /* Puffergröße für das Lesen von Daten */
 #define MQ_PATH "/psi"     /* Pfad zur POSIX Nachrichtenwarteschlange */
-#define NUM_RESOURCES 3         /* Anzahl der zu überwachenden Ressourcen */
+#define NUM_RESOURCES 4         /* Anzahl der zu überwachenden Ressourcen */
 
 /* Array von Ressourcennamen */
 const char *resources[NUM_RESOURCES] = {"cpu", "io", "memory"};
@@ -25,58 +25,41 @@ struct psi_values {
 };
 
 /* Funktion zur Verarbeitung der PSI-Datenschnur und zum Senden an eine Nachrichtenwarteschlange */
-void process_psi_data(char* data, const char* resource, int v) {
-    struct psi_values psi;      /* Struktur zur Aufnahme der PSI-Daten */
-    char formatted_message[BUFFER_SIZE];  /* Puffer zum Speichern der formatierten Nachricht */
-    char* token;                /* Zeiger auf Token für strtok */
-    const char delim[2] = " ";  /* Trennzeichen zum Tokenisieren der Datenschnur */
+void process_psi_data(char* data, const char* resource) {
+    struct psi_values psi;
+    char formatted_message[BUFFER_SIZE];
+    char* token;
+    const char delim[2] = " ";
+    const char* line_delim = "\n";
+    char* line;
 
-    //printf("Verarbeite PSI-Daten für %s: %s\n", resource, data);  /* Debug: Drucke rohe Daten */
-
-    /* Tokenisiere die eingegebene Datenschnur */
-    token = strtok(data, delim);
-    while (token != NULL) {
-        if (strncmp(token, "avg10=", 6) == 0) {
-            psi.avg10 = atof(token + 6);  /* Wert avg10 parsen */
-        } else if (strncmp(token, "avg60=", 6) == 0) {
-            psi.avg60 = atof(token + 6);  /* Wert avg60 parsen */
-        } else if (strncmp(token, "avg300=", 7) == 0) {
-            psi.avg300 = atof(token + 7); /* Wert avg300 parsen */
-        } else if (strncmp(token, "total=", 6) == 0) {
-            psi.total = atol(token + 6);  /* Wert total parsen */
+    line = strtok(data, line_delim); // Zuerst nach Zeilen trennen
+    while (line != NULL) {
+        token = strtok(line, delim); // Dann jede Zeile tokenisieren
+        while (token != NULL) {
+            if (strncmp(token, "avg10=", 6) == 0) {
+                psi.avg10 = atof(token + 6);
+            } else if (strncmp(token, "avg60=", 6) == 0) {
+                psi.avg60 = atof(token + 6);
+            } else if (strncmp(token, "avg300=", 7) == 0) {
+                psi.avg300 = atof(token + 7);
+            } else if (strncmp(token, "total=", 6) == 0) {
+                psi.total = atol(token + 6);
+            }
+            token = strtok(NULL, delim);
         }
-        token = strtok(NULL, delim);     /* Fortsetzung der Tokenisierung der Datenschnur */
+        line = strtok(NULL, line_delim); // Nächste Zeile bearbeiten
     }
 
-    /* Formatiere die Nachricht, die an die Nachrichtenwarteschlange gesendet wird */
-    snprintf(
-        formatted_message, BUFFER_SIZE,
-        "psi,resource=%s avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld\n",
-        resource, psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL)
-    );
-    send_to_mq(formatted_message, MQ_PATH);  /* Sende die formatierte Nachricht an die Nachrichtenwarteschlange */
-    if (v)
-        printf("%s\n", formatted_message);
+    snprintf(formatted_message, BUFFER_SIZE,
+             "psi,resource=%s avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld\n",
+             resource, psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL));
+    send_to_mq(formatted_message, MQ_PATH);
+    printf("%s\n", formatted_message);
 }
 
-int main(int argc, char *argv[]) {
-    int opt;
-    int c = 0;
-    int v = 0;
-    while (1) {
-        opt = getopt(argc, argv, "vc:");
-        if (opt == -1)
-            break;
-        switch (opt) {
-        case 'c':
-            sscanf(optarg, "%d", &c);
-            break;
-        case 'v':
-            v = 1;
-            break;
-        }
-    }
 
+int main() {
     int epfd = epoll_create1(0);  /* Erstelle einen epoll-Dateideskriptor */
     if (epfd == -1) {
         perror("epoll_create1");
@@ -84,7 +67,7 @@ int main(int argc, char *argv[]) {
     }
 
     int fds[NUM_RESOURCES];  /* Dateideskriptoren für jede Ressource */
-    struct epoll_event event, events[c];  /* Ereignisstruktur zur Verwendung mit epoll */
+    struct epoll_event event, events[MAX_EVENTS];  /* Ereignisstruktur zur Verwendung mit epoll */
     char buf[BUFFER_SIZE];  // Puffer für das Lesen von Daten
 
     /* Öffne jede Ressourcendatei und richte epoll ein */
@@ -114,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     /* Hauptschleife */
     while (1) {
-        int n = epoll_wait(epfd, events, c, -1);  /* Warte auf Ereignisse */
+        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);  /* Warte auf Ereignisse */
         if (n == -1) {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
@@ -133,7 +116,7 @@ int main(int argc, char *argv[]) {
                 buf[count] = '\0';
                 for (int j = 0; j < NUM_RESOURCES; j++) {
                     if (fd == fds[j]) {
-                        process_psi_data(buf, resources[j], v);
+                        process_psi_data(buf, resources[j]);
                         break;
                     }
                 }
