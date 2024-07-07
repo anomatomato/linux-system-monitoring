@@ -4,7 +4,7 @@
 #include <unistd.h>
 #include "mq.h"  // Einbinden der mq Utility
 
-#define MQ_PATH "/my_mq"  // Pfad zur Nachrichtenwarteschlange
+#define MQ_PATH "/dbus"  // Pfad zur Nachrichtenwarteschlange
 
 void monitor_and_report_systemd_events() {
     DBusConnection* conn;
