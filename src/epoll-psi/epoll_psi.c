@@ -1,121 +1,125 @@
 #include <fcntl.h>
-#include "../utilities/mq.h"    /* Include the message queue utility for inter-process communication */
-#include <mqueue.h>             /* Include POSIX message queue headers */
-#include <stdio.h>              /* Standard I/O operations */
-#include <stdlib.h>             /* Standard library for memory allocation, process control, conversions, etc */
-#include <string.h>             /* String operations like strtok, strncpy, etc */
-#include <sys/epoll.h>          /* Epoll event-driven I/O for handling large numbers of file descriptors */
-#include <time.h>               /* Time functions */
-#include <unistd.h>             /* POSIX operating system API */
+#include "../utilities/mq.h"    /* Einbinden der Hilfsbibliothek für Nachrichtenwarteschlangen zur Interprozesskommunikation */
+#include <mqueue.h>             /* Einbinden der POSIX Nachrichtenwarteschlangen-Header */
+#include <stdio.h>              /* Standard-I/O-Operationen */
+#include <stdlib.h>             /* Standardbibliothek für Speicherallokation, Prozesssteuerung, Konvertierungen usw. */
+#include <string.h>             /* Stringoperationen wie strtok, strncpy usw. */
+#include <sys/epoll.h>          /* Epoll eventgesteuerte I/O für die Verwaltung einer großen Anzahl von Dateideskriptoren */
+#include <time.h>               /* Zeitfunktionen */
+#include <unistd.h>             /* POSIX Betriebssystem API */
 
-#define MAX_EVENTS 1            /* Maximum number of events to be processed at once by epoll_wait */
-#define BUFFER_SIZE 1024        /* Buffer size for reading data */
-#define MQ_PATH "/my_queue"     /* Path to the POSIX message queue */
+#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
+#define BUFFER_SIZE 1024        /* Puffergröße für das Lesen von Daten */
+#define MQ_PATH "/my_queue"     /* Pfad zur POSIX Nachrichtenwarteschlange */
+#define NUM_RESOURCES 4         /* Anzahl der zu überwachenden Ressourcen */
 
-/* Structure to hold parsed PSI (Pressure Stall Information) values */
+/* Array von Ressourcennamen */
+const char *resources[NUM_RESOURCES] = {"cpu", "io", "irq", "memory"};
+
+/* Struktur zum Speichern der analysierten PSI (Pressure Stall Information) Werte */
 struct psi_values {
-    double avg10;   /* Average pressure over the last 10 seconds */
-    double avg60;   /* Average pressure over the last 60 seconds */
-    double avg300;  /* Average pressure over the last 300 seconds */
-    long total;     /* Total number of events */
+    double avg10;   /* Durchschnittlicher Druck über die letzten 10 Sekunden */
+    double avg60;   /* Durchschnittlicher Druck über die letzten 60 Sekunden */
+    double avg300;  /* Durchschnittlicher Druck über die letzten 300 Sekunden */
+    long total;     /* Gesamtanzahl der Ereignisse */
 };
 
-/* Function to process the PSI data string and send it to a message queue */
-void process_psi_data(char* data) {
-    struct psi_values psi;      /* Struct to hold the PSI data */
-    char formatted_message[BUFFER_SIZE];  /* Buffer to hold the formatted message */
-    char* token;                /* Token pointer for strtok */
-    const char delim[2] = " ";  /* Delimiter for tokenizing the data string */
+/* Funktion zur Verarbeitung der PSI-Datenschnur und zum Senden an eine Nachrichtenwarteschlange */
+void process_psi_data(char* data, const char* resource) {
+    struct psi_values psi;      /* Struktur zur Aufnahme der PSI-Daten */
+    char formatted_message[BUFFER_SIZE];  /* Puffer zum Speichern der formatierten Nachricht */
+    char* token;                /* Zeiger auf Token für strtok */
+    const char delim[2] = " ";  /* Trennzeichen zum Tokenisieren der Datenschnur */
 
-    printf("Processing PSI data: %s\n", data);  /* Debug: Print raw data */
+    printf("Verarbeite PSI-Daten für %s: %s\n", resource, data);  /* Debug: Drucke rohe Daten */
 
-    /* Tokenize the input data string */
+    /* Tokenisiere die eingegebene Datenschnur */
     token = strtok(data, delim);
     while (token != NULL) {
         if (strncmp(token, "avg10=", 6) == 0) {
-            psi.avg10 = atof(token + 6);  /* Parse avg10 value */
+            psi.avg10 = atof(token + 6);  /* Wert avg10 parsen */
         } else if (strncmp(token, "avg60=", 6) == 0) {
-            psi.avg60 = atof(token + 6);  /* Parse avg60 value */
+            psi.avg60 = atof(token + 6);  /* Wert avg60 parsen */
         } else if (strncmp(token, "avg300=", 7) == 0) {
-            psi.avg300 = atof(token + 7); /* Parse avg300 value */
+            psi.avg300 = atof(token + 7); /* Wert avg300 parsen */
         } else if (strncmp(token, "total=", 6) == 0) {
-            psi.total = atol(token + 6);  /* Parse total value */
+            psi.total = atol(token + 6);  /* Wert total parsen */
         }
-        token = strtok(NULL, delim);     /* Continue tokenizing the data string */
+        token = strtok(NULL, delim);     /* Fortsetzung der Tokenisierung der Datenschnur */
     }
 
-    /* Print the parsed PSI values for debugging */
-    printf("Parsed PSI values: avg10=%.2f, avg60=%.2f, avg300=%.2f, total=%ld\n", psi.avg10, psi.avg60, psi.avg300, psi.total);
-
-    /* Format the message to be sent to the message queue */
+    /* Formatiere die Nachricht, die an die Nachrichtenwarteschlange gesendet wird */
     snprintf(
         formatted_message, BUFFER_SIZE,
-        "psi,resource=cpu,stalled=some avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld\n",
-        psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL)
+        "psi,resource=%s avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld\n",
+        resource, psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL)
     );
-    send_to_mq(formatted_message, MQ_PATH);  /* Send the formatted message to the message queue */
+    send_to_mq(formatted_message, MQ_PATH);  /* Sende die formatierte Nachricht an die Nachrichtenwarteschlange */
 }
 
 int main() {
-    printf("Starting epoll_psi program\n");  /* Debug: Indicate program start */
-
-    int epfd = epoll_create1(0);  /* Create an epoll file descriptor */
+    int epfd = epoll_create1(0);  /* Erstelle einen epoll-Dateideskriptor */
     if (epfd == -1) {
-        perror("epoll_create1");  /* Print an error message if epoll creation failed */
-        exit(EXIT_FAILURE);       /* Exit with a failure result */
+        perror("epoll_create1");
+        exit(EXIT_FAILURE);
     }
 
-    int fd = open("/proc/pressure/cpu", O_RDONLY);  /* Open the CPU pressure info file */
-    if (fd == -1) {
-        perror("open");           /* Print an error message if file opening failed */
-        exit(EXIT_FAILURE);       /* Exit with a failure result */
-    }
+    int fds[NUM_RESOURCES];  /* Dateideskriptoren für jede Ressource */
+    struct epoll_event event, events[MAX_EVENTS];  /* Ereignisstruktur zur Verwendung mit epoll */
 
-    struct epoll_event event;     /* Event structure for use with epoll */
-    memset(&event, 0, sizeof(event));  /* Zero out the event structure */
-    event.events  = EPOLLPRI;     /* Set the type of events to check for */
-    event.data.fd = fd;           /* Set the file descriptor for events */
-
-    /* Add the file descriptor to the epoll instance */
-    if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &event) == -1) {
-        perror("epoll_ctl");      /* Print an error message if epoll control operation failed */
-        close(fd);                /* Close the file descriptor */
-        exit(EXIT_FAILURE);       /* Exit with a failure result */
-    }
-
-    printf("Entering main event loop\n");  /* Debug: Indicate entering the main loop */
-
-    char buf[BUFFER_SIZE];        /* Buffer for reading data from the file */
-    while (1) {                   /* Infinite loop to handle events as they come */
-        struct epoll_event events[MAX_EVENTS];  /* Array to hold events from epoll_wait */
-        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);  /* Wait for events on the epoll file descriptor */
-        if (n == -1) {
-            perror("epoll_wait"); /* Print an error message if epoll wait failed */
-            close(fd);            /* Close the file descriptor */
-            exit(EXIT_FAILURE);   /* Exit with a failure result */
+    /* Öffne jede Ressourcendatei und richte epoll ein */
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        char path[256];
+        snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
+        fds[i] = open(path, O_RDONLY);
+        if (fds[i] == -1) {
+            perror("open");
+            exit(EXIT_FAILURE);
         }
 
-        printf("Event received: %d\n", n);  /* Debug: Indicate event received */
+        memset(&event, 0, sizeof(event));
+        event.events = EPOLLPRI;     /* Festlegen des Ereignistyps, auf den geprüft wird */
+        event.data.fd = fds[i];      /* Festlegen des Dateideskriptors für Ereignisse */
 
-        /* Process each event */
+        if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
+            perror("epoll_ctl");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    printf("Betritt die Hauptschleife\n");
+
+    /* Hauptschleife */
+    while (1) {
+        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);  /* Warte auf Ereignisse */
+        if (n == -1) {
+            perror("epoll_wait");
+            exit(EXIT_FAILURE);
+        }
+
         for (int i = 0; i < n; i++) {
-            if (events[i].events & EPOLLPRI) {  /* Check for urgent data (high priority) */
-                lseek(fd, 0, SEEK_SET);         /* Seek to the beginning of the file */
-                ssize_t count = read(fd, buf, BUFFER_SIZE - 1);  /* Read from the file */
-                if (count == -1) {
-                    perror("read");             /* Print an error message if reading failed */
-                    close(fd);                  /* Close the file descriptor */
-                    exit(EXIT_FAILURE);         /* Exit with a failure result */
-                }
+            int fd = events[i].data.fd;
+            lseek(fd, 0, SEEK_SET);
+            ssize_t count = read(fd, buf, BUFFER_SIZE - 1);
+            if (count == -1) {
+                perror("read");
+                exit(EXIT_FAILURE);
+            }
 
-                if (count > 0) {
-                    buf[count] = '\0';          /* Null-terminate the buffer */
-                    process_psi_data(buf);      /* Process the PSI data */
+            if (count > 0) {
+                buf[count] = '\0';
+                for (int j = 0; j < NUM_RESOURCES; j++) {
+                    if (fd == fds[j]) {
+                        process_psi_data(buf, resources[j]);
+                        break;
+                    }
                 }
             }
         }
     }
 
-    close(fd);  /* Close the file descriptor */
-    return 0;   /* Return success */
+    for (int i = 0; i < NUM_RESOURCES; i++) {
+        close(fds[i]);  /* Schließe alle Dateideskriptoren */
+    }
+    return 0;
 }
