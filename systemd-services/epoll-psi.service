@@ -1,0 +1,10 @@
+[Unit]
+Description=epoll-psi
+
+[Service]
+EnvironmentFile=/etc/epoll-psi.conf
+ExecStart=/usr/local/bin/epoll-psi-exec $ARG1
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
