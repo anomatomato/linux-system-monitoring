@@ -35,13 +35,13 @@ int main(int argc, char *argv[]) {
                 int rv = 0;
                 int option_index = 0;
 
-                rv = getopt_long(argc, argv, "cvh", long_options, &option_index); /*ermittlung der flags*/
+                rv = getopt_long(argc, argv, "hvc:", long_options, &option_index); /*ermittlung der flags*/
                 if (rv == -1)
                         break;
 
                 switch (rv) {
                 case 99:
-                        c = 1;
+                        sscanf(optarg, "%d", &c);
                         break;
                 case 118:
                         v = 1;
@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
         struct itimerspec timerValue = {
-                { 5, 0 },
-                { 5, 0 }
+                { c, 0 },
+                { c, 0 }
         };
         timerfd_settime(timer, 0, &timerValue, NULL); /*timer scharf machen*/
 
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
                         dequeue(v);
                 }
 
-                if (!c) {/*wenn c==0, wird das alles nur einmal gemacht*/
+                if (c == 0) {/*wenn c==0, wird das alles nur einmal gemacht*/
                         close(timer);
                         return 0;
                 }
