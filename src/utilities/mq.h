@@ -6,13 +6,10 @@
  *  @brief Helper Macros and functions for message queues
  */
 
-#ifndef MAX_MSG_SIZE
-#        define MAX_MSG_SIZE 1024
-#endif
+#define MAX_MSG_SIZE 1024
+#define MAX_MESSAGES 10
 
-#ifndef MAX_MESSAGES
-#        define MAX_MESSAGES 10
-#endif
+#include <mqueue.h>
 
 /**
  * @brief init_mq initializes a message queue with the given name and returns
