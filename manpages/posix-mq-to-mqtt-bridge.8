@@ -1,10 +1,16 @@
-.\" Manpage for nuseradd.
+.\" Manpage for posix-mq-to-mqtt-bridge.
 .\" Contact k.meliksetian@tu-braunschweig.de to correct errors or typos.
 .TH man 8 "03 Juli 2024" "1.0" "posix-mq-to-mqtt-bridge man page"
 .SH NAME
 posix-mq-to-mqtt-bridge - start sending metrics to the server.
 .SH SYNOPSIS
-/bridge-exec
+.PP
+.B /dev/mqueue
+.PP
+.B posix\-mq\-to\-mqtt\-bridge@\&.service
+.PP
+.B ./bridge\-exec
+.PP
 .SH DESCRIPTION
 Diese Komponente ist dafür zuständig die Metriken von anderen Komponenten an den Server zu schicken.
 

@@ -39,6 +39,6 @@ Während das Programm durch die Prozesse iteriert, können Prozesse beendet werd
 
 Das lesen von Chip-Temperaturen geschieht durch Funktionen von libsensors(3). Die Funktion sensors_get_value() kann fehlschlagen und es werden Temperaturen von 0°C wiedergegeben. Ist dies der Fall muss das System solange neugestartet werden bis Temperaturen über 0 ermittelt werden.
 .SH SEE ALSO
-libsensors(3), posix-mq-to-mqtt-bridge(1)
+libsensors(3), posix-mq-to-mqtt-bridge(8)
 .SH AUTHOR
 Emre Onbasiogullari (e.onbasiogullari@tu-braunschweig.de)
