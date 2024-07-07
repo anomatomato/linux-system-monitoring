@@ -17,10 +17,10 @@
 #include <mqueue.h> /* For POSIX message queues */
 
 #define MQ_PATH "/sysinfo" /* Path for the message queue */
-#define CYCLE_INTERVAL 5 /* Interval in seconds to periodically gather system info */
+//#define CYCLE_INTERVAL 5 /* Interval in seconds to periodically gather system info */
 #define MAX_EVENTS 10 /* Max number of events the epoll instance can report in one go */
 
-void gather_sysinfo() {
+void gather_sysinfo(int v) {
 #ifdef __linux__
     struct sysinfo info; /* Structure to hold system statistics */
     if (sysinfo(&info) == 0) { /* Successfully gathered system info */
@@ -33,7 +33,8 @@ void gather_sysinfo() {
                  info.freeram * info.mem_unit, /* Available memory size */
                  info.procs, /* Number of current processes */
                  (long)time(NULL) * 1000000000); /* Timestamp in nanoseconds */
-        printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
+        if (v)
+            printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
 
         /* Send message to the message queue */
         send_to_mq(message, MQ_PATH);
@@ -55,7 +56,8 @@ void gather_sysinfo() {
                  "sysinfo,host=my_host total_ram=%lld %ld",
                  physical_memory, /* Total usable main memory size */
                  (long)time(NULL) * 1000000000); /* Timestamp in nanoseconds */
-        printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
+        if (v)
+            printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
 
         /* Send message to the message queue */
         send_to_mq(message, MQ_PATH);
@@ -65,7 +67,24 @@ void gather_sysinfo() {
 #endif
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    int opt;
+    int c = 0;
+    int v = 0;
+    while (1) {
+        opt = getopt(argc, argv, "vc:");
+        if (opt == -1)
+            break;
+        switch (opt) {
+        case 'c':
+            sscanf(optarg, "%d", &c);
+            break;
+        case 'v':
+            v = 1;
+            break;
+        }
+    }
+
     int fd = timerfd_create(CLOCK_REALTIME, 0);
     if (fd == -1) {
         perror("timerfd_create failed"); /* Handle error if timer creation fails */
@@ -73,9 +92,9 @@ int main() {
     }
 
     struct itimerspec timerValue;
-    timerValue.it_value.tv_sec = CYCLE_INTERVAL; /* Initial expiration after CYCLE_INTERVAL seconds */
+    timerValue.it_value.tv_sec = c; /* Initial expiration after CYCLE_INTERVAL seconds */
     timerValue.it_value.tv_nsec = 0; /* No initial expiration nanoseconds */
-    timerValue.it_interval.tv_sec = CYCLE_INTERVAL; /* Timer interval in seconds */
+    timerValue.it_interval.tv_sec = c; /* Timer interval in seconds */
     timerValue.it_interval.tv_nsec = 0; /* Timer interval in nanoseconds */
 
     if (timerfd_settime(fd, 0, &timerValue, NULL) == -1) {
@@ -83,6 +102,11 @@ int main() {
         close(fd); /* Close the timer file descriptor */
         exit(EXIT_FAILURE); /* Exit with a failure result */
     }
+
+    fd_set rfds; /* Tracking Timer */
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+    FD_SET(fd, &rfds);
 
     int epoll_fd = epoll_create1(0); /* No flags are specified (0), using default settings */
     if (epoll_fd == -1) {
@@ -115,9 +139,18 @@ int main() {
             if (events[n].data.fd == fd) { /* Check if the event is from the timer */
                 uint64_t expirations; /* Variable to count how many times the timer has expired */
                 read(fd, &expirations, sizeof(expirations)); /* Read to clear the event */
-                gather_sysinfo(); /* Call gather_sysinfo function to gather and print system info */
+                gather_sysinfo(v); /* Call gather_sysinfo function to gather and print system info */
             }
         }
+
+        if (c == 0) {/*wenn c==0, wird das alles nur einmal gemacht*/
+            close(fd);
+            return 0;
+        }
+
+        select(fd + 1, &rfds, NULL, NULL, NULL);   /* Wait for Timer expiration */
+        timerfd_settime(fd, 0, &timerValue, NULL); /* Reset Timer */
+
     }
 
     close(epoll_fd); /* Close the epoll file descriptor */
