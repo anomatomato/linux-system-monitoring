@@ -2,7 +2,7 @@
 
 # Essential
 set(CPACK_GENERATOR "DEB")
-set(CPACK_PACKAGE_NAME "${namespace}-${PROJECT_NAME}")
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name <your.email@example.com>")
 
