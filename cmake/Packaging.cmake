@@ -1,26 +1,24 @@
 # Packaging
-set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-include(CPack)
 
-# set(CPACK_GENERATOR "DEB")
-# set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name") # required
-# set(CPACK_PACKAGE_DESCRIPTION "Your package description.")
-# set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A concise version of the description.")
-# set(CPACK_DEBIAN_PACKAGE_VERSION "0.1.0") # Set the version of your package
-# set(CPACK_PACKAGE_CONTACT "Your Contact Information")
-# set(CPACK_DEBIAN_PACKAGE_DEPENDS "libdependency1, libdependency2 (>= version)")
-#
-# # Optionally specify architecture (if not specified, it defaults to the current architecture)
-# set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-#
-# # Set additional Debian-specific control files if necessary
-# set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-# "${CMAKE_CURRENT_SOURCE_DIR}/debian/postinst;
-# ${CMAKE_CURRENT_SOURCE_DIR}/debian/postrm;
-# ${CMAKE_CURRENT_SOURCE_DIR}/debian/preinst;
-# ${CMAKE_CURRENT_SOURCE_DIR}/debian/prerm")
-#
-# include(CPack)
-#
-#
+# Essential
+set(CPACK_GENERATOR "DEB")
+set(CPACK_PACKAGE_NAME "${namespace}-${PROJECT_NAME}")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Your Name <your.email@example.com>")
+
+# Highly Recommended
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C application for sending statistics to Mosquitto")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "debhelper (>= 11)")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "any") # Adjust
+
+# Good Practice
+set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
+set(CPACK_PACKAGE_DESCRIPTION "C application for sending statistics to Mosquitto. This application collects system statistics and sends them to a MQTT broker.")
+set(CPACK_DEBIAN_PACKAGE_SECTION "base")
+set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+
+# Additional
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/stats-recording")
+set(CPACK_DEBIAN_PACKAGE_RELEASE "1")
+
+include(CPack)

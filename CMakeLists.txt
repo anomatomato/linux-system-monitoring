@@ -7,8 +7,9 @@ set(PAHO_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 option(STATS_ENABLE_TESTING "Enable tests" ON) # Define an option for enabling tests
 
 # Include helper CMake files
-include(cmake/Policies.cmake)
-include(cmake/ExternalDependencies.cmake)
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(Policies)
+include(ExternalDependencies)
 
 # Add subdirectories
 add_subdirectory(src)
@@ -18,5 +19,5 @@ if(STATS_ENABLE_TESTING)
 endif()
 
 # Include installation and packaging
-include(cmake/Installation.cmake)
-include(cmake/Packaging.cmake)
+include(Installation)
+include(Packaging)
