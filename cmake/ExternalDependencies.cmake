@@ -1,6 +1,12 @@
 include(FetchContent)
 
+# Find DBus
 find_package(DBus1 REQUIRED)
+
+if(NOT DBus1_FOUND)
+    message(FATAL_ERROR "DBus1 not found, install it with 'sudo apt-get install libdbus-1-dev'")
+endif()
+
 find_package(eclipse-paho-mqtt-c QUIET)
 
 # Paho MQTT C
