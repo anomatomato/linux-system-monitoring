@@ -15,6 +15,7 @@ install(FILES
     systemd-services/inotify-coredump.service
     systemd-services/inotify-pacct.service
     systemd-services/epoll-psi.service
+    systemd-services/dbus-systemd-signals.service
     DESTINATION /etc/systemd/system
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
@@ -41,6 +42,7 @@ install(FILES
     manpages/inotify-coredump.8
     manpages/inotify-pacct.8
     manpages/epoll-psi.8
+    manpages/dbus-systemd-signals.8
     DESTINATION /usr/local/share/man/man8
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
