@@ -2,70 +2,77 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include "mq.h"  // Einbinden der mq Utility
 
-void listen_systemd_signals() {
+#define MQ_PATH "/my_mq"  // Pfad zur Nachrichtenwarteschlange
+
+void monitor_and_report_systemd_events() {
     DBusConnection* conn;
     DBusError err;
     DBusMessage* msg;
     int ret;
+    mqd_t mq;
 
-    /* Initialisiere die Fehlerbehandlung */
     dbus_error_init(&err);
 
-    /* Verbinde zum D-Bus Systembus */
+    /* Initialisiere die Nachrichtenwarteschlange */
+    mq = init_mq(MQ_PATH);
+    if (mq == -1) {
+        exit(1);  // Beende, falls MQ-Initialisierung fehlschlägt
+    }
+
     conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
     if (dbus_error_is_set(&err)) {
         fprintf(stderr, "Verbindungsfehler (%s)\n", err.message);
         dbus_error_free(&err);
     }
     if (conn == NULL) {
-        exit(1); /* Beende, falls Verbindung fehlgeschlagen ist */
+        exit(1);
     }
 
-    /* Fordere einen einzigartigen Namen auf dem Bus an */
     ret = dbus_bus_request_name(conn, "test.signal.sink", DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
     if (dbus_error_is_set(&err)) {
         fprintf(stderr, "Namensfehler (%s)\n", err.message);
         dbus_error_free(&err);
     }
     if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
-        exit(1); /* Beende, wenn wir nicht der primäre Besitzer sind */
+        exit(1);
     }
 
-    /* Setze einen Filter für die systemd Signale, die uns interessieren */
     dbus_bus_add_match(conn, "type='signal',interface='org.freedesktop.systemd1.Manager'", &err);
-    dbus_connection_flush(conn);
     if (dbus_error_is_set(&err)) {
         fprintf(stderr, "Filterfehler (%s)\n", err.message);
         dbus_error_free(&err);
         exit(1);
     }
 
-    /* Schleife, um auf Nachrichten zu hören */
     while (1) {
         dbus_connection_read_write(conn, 0);
         msg = dbus_connection_pop_message(conn);
 
         if (msg == NULL) {
-            sleep(1); /* Warte auf die nächste Nachricht */
+            sleep(1);
             continue;
         }
 
-        /* Überprüfe, ob die Nachricht ein Signal von systemd ist und handle entsprechend */
         if (dbus_message_is_signal(msg, "org.freedesktop.systemd1.Manager", "UnitStarted")) {
-            printf("Einheit gestartet\n");
-            // Hier würde die weitere Behandlung zur Umwandlung in das Line Protocol stattfinden
+            char* unit_name;
+            if (dbus_message_get_args(msg, &err, DBUS_TYPE_STRING, &unit_name, DBUS_TYPE_INVALID)) {
+                char message[256];
+                snprintf(message, sizeof(message), "Unit %s started", unit_name);
+                printf("%s\n", message);
+                send_to_mq(message, MQ_PATH);
+            }
         }
 
-        /* Gebe das Nachrichtenobjekt frei, um Speicher freizugeben */
         dbus_message_unref(msg);
     }
 
-    /* Schließe die DBus-Verbindung, wenn fertig */
     dbus_connection_close(conn);
+    remove_mq(MQ_PATH);
 }
 
 int main(int argc, char** argv) {
-    listen_systemd_signals(); /* Starte die Funktion zum Abhören von Signalen */
+    monitor_and_report_systemd_events();
     return 0;
 }
