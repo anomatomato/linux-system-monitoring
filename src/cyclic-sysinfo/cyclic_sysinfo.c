@@ -18,7 +18,7 @@
 
 #define MQ_PATH "/sysinfo" /* Pfad für die Nachrichtenwarteschlange */
 //#define CYCLE_INTERVAL 5 /* Intervall in Sekunden zur periodischen Erfassung der Systeminformationen */
-#define MAX_EVENTS 10 /* Maximale Anzahl von Ereignissen, die die epoll-Instanz auf einmal melden kann */
+#define MAX_EVENTS 10 
 
 void gather_sysinfo(int v) {
 #ifdef __linux__
