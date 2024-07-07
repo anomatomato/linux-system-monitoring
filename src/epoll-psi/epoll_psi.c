@@ -8,7 +8,7 @@
 #include <time.h>               /* Zeitfunktionen */
 #include <unistd.h>             /* POSIX Betriebssystem API */
 
-#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
+//#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
 #define BUFFER_SIZE 1024        /* Puffergröße für das Lesen von Daten */
 #define MQ_PATH "/psi"     /* Pfad zur POSIX Nachrichtenwarteschlange */
 #define NUM_RESOURCES 4         /* Anzahl der zu überwachenden Ressourcen */
@@ -25,7 +25,7 @@ struct psi_values {
 };
 
 /* Funktion zur Verarbeitung der PSI-Datenschnur und zum Senden an eine Nachrichtenwarteschlange */
-void process_psi_data(char* data, const char* resource) {
+void process_psi_data(char* data, const char* resource, int v) {
     struct psi_values psi;      /* Struktur zur Aufnahme der PSI-Daten */
     char formatted_message[BUFFER_SIZE];  /* Puffer zum Speichern der formatierten Nachricht */
     char* token;                /* Zeiger auf Token für strtok */
@@ -55,10 +55,28 @@ void process_psi_data(char* data, const char* resource) {
         resource, psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL)
     );
     send_to_mq(formatted_message, MQ_PATH);  /* Sende die formatierte Nachricht an die Nachrichtenwarteschlange */
-    printf("%s\n", formatted_message);
+    if (v)
+        printf("%s\n", formatted_message);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+    int opt;
+    int c = 0;
+    int v = 0;
+    while (1) {
+        opt = getopt(argc, argv, "vc:");
+        if (opt == -1)
+            break;
+        switch (opt) {
+        case 'c':
+            sscanf(optarg, "%d", &c);
+            break;
+        case 'v':
+            v = 1;
+            break;
+        }
+    }
+
     int epfd = epoll_create1(0);  /* Erstelle einen epoll-Dateideskriptor */
     if (epfd == -1) {
         perror("epoll_create1");
@@ -66,7 +84,7 @@ int main() {
     }
 
     int fds[NUM_RESOURCES];  /* Dateideskriptoren für jede Ressource */
-    struct epoll_event event, events[MAX_EVENTS];  /* Ereignisstruktur zur Verwendung mit epoll */
+    struct epoll_event event, events[c];  /* Ereignisstruktur zur Verwendung mit epoll */
     char buf[BUFFER_SIZE];  // Puffer für das Lesen von Daten
 
     /* Öffne jede Ressourcendatei und richte epoll ein */
@@ -96,7 +114,7 @@ int main() {
 
     /* Hauptschleife */
     while (1) {
-        int n = epoll_wait(epfd, events, MAX_EVENTS, -1);  /* Warte auf Ereignisse */
+        int n = epoll_wait(epfd, events, c, -1);  /* Warte auf Ereignisse */
         if (n == -1) {
             perror("epoll_wait");
             exit(EXIT_FAILURE);
@@ -115,7 +133,7 @@ int main() {
                 buf[count] = '\0';
                 for (int j = 0; j < NUM_RESOURCES; j++) {
                     if (fd == fds[j]) {
-                        process_psi_data(buf, resources[j]);
+                        process_psi_data(buf, resources[j], v);
                         break;
                     }
                 }
