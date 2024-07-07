@@ -11,7 +11,7 @@
 //#define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
 #define BUFFER_SIZE 1024        /* Puffergröße für das Lesen von Daten */
 #define MQ_PATH "/psi"     /* Pfad zur POSIX Nachrichtenwarteschlange */
-#define NUM_RESOURCES 4         /* Anzahl der zu überwachenden Ressourcen */
+#define NUM_RESOURCES 3         /* Anzahl der zu überwachenden Ressourcen */
 
 /* Array von Ressourcennamen */
 const char *resources[NUM_RESOURCES] = {"cpu", "io", "memory"};
