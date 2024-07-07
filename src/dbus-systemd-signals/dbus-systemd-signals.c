@@ -1,70 +1,71 @@
-#include "dbus-systemd-signals.h"
-#include <systemd/sd-bus.h>
+#include <dbus/dbus.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 
-static int on_systemd_signal(sd_bus_message* m, void* userdata, sd_bus_error* ret_error)
-{
-    const char *unit, *state;
-
-    unit  = "example.service";
-    state = "started";
-
-    char formatted_message[256];
-    snprintf(formatted_message, sizeof(formatted_message),
-             "systemd_event,unit=%s state=%s %ld", 
-             unit, state,
-             (long int)time(NULL));
-
-    printf("Event: %s\n", formatted_message);
-
-    return 0;
-}
-
-int main(int argc, char* argv[])
-{
-    sd_bus* bus = NULL;
+void listen_systemd_signals() {
+    DBusConnection* conn;
+    DBusError err;
+    DBusMessage* msg;
     int ret;
 
-    ret = sd_bus_open_system(&bus);
-    if (ret < 0)
-    {
-        fprintf(stderr, "Failed to connect to system bus: %s\n", strerror(-ret));
-        exit(EXIT_FAILURE);
+    /* Initialisiere die Fehlerbehandlung */
+    dbus_error_init(&err);
+
+    /* Verbinde zum D-Bus Systembus */
+    conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
+    if (dbus_error_is_set(&err)) {
+        fprintf(stderr, "Verbindungsfehler (%s)\n", err.message);
+        dbus_error_free(&err);
+    }
+    if (conn == NULL) {
+        exit(1); /* Beende, falls Verbindung fehlgeschlagen ist */
     }
 
-    ret = sd_bus_add_match(
-        bus, NULL,
-        "type='signal',"
-        "sender='org.freedesktop.systemd1',"
-        "interface='org.freedesktop.systemd1.Manager',"
-        "member='UnitNew'",
-        on_systemd_signal, NULL);
-    if (ret < 0)
-    {
-        fprintf(stderr, "Failed to add match: %s\n", strerror(-ret));
-        sd_bus_close(bus);
-        exit(EXIT_FAILURE);
+    /* Fordere einen einzigartigen Namen auf dem Bus an */
+    ret = dbus_bus_request_name(conn, "test.signal.sink", DBUS_NAME_FLAG_REPLACE_EXISTING, &err);
+    if (dbus_error_is_set(&err)) {
+        fprintf(stderr, "Namensfehler (%s)\n", err.message);
+        dbus_error_free(&err);
+    }
+    if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
+        exit(1); /* Beende, wenn wir nicht der primäre Besitzer sind */
     }
 
-    while (1)
-    {
-        ret = sd_bus_process(bus, NULL);
-        if (ret < 0)
-        {
-            fprintf(stderr, "Failed to process bus: %s\n", strerror(-ret));
-            break;
+    /* Setze einen Filter für die systemd Signale, die uns interessieren */
+    dbus_bus_add_match(conn, "type='signal',interface='org.freedesktop.systemd1.Manager'", &err);
+    dbus_connection_flush(conn);
+    if (dbus_error_is_set(&err)) {
+        fprintf(stderr, "Filterfehler (%s)\n", err.message);
+        dbus_error_free(&err);
+        exit(1);
+    }
+
+    /* Schleife, um auf Nachrichten zu hören */
+    while (1) {
+        dbus_connection_read_write(conn, 0);
+        msg = dbus_connection_pop_message(conn);
+
+        if (msg == NULL) {
+            sleep(1); /* Warte auf die nächste Nachricht */
+            continue;
         }
 
-        if (ret == 0)
-        {
-            ret = sd_bus_wait(bus, (uint64_t)-1);
-            if (ret < 0)
-            {
-                fprintf(stderr, "Failed to wait on bus: %s\n", strerror(-ret));
-                break;
-            }
+        /* Überprüfe, ob die Nachricht ein Signal von systemd ist und handle entsprechend */
+        if (dbus_message_is_signal(msg, "org.freedesktop.systemd1.Manager", "UnitStarted")) {
+            printf("Einheit gestartet\n");
+            // Hier würde die weitere Behandlung zur Umwandlung in das Line Protocol stattfinden
         }
+
+        /* Gebe das Nachrichtenobjekt frei, um Speicher freizugeben */
+        dbus_message_unref(msg);
     }
 
-    sd_bus_close(bus);
-    return ret < 0 ? EXIT_FAILURE : EXIT_SUCCESS;
+    /* Schließe die DBus-Verbindung, wenn fertig */
+    dbus_connection_close(conn);
+}
+
+int main(int argc, char** argv) {
+    listen_systemd_signals(); /* Starte die Funktion zum Abhören von Signalen */
+    return 0;
 }
