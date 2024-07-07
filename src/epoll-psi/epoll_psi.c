@@ -81,7 +81,7 @@ int main() {
         }
 
         memset(&event, 0, sizeof(event));
-        event.events = EPOLLPRI;     /* Festlegen des Ereignistyps, auf den geprüft wird */
+        event.events = EPOLLIN;     /* Festlegen des Ereignistyps, auf den geprüft wird */
         event.data.fd = fds[i];      /* Festlegen des Dateideskriptors für Ereignisse */
 
         if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
