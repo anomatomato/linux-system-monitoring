@@ -66,6 +66,7 @@ int main() {
 
     int fds[NUM_RESOURCES];  /* Dateideskriptoren für jede Ressource */
     struct epoll_event event, events[MAX_EVENTS];  /* Ereignisstruktur zur Verwendung mit epoll */
+    char buf[BUFFER_SIZE];  // Puffer für das Lesen von Daten
 
     /* Öffne jede Ressourcendatei und richte epoll ein */
     for (int i = 0; i < NUM_RESOURCES; i++) {
