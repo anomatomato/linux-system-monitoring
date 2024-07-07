@@ -2,8 +2,8 @@
 Description=cyclic-file-read
 
 [Service]
-EnvironmentFile=/etc/cyclic-file-read.conf
-ExecStart=/usr/local/bin/cyclic-file-read-exec $ARG1
+Environment="SCRIPT_ARGS=%I"
+ExecStart=/usr/local/bin/cyclic-file-read-exec $SCRIPT_ARGS
 Type=simple
 
 [Install]

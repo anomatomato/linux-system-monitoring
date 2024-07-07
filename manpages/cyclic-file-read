@@ -4,7 +4,8 @@
 .SH NAME
 cyclic-file-read - Ermittlung von Systemstatistiken.
 .SH SYNOPSIS
-cyclic-file-read-exec [OPTIONS]
+cycle-file-read@"[OPTIONS]".service
+./cyclic-file-read-exec [OPTIONS]
 .SH DESCRIPTION
 cyclic-file-read nutzt das procfs- and sysfs-Dateisystem um Systemstatistiken zu sammeln. Das Programm trägt seine ermittelten Werte in eine Message-Queue ein, welche posix-mq-to-mqtt-bridge(1) nutzen kann. Ist posix-mq-to-mqtt-bridge(1) ebenfalls aktiv, landen die Werte auf InfluxDB und können auf Grafana graphish dargestellt werden.
 
