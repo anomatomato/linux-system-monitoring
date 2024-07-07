@@ -16,7 +16,7 @@
 #include <sys/epoll.h> /* For epoll functions and constants */
 #include <mqueue.h> /* For POSIX message queues */
 
-#define MQ_PATH "/my_queue" /* Path for the message queue */
+#define MQ_PATH "/sysinfo" /* Path for the message queue */
 #define MAX_MSG_SIZE 150 /* Maximum message size that can be sent to the message queue */
 #define CYCLE_INTERVAL 5 /* Interval in seconds to periodically gather system info */
 #define MAX_EVENTS 10 /* Max number of events the epoll instance can report in one go */
@@ -37,16 +37,7 @@ void gather_sysinfo() {
         printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
 
         /* Send message to the message queue */
-        mqd_t mq;
-        mq = mq_open(MQ_PATH, O_WRONLY | O_CREAT, 0644, NULL);
-        if (mq == (mqd_t)-1) {
-            perror("mq_open failed");
-            return;
-        }
-        if (mq_send(mq, message, strlen(message) + 1, 0) == -1) {
-            perror("mq_send failed");
-        }
-        mq_close(mq);
+        send_to_mq(message, MQ_PATH);
     } else {
         perror("sysinfo call failed"); /* Print an error if sysinfo call fails */
     }
@@ -68,16 +59,7 @@ void gather_sysinfo() {
         printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
 
         /* Send message to the message queue */
-        mqd_t mq;
-        mq = mq_open(MQ_PATH, O_WRONLY | O_CREAT, 0644, NULL);
-        if (mq == (mqd_t)-1) {
-            perror("mq_open failed");
-            return;
-        }
-        if (mq_send(mq, message, strlen(message) + 1, 0) == -1) {
-            perror("mq_send failed");
-        }
-        mq_close(mq);
+        send_to_mq(message, MQ_PATH);
     } else {
         perror("sysctl call failed"); /* Print an error if sysctl call fails */
     }
@@ -120,7 +102,8 @@ int main() {
         close(fd); /* Close the timer file descriptor */
         exit(EXIT_FAILURE); /* Exit with a failure result */
     }
-
+    if (init_mq(MQ_PATH) == -1) /*mq für die bridge erstellen*/
+            return 1;
     struct epoll_event events[MAX_EVENTS];
     while (1) { /* Infinite loop to handle events as they come */
         int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
