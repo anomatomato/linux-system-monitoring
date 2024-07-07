@@ -1,5 +1,6 @@
 include(FetchContent)
 
+find_package(DBus1 REQUIRED)
 find_package(eclipse-paho-mqtt-c QUIET)
 
 # Paho MQTT C
