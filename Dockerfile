@@ -10,6 +10,7 @@ RUN apt-get update \
     libsensors4-dev \
     systemd-coredump \
     git \
+    acct \
     sudo \
     && apt-get clean && rm -rf /var/lib/lists/*
 
