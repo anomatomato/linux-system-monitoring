@@ -19,7 +19,8 @@ install(FILES
 )
 
 # Service Configs
-install(FILES systemd-services/argconfigs/cyclic-file-read.conf
+install(FILES
+    systemd-services/argconfigs/cyclic-file-read.conf
     systemd-services/argconfigs/inotify-coredump.conf
     DESTINATION /etc
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
