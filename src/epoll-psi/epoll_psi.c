@@ -10,11 +10,11 @@
 
 #define MAX_EVENTS 4            /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
 #define BUFFER_SIZE 1024        /* Puffergröße für das Lesen von Daten */
-#define MQ_PATH "/my_queue"     /* Pfad zur POSIX Nachrichtenwarteschlange */
+#define MQ_PATH "/psi"     /* Pfad zur POSIX Nachrichtenwarteschlange */
 #define NUM_RESOURCES 4         /* Anzahl der zu überwachenden Ressourcen */
 
 /* Array von Ressourcennamen */
-const char *resources[NUM_RESOURCES] = {"cpu", "io", "irq", "memory"};
+const char *resources[NUM_RESOURCES] = {"cpu", "io", "memory"};
 
 /* Struktur zum Speichern der analysierten PSI (Pressure Stall Information) Werte */
 struct psi_values {
@@ -31,7 +31,7 @@ void process_psi_data(char* data, const char* resource) {
     char* token;                /* Zeiger auf Token für strtok */
     const char delim[2] = " ";  /* Trennzeichen zum Tokenisieren der Datenschnur */
 
-    printf("Verarbeite PSI-Daten für %s: %s\n", resource, data);  /* Debug: Drucke rohe Daten */
+    //printf("Verarbeite PSI-Daten für %s: %s\n", resource, data);  /* Debug: Drucke rohe Daten */
 
     /* Tokenisiere die eingegebene Datenschnur */
     token = strtok(data, delim);
@@ -55,6 +55,7 @@ void process_psi_data(char* data, const char* resource) {
         resource, psi.avg10, psi.avg60, psi.avg300, psi.total, (long int)time(NULL)
     );
     send_to_mq(formatted_message, MQ_PATH);  /* Sende die formatierte Nachricht an die Nachrichtenwarteschlange */
+    printf("%s\n", formatted_message);
 }
 
 int main() {
@@ -89,6 +90,9 @@ int main() {
     }
 
     printf("Betritt die Hauptschleife\n");
+
+    if (init_mq(MQ_PATH) == -1) /*mq für die bridge erstellen*/
+                return 1;
 
     /* Hauptschleife */
     while (1) {
