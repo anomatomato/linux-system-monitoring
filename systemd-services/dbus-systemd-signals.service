@@ -1,0 +1,9 @@
+[Unit]
+Description=dbus-systemd-signals
+
+[Service]
+ExecStart=/usr/local/bin/dbus-systemd-signals-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
