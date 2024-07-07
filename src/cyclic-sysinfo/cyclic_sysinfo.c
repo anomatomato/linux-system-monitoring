@@ -1,45 +1,45 @@
-#include <fcntl.h> /* For O_* constants, like O_RDONLY used in open syscall */
-#include "../utilities/mq.h" /* Custom utility for managing message queues */
-#include <stdio.h> /* Standard input-output header for functions like printf, snprintf, perror */
-#include <stdlib.h> /* Standard library for memory allocation, process control, and conversions */
-#include <string.h> /* String handling functions like strtok and strncpy */
-#include <sys/stat.h> /* For mode constants and file permissions */
+#include <fcntl.h> /* Für O_* Konstanten, wie O_RDONLY, die in der open Systemfunktion verwendet werden */
+#include "../utilities/mq.h" /* Benutzerdefinierte Utility für die Verwaltung von Nachrichtenwarteschlangen */
+#include <stdio.h> /* Standard-Header für Ein-/Ausgabeoperationen für Funktionen wie printf, snprintf, perror */
+#include <stdlib.h> /* Standardbibliothek für Speicherallokation, Prozesskontrolle und Konversionen */
+#include <string.h> /* String-Handling-Funktionen wie strtok und strncpy */
+#include <sys/stat.h> /* Für Moduskonstanten und Dateiberechtigungen */
 #ifdef __linux__
-#include <sys/sysinfo.h> /* Include sysinfo struct and sysinfo function declarations */
+#include <sys/sysinfo.h> /* Einbinden von sysinfo Struktur und Funktionsdeklarationen */
 #else
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
-#include <unistd.h> /* For POSIX constants and functions like sleep, close, and read */
-#include <time.h> /* For clock and timer functions */
-#include <sys/timerfd.h> /* For timer file descriptor functions and constants */
-#include <sys/epoll.h> /* For epoll functions and constants */
-#include <mqueue.h> /* For POSIX message queues */
+#include <unistd.h> /* Für POSIX Konstanten und Funktionen wie sleep, close und read */
+#include <time.h> /* Für Uhr- und Timerfunktionen */
+#include <sys/timerfd.h> /* Für Timer-Dateideskriptor-Funktionen und Konstanten */
+#include <sys/epoll.h> /* Für epoll Funktionen und Konstanten */
+#include <mqueue.h> /* Für POSIX Nachrichtenwarteschlangen */
 
-#define MQ_PATH "/sysinfo" /* Path for the message queue */
-//#define CYCLE_INTERVAL 5 /* Interval in seconds to periodically gather system info */
-#define MAX_EVENTS 10 /* Max number of events the epoll instance can report in one go */
+#define MQ_PATH "/sysinfo" /* Pfad für die Nachrichtenwarteschlange */
+//#define CYCLE_INTERVAL 5 /* Intervall in Sekunden zur periodischen Erfassung der Systeminformationen */
+#define MAX_EVENTS 10 /* Maximale Anzahl von Ereignissen, die die epoll-Instanz auf einmal melden kann */
 
 void gather_sysinfo(int v) {
 #ifdef __linux__
-    struct sysinfo info; /* Structure to hold system statistics */
-    if (sysinfo(&info) == 0) { /* Successfully gathered system info */
-        char message[256]; /* Buffer to hold the message to be sent */
-        /* Format system information into InfluxDB Line Protocol */
+    struct sysinfo info; /* Struktur zum Halten der Systemstatistiken */
+    if (sysinfo(&info) == 0) { /* Erfolgreiche Erfassung der Systeminformationen */
+        char message[256]; /* Puffer, um die zu sendende Nachricht zu halten */
+        /* Formatieren der Systeminformationen in InfluxDB Line Protocol */
         snprintf(message, sizeof(message),
                  "sysinfo,host=my_host uptime=%ld,total_ram=%lu,free_ram=%lu,process_count=%hu %ld",
-                 info.uptime, /* System uptime in seconds */
-                 info.totalram * info.mem_unit, /* Total usable main memory size */
-                 info.freeram * info.mem_unit, /* Available memory size */
-                 info.procs, /* Number of current processes */
-                 (long)time(NULL) * 1000000000); /* Timestamp in nanoseconds */
+                 info.uptime, /* System-Uptime in Sekunden */
+                 info.totalram * info.mem_unit, /* Gesamte nutzbare Hauptspeichergröße */
+                 info.freeram * info.mem_unit, /* Verfügbare Speichergröße */
+                 info.procs, /* Anzahl der aktuellen Prozesse */
+                 (long)time(NULL) * 1000000000); /* Zeitstempel in Nanosekunden */
         if (v)
-            printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
+            printf("Statistiken: %s\n", message); /* Drucken der gesammelten Informationen zur Demonstration */
 
-        /* Send message to the message queue */
+        /* Nachricht an die Nachrichtenwarteschlange senden */
         send_to_mq(message, MQ_PATH);
     } else {
-        perror("sysinfo call failed"); /* Print an error if sysinfo call fails */
+        perror("sysinfo Aufruf fehlgeschlagen"); /* Fehler ausgeben, wenn der sysinfo-Aufruf fehlschlägt */
     }
 #else
     int mib[2];
@@ -50,19 +50,19 @@ void gather_sysinfo(int v) {
     mib[1] = HW_MEMSIZE;
 
     if (sysctl(mib, 2, &physical_memory, &length, NULL, 0) == 0) {
-        char message[256]; /* Buffer to hold the message to be sent */
-        /* Format system information into InfluxDB Line Protocol */
+        char message[256]; /* Puffer, um die zu sendende Nachricht zu halten */
+        /* Formatieren der Systeminformationen in InfluxDB Line Protocol */
         snprintf(message, sizeof(message),
                  "sysinfo,host=my_host total_ram=%lld %ld",
-                 physical_memory, /* Total usable main memory size */
-                 (long)time(NULL) * 1000000000); /* Timestamp in nanoseconds */
+                 physical_memory, /* Gesamte nutzbare Hauptspeichergröße */
+                 (long)time(NULL) * 1000000000); /* Zeitstempel in Nanosekunden */
         if (v)
-            printf("Stats: %s\n", message); /* Print the gathered information for demonstration */
+            printf("Statistiken: %s\n", message); /* Drucken der gesammelten Informationen zur Demonstration */
 
-        /* Send message to the message queue */
+        /* Nachricht an die Nachrichtenwarteschlange senden */
         send_to_mq(message, MQ_PATH);
     } else {
-        perror("sysctl call failed"); /* Print an error if sysctl call fails */
+        perror("sysctl Aufruf fehlgeschlagen"); /* Fehler ausgeben, wenn der sysctl-Aufruf fehlschlägt */
     }
 #endif
 }
@@ -87,20 +87,20 @@ int main(int argc, char *argv[]) {
 
     int fd = timerfd_create(CLOCK_REALTIME, 0);
     if (fd == -1) {
-        perror("timerfd_create failed"); /* Handle error if timer creation fails */
-        exit(EXIT_FAILURE); /* Exit with a failure result */
+        perror("timerfd_create fehlgeschlagen"); /* Fehler behandeln, wenn die Timererstellung fehlschlägt */
+        exit(EXIT_FAILURE); /* Mit einem Fehlerergebnis beenden */
     }
 
     struct itimerspec timerValue;
-    timerValue.it_value.tv_sec = c; /* Initial expiration after CYCLE_INTERVAL seconds */
-    timerValue.it_value.tv_nsec = 0; /* No initial expiration nanoseconds */
-    timerValue.it_interval.tv_sec = c; /* Timer interval in seconds */
-    timerValue.it_interval.tv_nsec = 0; /* Timer interval in nanoseconds */
+    timerValue.it_value.tv_sec = c; /* Erstes Ablaufen nach CYCLE_INTERVAL Sekunden */
+    timerValue.it_value.tv_nsec = 0; /* Keine ersten Ablauf-Nanosekunden */
+    timerValue.it_interval.tv_sec = c; /* Timerintervall in Sekunden */
+    timerValue.it_interval.tv_nsec = 0; /* Timerintervall in Nanosekunden */
 
     if (timerfd_settime(fd, 0, &timerValue, NULL) == -1) {
-        perror("timerfd_settime failed"); /* Handle error if setting timer fails */
-        close(fd); /* Close the timer file descriptor */
-        exit(EXIT_FAILURE); /* Exit with a failure result */
+        perror("timerfd_settime fehlgeschlagen"); /* Fehler behandeln, wenn das Einstellen des Timers fehlschlägt */
+        close(fd); /* Den Timer-Dateideskriptor schließen */
+        exit(EXIT_FAILURE); /* Mit einem Fehlerergebnis beenden */
     }
 
     fd_set rfds; /* Tracking Timer */
@@ -108,52 +108,52 @@ int main(int argc, char *argv[]) {
     FD_SET(0, &rfds);
     FD_SET(fd, &rfds);
 
-    int epoll_fd = epoll_create1(0); /* No flags are specified (0), using default settings */
+    int epoll_fd = epoll_create1(0); /* Keine Flags sind angegeben (0), Standard-Einstellungen verwenden */
     if (epoll_fd == -1) {
-        perror("epoll_create failed"); /* Handle error if epoll creation fails */
-        close(fd); /* Close the timer file descriptor */
-        exit(EXIT_FAILURE); /* Exit with a failure result */
+        perror("epoll_create fehlgeschlagen"); /* Fehler behandeln, wenn die epoll-Erstellung fehlschlägt */
+        close(fd); /* Den Timer-Dateideskriptor schließen */
+        exit(EXIT_FAILURE); /* Mit einem Fehlerergebnis beenden */
     }
 
     struct epoll_event ev;
-    ev.events = EPOLLIN; /* Interested in the input-ready event (EPOLLIN) */
-    ev.data.fd = fd; /* Associate the timer file descriptor with the event */
+    ev.events = EPOLLIN; /* Interessiert am eingabebereiten Ereignis (EPOLLIN) */
+    ev.data.fd = fd; /* Den Timer-Dateideskriptor mit dem Ereignis verknüpfen */
 
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fd, &ev) == -1) {
-        perror("epoll_ctl failed"); /* Handle error if epoll control operation fails */
-        close(epoll_fd); /* Close the epoll file descriptor */
-        close(fd); /* Close the timer file descriptor */
-        exit(EXIT_FAILURE); /* Exit with a failure result */
+        perror("epoll_ctl fehlgeschlagen"); /* Fehler behandeln, wenn der epoll-Steuervorgang fehlschlägt */
+        close(epoll_fd); /* Den epoll-Dateideskriptor schließen */
+        close(fd); /* Den Timer-Dateideskriptor schließen */
+        exit(EXIT_FAILURE); /* Mit einem Fehlerergebnis beenden */
     }
-    if (init_mq(MQ_PATH) == -1) /*mq für die bridge erstellen*/
+    if (init_mq(MQ_PATH) == -1) /* MQ für die Bridge erstellen */
             return 1;
     struct epoll_event events[MAX_EVENTS];
-    while (1) { /* Infinite loop to handle events as they come */
+    while (1) { /* Endlosschleife zur Behandlung von Ereignissen, wenn sie eintreffen */
         int nfds = epoll_wait(epoll_fd, events, MAX_EVENTS, -1);
         if (nfds == -1) {
-            perror("epoll_wait failed"); /* Handle error if epoll wait fails */
-            break; /* Break the loop to exit */
+            perror("epoll_wait fehlgeschlagen"); /* Fehler behandeln, wenn das epoll-Warten fehlschlägt */
+            break; /* Schleife unterbrechen, um zu beenden */
         }
 
         for (int n = 0; n < nfds; ++n) {
-            if (events[n].data.fd == fd) { /* Check if the event is from the timer */
-                uint64_t expirations; /* Variable to count how many times the timer has expired */
-                read(fd, &expirations, sizeof(expirations)); /* Read to clear the event */
-                gather_sysinfo(v); /* Call gather_sysinfo function to gather and print system info */
+            if (events[n].data.fd == fd) { /* Überprüfen, ob das Ereignis vom Timer stammt */
+                uint64_t expirations; /* Variable zum Zählen, wie oft der Timer abgelaufen ist */
+                read(fd, &expirations, sizeof(expirations)); /* Lesen, um das Ereignis zu löschen */
+                gather_sysinfo(v); /* Funktion gather_sysinfo aufrufen, um Systeminfos zu sammeln und zu drucken */
             }
         }
 
-        if (c == 0) {/*wenn c==0, wird das alles nur einmal gemacht*/
+        if (c == 0) {/* Wenn c==0, wird das alles nur einmal gemacht */
             close(fd);
             return 0;
         }
 
-        select(fd + 1, &rfds, NULL, NULL, NULL);   /* Wait for Timer expiration */
-        timerfd_settime(fd, 0, &timerValue, NULL); /* Reset Timer */
+        select(fd + 1, &rfds, NULL, NULL, NULL);   /* Warten auf Timerablauf */
+        timerfd_settime(fd, 0, &timerValue, NULL); /* Timer zurücksetzen */
 
     }
 
-    close(epoll_fd); /* Close the epoll file descriptor */
-    close(fd); /* Close the timer file descriptor */
-    return 0; /* Return success */
+    close(epoll_fd); /* Den epoll-Dateideskriptor schließen */
+    close(fd); /* Den Timer-Dateideskriptor schließen */
+    return 0; /* Erfolg zurückgeben */
 }
