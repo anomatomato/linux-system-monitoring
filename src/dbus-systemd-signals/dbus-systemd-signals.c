@@ -6,7 +6,7 @@
 
 #define MQ_PATH "/dbus" // Pfad zur Nachrichtenwarteschlange
 
-void monitor_and_report_systemd_events() {
+void monitor_and_report_systemd_events(int v) {
         DBusConnection *conn;
         DBusError err;
         DBusMessage *msg;
@@ -58,7 +58,8 @@ void monitor_and_report_systemd_events() {
                                         dbus_message_iter_get_basic(&args, &unit_name);
                                         char message[256];
                                         snprintf(message, sizeof(message), "Unit %s started", unit_name);
-                                        printf("%s\n", message);
+                                        if (v)
+                                            printf("%s\n", message);
                                         send_to_mq(message, MQ_PATH);
                                 }
                         }
@@ -72,6 +73,22 @@ void monitor_and_report_systemd_events() {
 }
 
 int main(int argc, char **argv) {
-        monitor_and_report_systemd_events();
+        int v = 0;
+        /* Loop over all flag options */
+        while (1) {
+                int opt;
+                opt = getopt(argc, argv, "v");
+                if (opt == -1)
+                        break;
+                switch (opt) {
+                case 'v':
+                        v = 0;
+                        break;
+                default:
+                        break;
+                }
+        }
+
+        monitor_and_report_systemd_events(v);
         return 0;
 }
