@@ -2,8 +2,7 @@
 Description=epoll-psi
 
 [Service]
-Environment="SCRIPT_ARGS=%I"
-ExecStart=/usr/local/bin/epoll-psi-exec $SCRIPT_ARGS
+ExecStart=/usr/local/bin/epoll-psi-exec -c 5
 Type=simple
 
 [Install]

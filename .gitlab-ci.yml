@@ -50,7 +50,7 @@ test_inotify_coredump:
     - build
   script:
     - mkdir -p build && cd build
-    - cmake ..
+    - cmake -DSTATS_ENABLE_TESTING=ON ..
     - make
     - ctest -V -R Inotify
 

@@ -2,7 +2,7 @@
 Description=cyclic-sysinfo
 
 [Service]
-ExecStart=/usr/local/bin/cyclic-sysinfo-exec
+ExecStart=/usr/local/bin/cyclic-sysinfo-exec -c 5
 Type=simple
 
 [Install]
