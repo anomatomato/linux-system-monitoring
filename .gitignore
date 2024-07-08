@@ -68,7 +68,8 @@ _deps
 
 # Custom
 
-build/*
+build/
+debs/
 cmake-build-debug/
 .idea
 segmentation_fault
