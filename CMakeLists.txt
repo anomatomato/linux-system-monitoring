@@ -15,6 +15,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(PAHO_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 option(STATS_ENABLE_TESTING "Enable tests" OFF) # Define an option for enabling tests
 
 # Include helper CMake files
