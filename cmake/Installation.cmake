@@ -24,13 +24,21 @@ install(FILES
     PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
 )
 
-# Manpages
-install(FILES
-    manpages/sd-journal-filter
-    DESTINATION /usr/local/share/man/man1
-    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-)
+# Service Configs
+# install(FILES
+# systemd-services/argconfigs/inotify-coredump.conf
+# systemd-services/argconfigs/inotify-pacct.conf
+# DESTINATION /etc
+# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+# )
 
+# Manpages
+# install(FILES
+# manpages/cyclic-file-read
+# manpages/sd-journal-filter
+# DESTINATION /usr/local/share/man/man1
+# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+# )
 install(FILES
     manpages/cyclic-file-read.8
     manpages/posix-mq-to-mqtt-bridge.8
