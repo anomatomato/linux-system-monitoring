@@ -21,33 +21,25 @@ build-docker-job:
     - changes:
         - Dockerfile
 
-build:
+build-app-job:
   stage: build
   image: $CI_REGISTRY_IMAGE/debian:latest
-  when: on_success
   allow_failure: false
   script:
-    - mkdir -p build && cd build
-    - cmake ..
-    - make
+    - echo "Building debian package" $CI_PROJECT_NAME
+    - ./build.sh --all
   artifacts:
     paths:
-      - build/
+      - "debs/"
     expire_in: 3 days
-  rules:
-    - changes:
-        - CMakeLists.txt
-        - src/
-        - include/
-        - .gitlab-ci.yml
-        - Dockerfile
+  needs:
+    - job: build-docker-job
+      optional: true
 
 test_inotify_coredump:
   stage: run
   image: $CI_REGISTRY_IMAGE/debian:latest
   allow_failure: false
-  dependencies:
-    - build
   script:
     - mkdir -p build && cd build
     - cmake -DSTATS_ENABLE_TESTING=ON ..

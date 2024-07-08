@@ -15,18 +15,16 @@ build_for_arch() {
     if [[ "$arch" == "amd64" || "$arch" == "x86_64" ]]; then
         cmake .. || return 1
     elif [ "$arch" == "arm64" ]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm64-toolchain.cmake .. \
-            -DCMAKE_FIND_ROOT_PATH="/usr/aarch64-linux-gnu" || return 1
+        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm64-toolchain.cmake .. || return 1
     elif [ "$arch" == "armhf" ]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/armhf-toolchain.cmake .. \
-            -DCMAKE_FIND_ROOT_PATH="/usr/arm-linux-gnueabihf" || return 1
+        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/armhf-toolchain.cmake .. || return 1
     else
         echo "Unsupported architecture: $arch"
         return 1
     fi
 
     make || return 1
-    cpack
+    cpack || return 1
     cd ..
 }
 

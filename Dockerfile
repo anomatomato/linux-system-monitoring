@@ -1,5 +1,8 @@
 FROM debian:latest
 
+RUN dpkg --add-architecture arm64
+RUN dpkg --add-architecture armhf
+
 RUN apt-get update \
     && apt-get install -y \
     crossbuild-essential-arm64 \
@@ -7,9 +10,8 @@ RUN apt-get update \
     dpkg-dev \
     cmake \
     make \
-    libsensors4-dev \
-    libdbus-1-dev \
-    libdbus-1-3 \
+    libsensors4-dev:amd64 libsensors4-dev:arm64 libsensors4-dev:armhf \
+    libdbus-1-dev:amd64 libdbus-1-dev:arm64 libdbus-1-dev:armhf \
     systemd-coredump \
     git \
     acct \
@@ -20,12 +22,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["./build.sh"]
-
-# Clone and install paho.mqtt.c
-# RUN git clone https://github.com/eclipse/paho.mqtt.c.git && \
-#     cd paho.mqtt.c && \
-#     mkdir build && cd build && \
-#     cmake .. && \
-#     make && make install && \
-#     cd ../.. && rm -rf paho.mqtt.c
+# CMD ["./build.sh", "--all"]
