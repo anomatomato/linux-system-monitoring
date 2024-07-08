@@ -25,12 +25,12 @@ install(FILES
 )
 
 # Service Configs
-install(FILES
-    systemd-services/argconfigs/inotify-coredump.conf
-    systemd-services/argconfigs/inotify-pacct.conf
-    DESTINATION /etc
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
+#install(FILES
+    #systemd-services/argconfigs/inotify-coredump.conf
+    #systemd-services/argconfigs/inotify-pacct.conf
+    #DESTINATION /etc
+    #PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+#)
 
 # Manpages
 install(FILES
