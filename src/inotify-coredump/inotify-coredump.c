@@ -13,9 +13,6 @@
 #include <sys/inotify.h>
 #include <unistd.h>
 
-/* Helper functions */
-/*------------------------------------------------------------------------------------------------------*/
-
 int init_inotify(coredump_monitor_t *monitor) {
         if (!monitor) {
                 fprintf(stderr, "monitor not initialized\n");

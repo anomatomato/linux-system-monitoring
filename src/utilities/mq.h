@@ -16,9 +16,7 @@
  * the file descriptor or failure
  *
  * @param mq_path: The identifying name of the message queue
- * @return File descriptor of the new message queue on success, -1 on failure
- * with errno set appropriately
- *     @retval  File descriptor  success
+ *     @retval  File descriptor of the new message queue on success
  *     @retval  -1               failure, with errno set appropriately
  */
 int init_mq(const char *mq_path);
@@ -29,7 +27,6 @@ int init_mq(const char *mq_path);
  *
  * @param message: The message to send
  * @param mq_path: The identifying name of the message queue
- * @return 0 on success, -1 on failure with errno set appropriately
  *     @retval  0   success
  *     @retval -1  on failure with errno set appropriately
  */
