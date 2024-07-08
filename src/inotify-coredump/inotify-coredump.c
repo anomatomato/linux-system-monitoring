@@ -1,6 +1,6 @@
 #include "inotify-coredump.h"
 #include "colored_output.h"
-#include "line_protocol_parser.h"
+#include "line_protocol_escaper.h"
 #include "mq.h"
 #include "signal_handling.h"
 #include <errno.h>
@@ -47,11 +47,19 @@ int init_inotify(coredump_monitor_t *monitor) {
 }
 
 int coredump_to_line_protocol(char *buffer, const char *coredump_name) {
+        char tag_path[MAX_MSG_SIZE];
+        char field_coredump_name[MAX_MSG_SIZE];
+
+        int rt1 = escape_tag_value(WATCH_DIR, tag_path, MAX_MSG_SIZE);
+        int rt2 = escape_field_value(coredump_name, field_coredump_name, MAX_MSG_SIZE);
+        if (rt2 == -1 || rt2 == -1)
+                return -1;
+
         return snprintf(buffer,
                         MAX_MSG_SIZE,
                         "coredump,path=%s corefile=\"%s\" %lld",
-                        WATCH_DIR,
-                        coredump_name,
+                        tag_path,
+                        field_coredump_name,
                         get_timestamp());
 }
 
