@@ -13,6 +13,10 @@ int finished = 0;
 
 
 void connlost(void *context, char *cause) {
+        if (context == NULL) {
+                fprintf(stderr, "Error: context in connlost is NULL\n");
+                return;
+        }
         MQTTAsync *client = (MQTTAsync *) context;
         MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
         int rc;
@@ -26,7 +30,7 @@ void connlost(void *context, char *cause) {
         conn_opts.cleansession = 1;
         if ((rc = MQTTAsync_connect(*client, &conn_opts)) != MQTTASYNC_SUCCESS) {
                 printf("Failed to start connect, return code %d\n", rc);
-                finished = 1;
+                exit(EXIT_FAILURE);
         }
 }
 
@@ -60,7 +64,7 @@ void onSend(void *context, MQTTAsync_successData *response) {
 
 void onConnectFailure(void *context, MQTTAsync_failureData *response) {
         printf("Connect failed, rc %d\n", response ? response->code : 0);
-        finished = 1;
+        exit(EXIT_FAILURE);
 }
 
 void onConnect(client_msg_t *context, MQTTAsync_successData *response) {
