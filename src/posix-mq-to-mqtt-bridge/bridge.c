@@ -55,7 +55,7 @@ void onSendFailure(void *context, MQTTAsync_failureData *response) {
 }
 
 void onSend(void *context, MQTTAsync_successData *response) {
-        //printf("Message with token value %d delivery confirmed\n", response->token);
+        // printf("Message with token value %d delivery confirmed\n", response->token);
 }
 
 void onConnectFailure(void *context, MQTTAsync_failureData *response) {
@@ -97,6 +97,20 @@ void add_hostname_to_msg(char *msg) {
 
         if (whitespace != NULL) {
                 int prefix_len = whitespace - msg;
+
+                /* Look if the whitespace is escpaed */
+                if (prefix_len > 0 && msg[prefix_len - 1] == '\\') {
+                        char *next_whitespace = strchr(whitespace + 1, ' ');
+                        while (next_whitespace != NULL && *(next_whitespace - 1) == '\\') {
+                                next_whitespace = strchr(next_whitespace + 1, ' ');
+                        }
+
+                        if (next_whitespace == NULL)
+                                return;
+
+                        whitespace = next_whitespace;
+                        prefix_len = whitespace - msg;
+                }
                 char buffer[MAX_MSG_SIZE];
                 snprintf(buffer, sizeof(buffer), "%.*s%s%s", prefix_len, msg, tag, whitespace);
                 strncpy(msg, buffer, MAX_MSG_SIZE - 1);
