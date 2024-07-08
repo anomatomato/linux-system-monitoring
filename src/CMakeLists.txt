@@ -9,6 +9,13 @@ add_subdirectory(posix-mq-to-mqtt-bridge)
 add_subdirectory(utilities)
 
 # Set the output directory for the executable
-set_target_properties(cyclic-file-read-exec cyclic-sysinfo-exec dbus-systemd-signals-exec epoll-psi-exec inotify-coredump-exec inotify-pacct-exec bridge-exec PROPERTIES
+set_target_properties(cyclic-file-read-exec
+    cyclic-sysinfo-exec
+    dbus-systemd-signals-exec
+    epoll-psi-exec
+    inotify-coredump-exec
+    inotify-pacct-exec
+    bridge-exec
+    PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
