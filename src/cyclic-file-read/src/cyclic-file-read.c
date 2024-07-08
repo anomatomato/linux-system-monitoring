@@ -13,8 +13,65 @@
 #include <time.h>
 #include <unistd.h>
 
+#define CFR_MQ "/cfr"
+
+void send_metrics(int arg, int v) {
+        if (arg == 0 || arg == 1 || arg == 8) {
+                if (stat() == 1) {
+                        perror("stat");
+                        printf("Failed to read /proc/stat\n");
+                }
+        }
+
+        if (arg == 0 || arg == 2 || arg == 8) {
+                if (net() == 1) {
+                        perror("net");
+                        printf("Failed to read /proc/net/dev\n");
+                }
+        }
+
+        if (arg == 0 || arg == 3 || arg == 8) {
+                if (disk() == 1) {
+                        perror("disk");
+                        printf("Failed to read /proc/diskstats\n");
+                }
+        }
+
+        if (arg == 0 || arg == 4 || arg == 9) {
+                if (pid("stat") == 1) {
+                        perror("pid");
+                        printf("Failed to read /proc/<pid>/stat\n");
+                }
+        }
+
+        if (arg == 0 || arg == 5 || arg == 9) {
+                if (pid("statm") == 1) {
+                        perror("pid");
+                        printf("Failed to read /proc/<pid>/statm\n");
+                }
+        }
+
+        if (arg == 0 || arg == 6 || arg == 9) {
+                if (pid("io") == 1) {
+                        perror("pid");
+                        printf("Failed to read /proc/<pid>/io\n");
+                }
+        }
+
+        dequeue(v);
+
+        if (arg == 0 || arg == 7 || arg == 8) {
+                if (sys() == 1) {
+                        perror("sys");
+                        printf("Failed to read temperatures\n");
+                }
+                dequeue(v);
+        }
+}
+
 int main(int argc, char *argv[]) {
-        static struct option long_options[] = { /*struct für die langen flags*/
+        static struct option long_options[] = {
+                /*struct für die langen flags*/
                 {      "proc-stat", 0, 0, 1 },
                 {   "proc-net-dev", 0, 0, 2 },
                 { "proc-diskstats", 0, 0, 3 },
@@ -28,9 +85,9 @@ int main(int argc, char *argv[]) {
         };
 
         int arg = 0; /*flag für die funktionen*/
-        int c = 0; /*duty cycle flag*/
-        int v = 0; /*verbose flag*/
-        int h = 0; /*help flag*/
+        int c = 0;   /*duty cycle flag*/
+        int v = 0;   /*verbose flag*/
+        int h = 0;   /*help flag*/
         while (1) {
                 int rv = 0;
                 int option_index = 0;
@@ -56,7 +113,6 @@ int main(int argc, char *argv[]) {
                         }
                         printf("Try ./cyclic-file-read-exec -h for help\n");
                         return 1;
-
                 }
         } /*c=99, v=118*/
 
@@ -76,11 +132,19 @@ int main(int argc, char *argv[]) {
                 return 1;
         }
 
-        if (init_mq("/cfr") == -1) /*mq für die bridge erstellen*/
+        if (init_mq(CFR_MQ) == -1) /*mq für die bridge erstellen*/
                 return 1;
+
+        send_metrics(arg, v);
+
+        if (c == 0) { /*wenn c==0, wird das alles nur einmal gemacht*/
+                remove_mq(CFR_MQ);
+                return 0;
+        }
 
         int timer;
         if ((timer = timerfd_create(CLOCK_REALTIME, 0)) <= 0) { /*timer initialisieren*/
+                remove_mq(CFR_MQ);
                 perror("timerfd_create");
                 return 1;
         }
@@ -90,70 +154,25 @@ int main(int argc, char *argv[]) {
         };
         timerfd_settime(timer, 0, &timerValue, NULL); /*timer scharf machen*/
 
-        fd_set rfds; /*den timer beobachten*/
-        FD_ZERO(&rfds);
-        FD_SET(0, &rfds);
-        FD_SET(timer, &rfds);
 
-        while (1) { /*kontinuierliches sammeln*/
-                if (arg == 0 || arg == 1 || arg == 8) {
-                        if (stat() == 1) {
-                                perror("stat");
-                                printf("Failed to read /proc/stat\n");
-                        }
+        while (1) {          /*kontinuierliches sammeln*/
+                fd_set rfds; /*den timer beobachten*/
+                FD_ZERO(&rfds);
+                FD_SET(timer, &rfds);
+
+                int result = select(timer + 1, &rfds, NULL, NULL, NULL); /*auf timer warten*/
+                if (result < 0) {
+                        perror("select failed");
+                        break;
                 }
 
-                if (arg == 0 || arg == 2 || arg == 8) {
-                        if (net() == 1) {
-                                perror("net");
-                                printf("Failed to read /proc/net/dev\n");
-                        }
+                if (FD_ISSET(timer, &rfds)) {
+                        send_metrics(arg, v);
+                        timerfd_settime(timer, 0, &timerValue, NULL); /*timer neu aufsetzen*/
                 }
-
-                if (arg == 0 || arg == 3 || arg == 8) {
-                        if (disk() == 1) {
-                                perror("disk");
-                                printf("Failed to read /proc/diskstats\n");
-                        }
-                }
-
-                if (arg == 0 || arg == 4 || arg == 9) {
-                        if (pid("stat") == 1) {
-                                perror("pid");
-                                printf("Failed to read /proc/<pid>/stat\n");
-                        }
-                }
-
-                if (arg == 0 || arg == 5 || arg == 9) {
-                        if (pid("statm") == 1) {
-                                perror("pid");
-                                printf("Failed to read /proc/<pid>/statm\n");
-                        }
-                }
-
-                if (arg == 0 || arg == 6 || arg == 9) {
-                        if (pid("io") == 1) {
-                                perror("pid");
-                                printf("Failed to read /proc/<pid>/io\n");
-                        }
-                }
-
-                dequeue(v);
-
-                if (arg == 0 || arg == 7 || arg == 8) {
-                        if (sys() == 1) {
-                                perror("sys");
-                                printf("Failed to read temperatures\n");
-                        }
-                        dequeue(v);
-                }
-
-                if (c == 0) {/*wenn c==0, wird das alles nur einmal gemacht*/
-                        close(timer);
-                        return 0;
-                }
-
-                select(timer + 1, &rfds, NULL, NULL, NULL);   /*auf timer warten*/
-                timerfd_settime(timer, 0, &timerValue, NULL); /*timer neu aufsetzen*/
         }
+
+        close(timer);
+        remove_mq(CFR_MQ);
+        return 0;
 }
