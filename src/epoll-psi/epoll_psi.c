@@ -1,71 +1,47 @@
-#include "mq.h" /* Einbinden der Hilfsbibliothek für Nachrichtenwarteschlangen zur Interprozesskommunikation */
+#include "mq.h"
 #include <fcntl.h>
-#include <mqueue.h> /* Einbinden der POSIX Nachrichtenwarteschlangen-Header */
-#include <stdio.h>  /* Standard-I/O-Operationen */
-#include <stdlib.h> /* Standardbibliothek für Speicherallokation, Prozesssteuerung, Konvertierungen usw. */
-#include <string.h> /* Stringoperationen wie strtok, strncpy usw. */
-#include <sys/epoll.h> /* Epoll eventgesteuerte I/O für die Verwaltung einer großen Anzahl von Dateideskriptoren */
-#include <sys/timerfd.h> /* Timerfd für zeitgesteuerte Ereignisse */
-#include <time.h>        /* Zeitfunktionen */
-#include <unistd.h>      /* POSIX Betriebssystem API */
+#include <mqueue.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/epoll.h>
+#include <sys/timerfd.h>
+#include <time.h>
+#include <unistd.h>
 
-#define MAX_EVENTS \
-        4 /* Maximale Anzahl von Ereignissen, die gleichzeitig von epoll_wait verarbeitet werden */
-#define BUFFER_SIZE 1024     /* Puffergröße für das Lesen von Daten */
-#define MQ_PATH "/psi"       /* Pfad zur POSIX Nachrichtenwarteschlange */
-#define NUM_RESOURCES 3      /* Anzahl der zu überwachenden Ressourcen */
-#define DEFAULT_DUTY_CYCLE 0 /* Standard-Abfrageintervall (0 bedeutet, nur einmal senden) */
+#define MAX_EVENTS 4
+#define BUFFER_SIZE 1024
+#define MQ_PATH "/psi"
+#define NUM_RESOURCES 3
+#define DEFAULT_DUTY_CYCLE 0
 #define TFD_CLOCK CLOCK_MONOTONIC
+#define MESSAGE_BATCH_SIZE 10
 
-/* Array von Ressourcennamen */
 const char *resources[NUM_RESOURCES] = { "cpu", "io", "memory" };
 
-/* Struktur zum Speichern der analysierten PSI (Pressure Stall Information) Werte */
 struct psi_values {
-        double avg10;  /* Durchschnittlicher Druck über die letzten 10 Sekunden */
-        double avg60;  /* Durchschnittlicher Druck über die letzten 60 Sekunden */
-        double avg300; /* Durchschnittlicher Druck über die letzten 300 Sekunden */
-        long total;    /* Gesamtanzahl der Ereignisse */
+        double avg10, avg60, avg300;
+        long total;
 };
 
-/* Funktion zur Verarbeitung der PSI-Daten und zum Senden an eine Nachrichtenwarteschlange */
-void process_psi_data(char *data, const char *resource) {
-        struct psi_values psi;
-        char formatted_message[BUFFER_SIZE];
-        char *token;
-        const char delim[2] = " ";
-        const char *line_delim = "\n";
-        char *line;
+void process_psi_data(char *data, const char *resource, char *output, size_t output_size) {
+        struct psi_values psi = { 0 };
+        sscanf(data,
+               "some avg10=%lf avg60=%lf avg300=%lf total=%ld",
+               &psi.avg10,
+               &psi.avg60,
+               &psi.avg300,
+               &psi.total);
 
-        line = strtok(data, line_delim); // Zuerst nach Zeilen trennen
-        while (line != NULL) {
-                token = strtok(line, delim); // Dann jede Zeile tokenisieren
-                while (token != NULL) {
-                        if (strncmp(token, "avg10=", 6) == 0) {
-                                psi.avg10 = atof(token + 6);
-                        } else if (strncmp(token, "avg60=", 6) == 0) {
-                                psi.avg60 = atof(token + 6);
-                        } else if (strncmp(token, "avg300=", 7) == 0) {
-                                psi.avg300 = atof(token + 7);
-                        } else if (strncmp(token, "total=", 6) == 0) {
-                                psi.total = atol(token + 6);
-                        }
-                        token = strtok(NULL, delim);
-                }
-                line = strtok(NULL, line_delim); // Nächste Zeile bearbeiten
-        }
-
-        snprintf(formatted_message,
-                 BUFFER_SIZE,
-                 "psi,resource=%s avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld\n",
+        snprintf(output,
+                 output_size,
+                 "psi,resource=%s avg10=%.2f,avg60=%.2f,avg300=%.2f,total=%ld %ld",
                  resource,
                  psi.avg10,
                  psi.avg60,
                  psi.avg300,
                  psi.total,
                  (long int) time(NULL));
-        send_to_mq(formatted_message, MQ_PATH);
-        printf("%s\n", formatted_message);
 }
 
 int create_timer_fd(int sec) {
@@ -75,11 +51,10 @@ int create_timer_fd(int sec) {
                 exit(EXIT_FAILURE);
         }
 
-        struct itimerspec new_value;
-        new_value.it_value.tv_sec = sec;
-        new_value.it_value.tv_nsec = 0;
-        new_value.it_interval.tv_sec = sec;
-        new_value.it_interval.tv_nsec = 0;
+        struct itimerspec new_value = {
+                .it_value = { .tv_sec = sec, .tv_nsec = 0 },
+                  .it_interval = { .tv_sec = sec, .tv_nsec = 0 }
+        };
 
         if (timerfd_settime(timerfd, 0, &new_value, NULL) == -1) {
                 perror("timerfd_settime");
@@ -90,10 +65,9 @@ int create_timer_fd(int sec) {
 }
 
 int main(int argc, char *argv[]) {
-        int duty_cycle = DEFAULT_DUTY_CYCLE; // Standard-Duty-Cycle
-        int verbose = 0;                     // Verbose-Modus deaktiviert
+        int duty_cycle = DEFAULT_DUTY_CYCLE;
+        int verbose = 0;
 
-        // Kommandozeilenargumente verarbeiten
         int opt;
         while ((opt = getopt(argc, argv, "c:v")) != -1) {
                 switch (opt) {
@@ -109,18 +83,17 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-        int epfd = epoll_create1(0); /* Erstelle einen epoll-Dateideskriptor */
+        int epfd = epoll_create1(0);
         if (epfd == -1) {
                 perror("epoll_create1");
                 exit(EXIT_FAILURE);
         }
 
-        int fds[NUM_RESOURCES];                       /* Dateideskriptoren für jede Ressource */
-        struct epoll_event event, events[MAX_EVENTS]; /* Ereignisstruktur zur Verwendung mit epoll */
-        char buf[BUFFER_SIZE];                        // Puffer für das Lesen von Daten
+        int fds[NUM_RESOURCES];
+        struct epoll_event event, events[MAX_EVENTS];
 
-        int timer_fd;
-        if (duty_cycle > 0) { /* Timer Datei-Deskriptor erstellen, wenn duty_cycle gesetzt ist */
+        int timer_fd = -1;
+        if (duty_cycle > 0) {
                 timer_fd = create_timer_fd(duty_cycle);
                 event.events = EPOLLIN;
                 event.data.fd = timer_fd;
@@ -130,7 +103,6 @@ int main(int argc, char *argv[]) {
                 }
         }
 
-        /* Öffne jede Ressourcendatei und richte epoll ein */
         for (int i = 0; i < NUM_RESOURCES; i++) {
                 char path[256];
                 snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
@@ -140,90 +112,77 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                 }
 
-                memset(&event, 0, sizeof(event));
-                event.events = EPOLLIN; /* Festlegen des Ereignistyps, auf den geprüft wird */
-                event.data.fd = fds[i]; /* Festlegen des Dateideskriptors für Ereignisse */
-
+                event.events = EPOLLIN;
+                event.data.fd = fds[i];
                 if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
                         perror("epoll_ctl");
                         exit(EXIT_FAILURE);
                 }
         }
 
-        printf("Betritt die Hauptschleife mit Duty-Cycle von %d Sekunden\n", duty_cycle);
+        printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
-        if (init_mq(MQ_PATH) == -1) /*mq für die bridge erstellen*/
+        if (init_mq(MQ_PATH) == -1)
                 return 1;
 
-        if (duty_cycle > 0) { /* Wenn duty_cycle gesetzt ist, bleibe in der Schleife */
-                /* Hauptschleife */
-                while (1) {
-                        int n = epoll_wait(epfd, events, MAX_EVENTS, -1); /* Warte auf Ereignisse */
-                        if (n == -1) {
-                                perror("epoll_wait");
-                                exit(EXIT_FAILURE);
-                        }
+        char message_batch[MESSAGE_BATCH_SIZE][BUFFER_SIZE];
+        int batch_index = 0;
+        time_t last_read_time = 0;
 
-                        for (int i = 0; i < n; i++) {
-                                if (events[i].data.fd == timer_fd) {
-                                        uint64_t exp;
-                                        ssize_t s = read(
-                                                        timer_fd,
-                                                        &exp,
-                                                        sizeof(uint64_t)); /* Timer fd lesen, um es zurückzusetzen */
-                                        if (s == -1) {
-                                                perror("read timer_fd");
-                                                continue;
+        while (1) {
+                int n = epoll_wait(epfd, events, MAX_EVENTS, -1);
+                if (n == -1) {
+                        perror("epoll_wait");
+                        exit(EXIT_FAILURE);
+                }
+
+                time_t current_time = time(NULL);
+                if (current_time - last_read_time >= duty_cycle) {
+                        for (int j = 0; j < NUM_RESOURCES; j++) {
+                                char buf[BUFFER_SIZE];
+                                if (lseek(fds[j], 0, SEEK_SET) == -1) {
+                                        perror("lseek");
+                                        continue;
+                                }
+                                ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
+                                if (count == -1) {
+                                        perror("read");
+                                        continue;
+                                }
+
+                                if (count > 0) {
+                                        buf[count] = '\0';
+                                        process_psi_data(
+                                                        buf,
+                                                        resources[j],
+                                                        message_batch[batch_index],
+                                                        BUFFER_SIZE);
+                                        if (verbose) {
+                                                printf("%s\n", message_batch[batch_index]);
                                         }
+                                        batch_index++;
 
-                                        /* Lese und verarbeite PSI-Daten */
-                                        for (int j = 0; j < NUM_RESOURCES; j++) {
-                                                if (lseek(fds[j], 0, SEEK_SET) == -1) {
-                                                        perror("lseek");
-                                                        continue;
+                                        if (batch_index == MESSAGE_BATCH_SIZE) {
+                                                for (int k = 0; k < MESSAGE_BATCH_SIZE; k++) {
+                                                        send_to_mq(message_batch[k], MQ_PATH);
                                                 }
-                                                ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
-                                                if (count == -1) {
-                                                        perror("read");
-                                                        continue;
-                                                }
-
-                                                if (count > 0) {
-                                                        buf[count] = '\0';
-                                                        process_psi_data(buf, resources[j]);
-                                                }
+                                                batch_index = 0;
                                         }
-                                } else {
-                                        // Ignoriere andere Dateideskriptoren, um Doppelreads zu vermeiden.
                                 }
                         }
+                        last_read_time = current_time;
                 }
-        } else { /* Wenn kein duty_cycle gesetzt ist, führe nur einmal aus */
-                for (int j = 0; j < NUM_RESOURCES; j++) {
-                        if (lseek(fds[j], 0, SEEK_SET) == -1) {
-                                perror("lseek");
-                                continue;
-                        }
-                        ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
-                        if (count == -1) {
-                                perror("read");
-                                continue;
-                        }
 
-                        if (count > 0) {
-                                buf[count] = '\0';
-                                process_psi_data(buf, resources[j]);
-                        }
-                }
+                struct timespec sleep_time = { 0, 1000000 }; // 1 millisecond
+                nanosleep(&sleep_time, NULL);
         }
 
         for (int i = 0; i < NUM_RESOURCES; i++) {
-                close(fds[i]); /* Schließe alle Dateideskriptoren */
+                close(fds[i]);
         }
 
-        // Close timer_fd only if it was created
-        if (duty_cycle > 0) {
-                close(timer_fd); /* Timer Datei-Deskriptor schließen */
+        if (timer_fd != -1) {
+                close(timer_fd);
         }
 
         return 0;
