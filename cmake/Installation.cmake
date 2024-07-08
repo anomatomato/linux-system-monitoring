@@ -33,14 +33,15 @@ install(FILES
 #)
 
 # Manpages
-install(FILES
-    manpages/cyclic-file-read
-    manpages/sd-journal-filter
-    DESTINATION /usr/local/share/man/man1
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-)
+#install(FILES
+    #manpages/cyclic-file-read
+    #manpages/sd-journal-filter
+    #DESTINATION /usr/local/share/man/man1
+    #PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+#)
 
 install(FILES
+    manpages/cyclic-file-read.8
     manpages/posix-mq-to-mqtt-bridge.8
     manpages/inotify-coredump.8
     manpages/inotify-pacct.8
