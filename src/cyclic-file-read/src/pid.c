@@ -27,6 +27,14 @@ int dirctory_check(char *path) { /*überprüfen ob prozess existiert*/
         return 1;
 }
 
+void escape_and_append(char *message, char *field, char *value) {
+        char escaped_value[MAX_BUFFER];
+        snprintf(escaped_value, sizeof(escaped_value), "\"%s\"", value);
+
+        strcat(message, field);
+        strcat(message, escaped_value);
+}
+
 int write_pid_stat(char *path) {
         FILE *pidf;
         if ((pidf = fopen(path, "r")) == NULL) { /*übergebenen pfad öffnen*/
@@ -36,12 +44,13 @@ int write_pid_stat(char *path) {
 
         char line_buffer[2048];
         fgets(line_buffer, 2048, pidf);
+        fclose(pidf);
         if (line_buffer[strlen(line_buffer) - 1] != '\n') {
                 printf("File too big.\n"); /*falls zeile zu groß ist*/
                 return 1;
         }
 
-        fclose(pidf);
+        line_buffer[strlen(line_buffer) - 1] = '\0';
 
         char message[2048];
         message[0] = '\0';
@@ -56,28 +65,17 @@ int write_pid_stat(char *path) {
         extern char pstat_form[53][MAX_BUFFER]; /*fürs line protokol*/
 
         for (int i = 0; i < 51; i++) { /*gelesene werte ins format legen*/
-                strcat(message, pstat_form[i]);
-                strcat(message, token);
-                token = strtok(NULL, " ");
-                if (i == 0 ) {
-                        for (int ii = 1; ii < 3; ii++) { /*zweiter und dritter eintrag sind string/char; müssen escaped werden*/
-                                strcat(message, pstat_form[ii]);
-                                strcpy(placeholder1, escape);
-                                strcpy(placeholder2, token);
-                                strcat(placeholder1, placeholder2);
-                                strcat(placeholder1, escape);
-                                strcat(message, placeholder1);
-                                placeholder1[0] = '\0';
-                                placeholder2[0] = '\0';
-                                token = strtok(NULL, " ");
-                        }
-                        i = i+2;
+                if (i >= 1 && i <= 5)
+                        escape_and_append(message, pstat_form[i], token);
+                else {
+                        strcat(message, pstat_form[i]);
+                        strcat(message, token);
                 }
+                token = strtok(NULL, " ");
         }
-        strcat(message, pstat_form[51]);
-        token[strlen(token) - 1] = '\0'; /*'\n' entfernen*/
-        strcat(message, token);
 
+        strcat(message, pstat_form[51]);
+        strcat(message, token);
         strcat(message, pstat_form[52]);
 
         if (enqueue(message) == 1) /*in die queue anreihen*/
