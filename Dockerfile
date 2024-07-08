@@ -13,7 +13,6 @@ RUN apt-get update \
     libsensors4-dev:amd64 libsensors4-dev:arm64 libsensors4-dev:armhf \
     libdbus-1-dev:amd64 libdbus-1-dev:arm64 libdbus-1-dev:armhf \
     systemd-coredump \
-    git \
     acct \
     sudo \
     && apt-get clean && rm -rf /var/lib/lists/*
