@@ -2,8 +2,7 @@
 Description=inotify-pacct
 
 [Service]
-EnvironmentFile=/etc/inotify-pacct.conf
-ExecStart=/usr/local/bin/inotify-pacct-exec $ARG1
+ExecStart=/usr/local/bin/inotify-pacct-exec
 Type=simple
 
 [Install]
