@@ -1,4 +1,4 @@
-#include "../utilities/mq.h" /* Einbinden der Hilfsbibliothek für Nachrichtenwarteschlangen zur Interprozesskommunikation */
+#include "mq.h" /* Einbinden der Hilfsbibliothek für Nachrichtenwarteschlangen zur Interprozesskommunikation */
 #include <fcntl.h>
 #include <mqueue.h> /* Einbinden der POSIX Nachrichtenwarteschlangen-Header */
 #include <stdio.h>  /* Standard-I/O-Operationen */
@@ -167,17 +167,25 @@ int main(int argc, char *argv[]) {
                         for (int i = 0; i < n; i++) {
                                 if (events[i].data.fd == timer_fd) {
                                         uint64_t exp;
-                                        read(timer_fd,
-                                             &exp,
-                                             sizeof(uint64_t)); /* Timer fd lesen, um es zurückzusetzen */
+                                        ssize_t s = read(
+                                                        timer_fd,
+                                                        &exp,
+                                                        sizeof(uint64_t)); /* Timer fd lesen, um es zurückzusetzen */
+                                        if (s == -1) {
+                                                perror("read timer_fd");
+                                                continue;
+                                        }
 
                                         /* Lese und verarbeite PSI-Daten */
                                         for (int j = 0; j < NUM_RESOURCES; j++) {
-                                                lseek(fds[j], 0, SEEK_SET);
+                                                if (lseek(fds[j], 0, SEEK_SET) == -1) {
+                                                        perror("lseek");
+                                                        continue;
+                                                }
                                                 ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
                                                 if (count == -1) {
                                                         perror("read");
-                                                        exit(EXIT_FAILURE);
+                                                        continue;
                                                 }
 
                                                 if (count > 0) {
@@ -192,11 +200,14 @@ int main(int argc, char *argv[]) {
                 }
         } else { /* Wenn kein duty_cycle gesetzt ist, führe nur einmal aus */
                 for (int j = 0; j < NUM_RESOURCES; j++) {
-                        lseek(fds[j], 0, SEEK_SET);
+                        if (lseek(fds[j], 0, SEEK_SET) == -1) {
+                                perror("lseek");
+                                continue;
+                        }
                         ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
                         if (count == -1) {
                                 perror("read");
-                                exit(EXIT_FAILURE);
+                                continue;
                         }
 
                         if (count > 0) {
