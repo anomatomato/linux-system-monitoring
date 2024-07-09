@@ -1,11 +1,15 @@
 #include "mq.h"
+#include <bits/getopt_core.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <mqueue.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include <sys/stat.h>
 #include <sys/timerfd.h>
+#include <sys/types.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -64,6 +68,62 @@ int create_timer_fd(int sec) {
         return timerfd;
 }
 
+
+void find_directories(char *dirs, const int dirs_max_size, const char *path) {
+        struct dirent *entry;
+
+        struct stat statbuf = {};
+        DIR *dp = opendir(path);
+
+        if (dp == NULL) {
+                perror("opendir");
+                return;
+        }
+        int i = 0;
+        while ((entry = readdir(dp)) != NULL && i < *dirs_max_size) {
+                char full_path[1024];
+
+                if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                        continue;
+
+                snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+
+                if (stat(full_path, &statbuf) == -1) {
+                        perror("stat");
+                        continue;
+                }
+
+                if (S_ISDIR(statbuf.st_mode)) {
+                        printf("%s\n", full_path);
+                        dirs[i] = full_path;
+                }
+                i++;
+        }
+
+        closedir(dp);
+}
+
+int *resgister_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, int epfd) {
+        for (int i = 0; i < NUM_RESOURCES; i++) {
+                char path[256];
+                strcpy(path, dir_name);
+                strcat(path, resources[i]);
+                // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
+                fds[i] = open(path, O_RDONLY | O_NONBLOCK);
+                if (fds[i] == -1) {
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                event.events = EPOLLIN;
+                event.data.fd = fds[i];
+                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
+                        perror("epoll_ctl");
+                        exit(EXIT_FAILURE);
+                }
+        }
+}
+
 int main(int argc, char *argv[]) {
         int duty_cycle = DEFAULT_DUTY_CYCLE;
         int verbose = 0;
@@ -89,7 +149,8 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
 
-        int fds[NUM_RESOURCES];
+        const int max_dirs = 20;
+        int fds[NUM_RESOURCES * max_dirs];
         struct epoll_event event, events[MAX_EVENTS];
 
         int timer_fd = -1;
@@ -102,24 +163,14 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                 }
         }
-
-        for (int i = 0; i < NUM_RESOURCES; i++) {
-                char path[256];
-                snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
-                fds[i] = open(path, O_RDONLY | O_NONBLOCK);
-                if (fds[i] == -1) {
-                        perror("open");
-                        exit(EXIT_FAILURE);
-                }
-
-                event.events = EPOLLIN;
-                event.data.fd = fds[i];
-                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
-                        perror("epoll_ctl");
-                        exit(EXIT_FAILURE);
-                }
+        resgister_files_in_dir(fds, &event, "/proc/pressure/", epfd);
+        char dirs[max_dirs];
+        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
+        for(int i = 0; i < max_dirs; i++) {
+                if (max_dirs[i] == NULL)
+                        break;
+                find_directories(fds, &event, dirs[i], epfd);
         }
-
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
         if (init_mq(MQ_PATH) == -1)
@@ -138,7 +189,7 @@ int main(int argc, char *argv[]) {
 
                 time_t current_time = time(NULL);
                 if (current_time - last_read_time >= duty_cycle) {
-                        for (int j = 0; j < NUM_RESOURCES; j++) {
+                        for (int j = 0; j < sizeof(fds); j++) {
                                 char buf[BUFFER_SIZE];
                                 if (lseek(fds[j], 0, SEEK_SET) == -1) {
                                         perror("lseek");
