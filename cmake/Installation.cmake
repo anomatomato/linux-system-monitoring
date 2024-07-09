@@ -52,6 +52,7 @@ install(FILES
     manpages/epoll-psi.8
     manpages/dbus-systemd-signals.8
     manpages/cyclic-sysinfo.8
+    manpages/stats-recording.8
     DESTINATION /usr/local/share/man/man8
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
 )
