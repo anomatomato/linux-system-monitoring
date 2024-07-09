@@ -26,7 +26,7 @@ install(TARGETS
 # Services
 install(FILES
     systemd-services/posix-mq-to-mqtt-bridge.service
-    systemd-services/cyclic-file-read@.service
+    systemd-services/cyclic-file-read.service
     systemd-services/inotify-coredump.service
     systemd-services/inotify-pacct.service
     systemd-services/epoll-psi.service
