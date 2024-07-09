@@ -171,6 +171,7 @@ int main(int argc, char *argv[]) {
                 if (dirs[i] == NULL)
                         break;
                 register_files_in_dir(fds, &event, dirs[i], epfd);
+                free(dirs[i]);
         }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
