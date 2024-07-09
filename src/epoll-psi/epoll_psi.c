@@ -107,8 +107,9 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
         closedir(dp);
 }
 
-int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, int epfd) {
+int *register_files_in_dir(int *fds, char *dir_name, int epfd) {
         for (int i = 0; i < NUM_RESOURCES; i++) {
+                struct epoll_event event;
                 char path[256];
                 strcpy(path, dir_name);
                 strcat(path, resources[i]);
@@ -123,9 +124,9 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                         exit(EXIT_FAILURE);
                 }
 
-                event->events = EPOLLIN;
-                event->data.fd = fds[i];
-                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], event) == -1) {
+                event.events = EPOLLIN;
+                event.data.fd = fds[i];
+                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
                         perror("epoll_ctl");
                         exit(EXIT_FAILURE);
                 }
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                 }
         }
-        register_files_in_dir(fds, &event, "/proc/pressure/", epfd);
+        register_files_in_dir(fds, "/proc/pressure/", epfd);
         // char* dirs[max_dirs]; 
         // find_directories(dirs, max_dirs, "/sys/fs/cgroup");
         // for(int i = 0; i < max_dirs; i++) {
