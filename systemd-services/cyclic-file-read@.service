@@ -4,7 +4,7 @@ Description=cyclic-file-read
 [Service]
 Environment="SCRIPT_ARGS=%I"
 ExecStart=/usr/local/bin/cyclic-file-read-exec $SCRIPT_ARGS
-Type=simple
+#Type=simple
 
 [Install]
 WantedBy=multi-user.target

@@ -85,9 +85,9 @@ int main(int argc, char *argv[]) {
         };
 
         int arg = 0; /*flag für die funktionen*/
-        int c = 0;   /*duty cycle flag*/
-        int v = 0;   /*verbose flag*/
-        int h = 0;   /*help flag*/
+        int c = 5; /*duty cycle flag*/
+        int v = 0; /*verbose flag*/
+        int h = 0; /*help flag*/
         while (1) {
                 int rv = 0;
                 int option_index = 0;

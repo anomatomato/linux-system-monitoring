@@ -26,7 +26,7 @@ install(TARGETS
 # Services
 install(FILES
     systemd-services/posix-mq-to-mqtt-bridge.service
-    systemd-services/cyclic-file-read@.service
+    systemd-services/cyclic-file-read.service
     systemd-services/inotify-coredump.service
     systemd-services/inotify-pacct.service
     systemd-services/epoll-psi.service
@@ -37,20 +37,13 @@ install(FILES
 )
 
 # Service Configs
-# install(FILES
-# systemd-services/argconfigs/inotify-coredump.conf
-# systemd-services/argconfigs/inotify-pacct.conf
-# DESTINATION /etc
-# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-# )
+#install(FILES
+    #systemd-services/argconfigs/cyclic-file-read.conf
+    #DESTINATION /etc
+    #PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+#)
 
 # Manpages
-# install(FILES
-# manpages/cyclic-file-read
-# manpages/sd-journal-filter
-# DESTINATION /usr/local/share/man/man1
-# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-# )
 install(FILES
     manpages/cyclic-file-read.8
     manpages/posix-mq-to-mqtt-bridge.8
