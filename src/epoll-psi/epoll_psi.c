@@ -106,7 +106,7 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                 char path[256];
                 strcpy(path, dir_name);
                 strcat(path, resources[i]);
-                if (strstr("/sys/fc/cgroup", dir_name) != NULL)
+                if (strstr("/sys/fs/cgroup", dir_name) != NULL)
                         strcat(path, ".pressure");
                 // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
                 printf("path:%s\n, dir:%s", path, dir_name);
