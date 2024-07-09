@@ -54,22 +54,23 @@ int create_list(FILE *file, int lines) {
 }
 
 void percentages(int lines) {
-        float totals[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; /*array um total-werte zu speichern*/
+        //float totals[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; /*array um total-werte zu speichern*/
 
-        Cpu_t *current;
-        for (int i = 0; i < 10; i++) { /*teilwerte zusammenaddieren*/
-                current = stat_head;
-                for (int j = 0; j < (lines - 7); j++) {
-                        totals[i] += current->stats[i];
-                        current = current->next;
-                }
-        }
+        //Cpu_t *current;
+        //for (int i = 0; i < 10; i++) { /*teilwerte zusammenaddieren*/
+                //current = stat_head;
+                //for (int j = 0; j < (lines - 7); j++) {
+                        //totals[i] += current->stats[i];
+                        //current = current->next;
+                //}
+        //}
 
         current = stat_head;
-        for (int i = 0; i < (lines - 7); i++) { /*prozent-anteile berechnen*/
+        current = current->next;
+        for (int i = 1; i < (lines - 7); i++) { /*prozent-anteile berechnen*/
                 for (int j = 0; j < 10; j++) {
-                        if (totals[j] != 0) {
-                                current->stats[j] = (current->stats[j]) / totals[j];
+                        if (stat_head->stats[j] != 0) {
+                                current->stats[j] = (current->stats[j]) / stat_head->stats[j];
                                 current->stats[j] = current->stats[j] * 100;
                         } else {
                                 current->stats[j] = 0;
