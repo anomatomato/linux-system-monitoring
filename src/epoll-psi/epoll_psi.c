@@ -112,9 +112,12 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                 char path[256];
                 strcpy(path, dir_name);
                 strcat(path, resources[i]);
+                printf("Befor segfault\n");
                 // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
                 if (strstr(dir_name, "/sys/fs/cgroup") != NULL)
                         strcat(path, ".pressure");
+                printf("After segfault\n");
+
                 printf("path:%s\n, dir:%s", path, dir_name);
                 fds[i] = open(path, O_RDONLY | O_NONBLOCK);
                 if (fds[i] == -1) {
