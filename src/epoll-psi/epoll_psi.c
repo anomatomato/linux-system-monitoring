@@ -172,7 +172,31 @@ int main(int argc, char *argv[]) {
                         exit(EXIT_FAILURE);
                 }
         }
-        register_files_in_dir(fds, "/proc/pressure/", epfd);
+        //register_files_in_dir(fds, "/proc/pressure/", epfd);
+        char *dir_name = "/proc/pressure/";
+        for (int i = 0; i < NUM_RESOURCES; i++) {
+                struct epoll_event event;
+                char path[256];
+                strcpy(path, dir_name);
+                strcat(path, resources[i]);
+                // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
+                if (strstr(dir_name, "/sys/fs/cgroup") != NULL)
+                        strcat(path, ".pressure");
+
+                printf("path:%s\n, dir:%s", path, dir_name);
+                fds[i] = open(path, O_RDONLY | O_NONBLOCK);
+                if (fds[i] == -1) {
+                        perror("open");
+                        exit(EXIT_FAILURE);
+                }
+
+                event.events = EPOLLIN;
+                event.data.fd = fds[i];
+                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
+                        perror("epoll_ctl");
+                        exit(EXIT_FAILURE);
+                }
+        }
         // char* dirs[max_dirs]; 
         // find_directories(dirs, max_dirs, "/sys/fs/cgroup");
         // for(int i = 0; i < max_dirs; i++) {
