@@ -8,9 +8,9 @@ build_for_arch() {
     build_dir="build-$arch"
 
     echo "Building for $arch"
+    rm "$build_dir" -rf >/dev/null 2>&1
     mkdir -p "$build_dir"
-    cd $build_dir
-    rm -rf CMakeCache.txt CMakeFiles >/dev/null 2>&1
+    cd "$build_dir"
 
     if [[ "$arch" == "amd64" || "$arch" == "x86_64" ]]; then
         cmake .. || return 1
