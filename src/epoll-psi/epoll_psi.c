@@ -92,12 +92,11 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
                         continue;
                 }
 
-                if (S_ISDIR(statbuf.st_mode)) {
+                if (S_ISDIR(statbuf.st_mode))
                         printf("%s\n", dirs[i]);
-                        i++;
-                } else {
+                else
                         free(dirs[i]);
-                }
+                i++;
         }
 
         closedir(dp);
