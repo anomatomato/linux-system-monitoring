@@ -85,7 +85,7 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
                         continue;
 
                 dirs[i] = malloc(MAX_MSG_SIZE);
-                snprintf(dirs[i], MAX_MSG_SIZE, "%s/%s/", path, entry->d_name);
+                snprintf(dirs[i], MAX_MSG_SIZE, "%s/%s", path, entry->d_name);
 
                 if (stat(dirs[i], &statbuf) == -1) {
                         perror("stat");
