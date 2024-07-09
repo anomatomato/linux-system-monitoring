@@ -80,7 +80,7 @@ void find_directories(char *dirs, const int dirs_max_size, const char *path) {
                 return;
         }
         int i = 0;
-        while ((entry = readdir(dp)) != NULL && i < *dirs_max_size) {
+        while ((entry = readdir(dp)) != NULL && i < dirs_max_size) {
                 char full_path[1024];
 
                 if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
