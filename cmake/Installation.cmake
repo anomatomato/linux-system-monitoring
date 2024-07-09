@@ -11,6 +11,18 @@ install(TARGETS
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
+# install(FILES
+# ${CMAKE_BINARY_DIR}/bridge-exec
+# ${CMAKE_BINARY_DIR}/cyclic-file-read-exec
+# ${CMAKE_BINARY_DIR}/inotify-coredump-exec
+# ${CMAKE_BINARY_DIR}/inotify-pacct-exec
+# ${CMAKE_BINARY_DIR}/epoll-psi-exec
+# ${CMAKE_BINARY_DIR}/dbus-systemd-signals-exec
+# ${CMAKE_BINARY_DIR}/cyclic-sysinfo-exec
+# DESTINATION /usr/local/bin
+# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+# )
+
 # Services
 install(FILES
     systemd-services/posix-mq-to-mqtt-bridge.service
