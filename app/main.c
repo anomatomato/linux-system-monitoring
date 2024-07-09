@@ -5,23 +5,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main() {
-        pthread_t bridge_thread, inotify_thread;
 
-        int rc1 = pthread_create(&bridge_thread, NULL, bridge, NULL);
-        // int rc2 = pthread_create(&inotify_thread, NULL, inotify_coredump, NULL);
-
-        if (rc1 != 0) {
-                perror("pthread_create for bridge failed");
-                exit(-1);
+void fill_memory(){
+        int i = 0;
+        int *array[100];
+        while (i < 100) {
+                int *memory = malloc(sizeof(int));
+                array[i] = memory;
+                i++;
         }
-        // if (rc2 != 0)
-        // {
-        //     perror("pthread_create for inotify_coredump failed");
-        //     exit(-1);
-        // }
+        for (int i = 0; i++; i < 100) {
+                free(array[i]);
+        }
+}
 
-        while (1)
-                sleep(100);
-        return 0;
+int main() {
+        fill_memory();
 }
