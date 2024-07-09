@@ -177,7 +177,9 @@ int main(int argc, char *argv[]) {
                 if (dirs[i] == NULL)
                         break;
                 register_files_in_dir(fds, &event, dirs[i], epfd);
+                printf("Befor segfault\n");
                 free(dirs[i]);
+                printf("After segfault\n");
         }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
