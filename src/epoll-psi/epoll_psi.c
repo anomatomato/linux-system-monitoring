@@ -96,7 +96,7 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
                         printf("%s\n", dirs[i]);
                         i++;
                 } else {
-                        free(dirs[i])
+                        free(dirs[i]);
                 }
         }
 
