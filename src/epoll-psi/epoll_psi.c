@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
 
-        const int max_dirs = 20;
+        const int max_dirs = 9;
         int fds[NUM_RESOURCES * max_dirs];
         struct epoll_event event, events[MAX_EVENTS];
 
