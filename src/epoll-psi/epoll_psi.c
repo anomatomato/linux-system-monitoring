@@ -13,7 +13,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define MAX_EVENTS 4
+#define MAX_EVENTS 30
 #define BUFFER_SIZE 1024
 #define MQ_PATH "/psi"
 #define NUM_RESOURCES 3
@@ -115,9 +115,9 @@ int *resgister_files_in_dir(int *fds, struct epoll_event *event, char *dir_name,
                         exit(EXIT_FAILURE);
                 }
 
-                event.events = EPOLLIN;
-                event.data.fd = fds[i];
-                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
+                event->events = EPOLLIN;
+                event->data.fd = fds[i];
+                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], event) == -1) {
                         perror("epoll_ctl");
                         exit(EXIT_FAILURE);
                 }
