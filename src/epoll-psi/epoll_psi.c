@@ -111,6 +111,7 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                 char path[256];
                 strcpy(path, dir_name);
                 strcat(path, resources[i]);
+                strcat(path, ".pressure");
                 // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
                 fds[i] = open(path, O_RDONLY | O_NONBLOCK);
                 if (fds[i] == -1) {
