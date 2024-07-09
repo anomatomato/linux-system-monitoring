@@ -1,0 +1,54 @@
+.\" Manpage for stats\-recording.
+.\" Contact k.meliksetian@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "09 Juli 2024" "1.0" "stats-recording man page"
+.SH NAME
+stats\-recording overview\- system for recording statistics from a Linux-based device
+.SH SYNOPSIS
+.B posix\-mq\-to\-mqtt\-bridge@\&.service
+.br
+.B cycle\-file\-read@"[OPTIONS]".service
+.br
+.B cyclic\-sysinfo@\&.service
+.br
+.B dbus\-systemd\-signals@\&.service
+.br
+.B epoll\-psi@"[OPTIONS]"\&.service
+.br
+.B inotify\-coredump@\&.service
+.br
+.B inotify\-pacct@\&.service
+.SH DESCRIPTION
+.PP
+stats-recording is a flexible loosely-coupled system for recording statistics( such as PSI, chip temperature etc.) from a Linux-based device. 
+The essential component for the system is posix\-mq\-to\-mqtt\-bridge (8), which is responsible for sending the collected statistics/metrics to the server.
+It should be also started as a first component. Other components are not required and can be started/stopped at any time.  
+All components work with posix\-mq\-to\-mqtt\-bridge (8) through POSIX Message Queues. All Messages that are pushed, are in 
+.B InfluxDB\-Line\-Protocol.
+The system itself communicates with server through MQTT protocol.
+.IP \[bu] 2
+To collect statistics reported by sysinfo(2) start cyclic-sysinfo.service
+.IP \[bu] 2
+To collect statistics for CPU, network and hard-drive start cyclic-file-read.service
+.IP \[bu] 2
+To collect PSI, start epoll-psi.service
+.IP \[bu] 2
+To collect coredumps, start inotify-coredump.service
+.IP \[bu] 2
+To collect information about processes in the system, start inotify-pacct.service
+.PP
+.SH OPTIONS
+No options.
+.SH "SEE ALSO"
+.BR posix\-mq\-to\-mqtt\-bridge (8),
+.BR cycle\-file\-read (8),
+.BR dbus\-systemd\-signals (8),
+.BR epoll\-psi (8),
+.BR inotify\-coredump (8),
+.BR inotify\-pacct (8),
+.BR mq_overview (7),
+.SH ARGUMENTS
+No arguments.
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Karen Meliksetian (k.meliksetian@tu\-braunschweig.de)
