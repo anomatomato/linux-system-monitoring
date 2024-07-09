@@ -167,9 +167,9 @@ int main(int argc, char *argv[]) {
         char dirs[max_dirs];
         find_directories(dirs, max_dirs, "/sys/fs/cgroup");
         for(int i = 0; i < max_dirs; i++) {
-                if (max_dirs[i] == NULL)
+                if (dirs[i] == NULL)
                         break;
-                find_directories(fds, &event, dirs[i], epfd);
+                resgister_files_in_dir(fds, &event, dirs[i], epfd);
         }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
