@@ -56,7 +56,7 @@ int create_list(FILE *file, int lines) {
 void percentages(int lines) {
         //float totals[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }; /*array um total-werte zu speichern*/
 
-        //Cpu_t *current;
+        Cpu_t *current;
         //for (int i = 0; i < 10; i++) { /*teilwerte zusammenaddieren*/
                 //current = stat_head;
                 //for (int j = 0; j < (lines - 7); j++) {
