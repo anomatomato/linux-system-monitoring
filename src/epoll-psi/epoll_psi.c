@@ -84,19 +84,24 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
                 if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                         continue;
 
-                dirs[i] = malloc(MAX_MSG_SIZE);
-                snprintf(dirs[i], MAX_MSG_SIZE, "%s/%s/", path, entry->d_name);
+                char full_path[MAX_MSG_SIZE];
+                snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
 
-                if (stat(dirs[i], &statbuf) == -1) {
+                if (stat(full_path, &statbuf) == -1) {
                         perror("stat");
                         continue;
                 }
 
-                if (S_ISDIR(statbuf.st_mode))
+                if (S_ISDIR(statbuf.st_mode)) {
+                        dirs[i] = malloc(MAX_MSG_SIZE);
+                        if (dirs[i] == NULL) {
+                                perror("malloc");
+                                break;
+                        }
+                        snprintf(dirs[i], MAX_MSG_SIZE, "%s/", full_path);
                         printf("%s\n", dirs[i]);
-                else
-                        free(dirs[i]);
-                i++;
+                        i++;
+                }
         }
 
         closedir(dp);
