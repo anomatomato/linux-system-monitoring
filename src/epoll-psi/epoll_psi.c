@@ -112,11 +112,9 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                 char path[256];
                 strcpy(path, dir_name);
                 strcat(path, resources[i]);
-                printf("Befor segfault\n");
                 // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
                 if (strstr(dir_name, "/sys/fs/cgroup") != NULL)
                         strcat(path, ".pressure");
-                printf("After segfault\n");
 
                 printf("path:%s\n, dir:%s", path, dir_name);
                 fds[i] = open(path, O_RDONLY | O_NONBLOCK);
@@ -174,16 +172,14 @@ int main(int argc, char *argv[]) {
                 }
         }
         register_files_in_dir(fds, &event, "/proc/pressure/", epfd);
-        char* dirs[max_dirs]; 
-        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
-        for(int i = 0; i < max_dirs; i++) {
-                printf("Befor segfault\n"); 
-                if (dirs[i] == NULL)
-                        break;
-                register_files_in_dir(fds, &event, dirs[i], epfd);
-                printf("After segfault\n");
-                free(dirs[i]);
-        }
+        // char* dirs[max_dirs]; 
+        // find_directories(dirs, max_dirs, "/sys/fs/cgroup");
+        // for(int i = 0; i < max_dirs; i++) {
+        //         if (dirs[i] == NULL)
+        //                 break;
+        //         register_files_in_dir(fds, &event, dirs[i], epfd);
+        //         free(dirs[i]);
+        // }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
         if (init_mq(MQ_PATH) == -1)
