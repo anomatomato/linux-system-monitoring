@@ -201,6 +201,7 @@ int main(int argc, char *argv[]) {
                 if (current_time - last_read_time >= duty_cycle) {
                         for (int j = 0; j < sizeof(fds); j++) {
                                 char buf[BUFFER_SIZE];
+                                printf("%d\n", fds[j]);
                                 if (lseek(fds[j], 0, SEEK_SET) == -1) {
                                         perror("lseek");
                                         continue;
