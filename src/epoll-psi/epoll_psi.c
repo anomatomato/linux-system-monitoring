@@ -79,11 +79,11 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
                 perror("opendir");
                 return;
         }
-        char* copy_dir_path = path;
         int i = 0;
         while ((entry = readdir(dp)) != NULL && i < dirs_max_size) {
                 char full_path[1024];
-
+                char dir_path[1054];
+                strcpy(dir_path, path);
                 if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                         continue;
 
@@ -96,8 +96,9 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
 
                 if (S_ISDIR(statbuf.st_mode)) {
                         printf("%s\n", full_path);
-                        strcat(copy_dir_path, full_path);
-                        dirs[i] = copy_dir_path;
+                        
+                        strcat(dir_path, full_path);
+                        dirs[i] = dir_path;
                 }
                 i++;
         }
