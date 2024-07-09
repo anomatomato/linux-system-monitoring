@@ -81,21 +81,19 @@ void find_directories(char **dirs, const int dirs_max_size, const char *path) {
         }
         int i = 0;
         while ((entry = readdir(dp)) != NULL && i < dirs_max_size) {
-                char full_path[1024];
                 if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
                         continue;
 
-                snprintf(full_path, sizeof(full_path), "%s/%s", path, entry->d_name);
+                dirs[i] = malloc(MAX_MSG_SIZE);
+                snprintf(dirs[i], MAX_MSG_SIZE, "%s/%s", path, entry->d_name);
 
-                if (stat(full_path, &statbuf) == -1) {
+                if (stat(dirs[i], &statbuf) == -1) {
                         perror("stat");
                         continue;
                 }
 
                 if (S_ISDIR(statbuf.st_mode)) {
-                        printf("%s\n", full_path);
-                        
-                        dirs[i] = full_path;
+                        printf("%s\n", dirs[i]);
                 }
                 i++;
         }
@@ -111,6 +109,7 @@ int *register_files_in_dir(int *fds, struct epoll_event *event, char *dir_name, 
                 if (strstr("/sys/fc/cgroup", path) != NULL)
                         strcat(path, ".pressure");
                 // snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
+                printf("path:%s\n, dir:%s", path, dir_name);
                 fds[i] = open(path, O_RDONLY | O_NONBLOCK);
                 if (fds[i] == -1) {
                         perror("open");
