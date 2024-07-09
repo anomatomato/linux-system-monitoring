@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
         }
         register_files_in_dir(fds, &event, "/proc/pressure/", epfd);
         char* dirs[max_dirs]; 
-        find_directories(dirs, max_dirs, "/sys/fs/cgroup/");
+        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
         for(int i = 0; i < max_dirs; i++) {
                 if (dirs[i] == NULL)
                         break;
