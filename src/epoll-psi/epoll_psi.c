@@ -173,14 +173,14 @@ int main(int argc, char *argv[]) {
                 }
         }
         register_files_in_dir("/proc/pressure/", epfd);
-        // char* dirs[max_dirs];
-        // find_directories(dirs, max_dirs, "/sys/fs/cgroup");
-        // for(int i = 0; i < max_dirs; i++) {
-        //         if (dirs[i] == NULL)
-        //                 break;
-        //         register_files_in_dir(fds, &event, dirs[i], epfd);
-        //         free(dirs[i]);
-        // }
+        char* dirs[max_dirs];
+        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
+        for(int i = 0; i < max_dirs; i++) {
+                if (dirs[i] == NULL)
+                        break;
+                register_files_in_dir(dirs[i], epfd);
+                free(dirs[i]);
+        }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
         if (init_mq(MQ_PATH) == -1)
@@ -202,7 +202,8 @@ int main(int argc, char *argv[]) {
                         for (int n = 0; n < nfds; ++n) {
                                 char buf[BUFFER_SIZE];
                                 int fd = events[n].data.fd;
-                                printf("%d\n", fd);
+                                if (fd == timer_fd)
+                                        continue;
                                 if (lseek(fd, 0, SEEK_SET) == -1) {
                                         perror("lseek");
                                         continue;
