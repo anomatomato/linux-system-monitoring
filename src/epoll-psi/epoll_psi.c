@@ -31,7 +31,6 @@ struct psi_values {
 
 void process_psi_data(char *data, const char *resource, char *output, size_t output_size) {
         struct psi_values psi = { 0 };
-        printf("data: %s\n", data);
         sscanf(data,
                "some avg10=%lf avg60=%lf avg300=%lf total=%ld",
                &psi.avg10,
@@ -174,14 +173,14 @@ int main(int argc, char *argv[]) {
                 }
         }
         register_files_in_dir("/proc/pressure/", epfd);
-        char* dirs[max_dirs];
-        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
-        for(int i = 0; i < max_dirs; i++) {
-                if (dirs[i] == NULL)
-                        break;
-                register_files_in_dir(dirs[i], epfd);
-                free(dirs[i]);
-        }
+        // char* dirs[max_dirs];
+        // find_directories(dirs, max_dirs, "/sys/fs/cgroup");
+        // for(int i = 0; i < max_dirs; i++) {
+        //         if (dirs[i] == NULL)
+        //                 break;
+        //         register_files_in_dir(dirs[i], epfd);
+        //         free(dirs[i]);
+        // }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
         if (init_mq(MQ_PATH) == -1)
