@@ -16,6 +16,11 @@ target_include_directories(bridge-test PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(inotify-coredump-test bridge-test PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
+set_target_properties(bridge-test PROPERTIES
+    INSTALL_RPATH "${CMAKE_BINARY_DIR}/_deps/paho-mqtt-c-build/src"
+    BUILD_WITH_INSTALL_RPATH TRUE
+)
+
 gtest_discover_tests(inotify-coredump-test
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     EXTRA_ARGS --gtest_color=yes)
