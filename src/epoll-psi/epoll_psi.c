@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
                                         buf[count] = '\0';
                                         process_psi_data(
                                                         buf,
-                                                        resources[n],
+                                                        resources[n%3],
                                                         message_batch[batch_index],
                                                         BUFFER_SIZE);
                                         if (verbose) {
