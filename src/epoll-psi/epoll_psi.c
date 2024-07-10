@@ -15,7 +15,7 @@
 
 
 #define MAX_EVENTS 30
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 2048
 #define MQ_PATH "/psi"
 #define NUM_RESOURCES 3
 #define DEFAULT_DUTY_CYCLE 0
