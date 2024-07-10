@@ -15,9 +15,9 @@ build_for_arch() {
     if [[ "$arch" == "amd64" || "$arch" == "x86_64" ]]; then
         cmake .. || return 1
     elif [ "$arch" == "arm64" ]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/arm64-toolchain.cmake .. || return 1
+        cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain.arm64.cmake .. || return 1
     elif [ "$arch" == "armhf" ]; then
-        cmake -DCMAKE_TOOLCHAIN_FILE=../toolchains/armhf-toolchain.cmake .. || return 1
+        cmake -DCMAKE_TOOLCHAIN_FILE=../cmake/toolchain.armhf.cmake .. || return 1
     else
         echo "Unsupported architecture: $arch"
         return 1

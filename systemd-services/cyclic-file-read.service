@@ -1,5 +1,7 @@
 [Unit]
 Description=cyclic-file-read
+After=posix-mq-to-mqtt-bridge.service
+Requires=posix-mq-to-mqtt-bridge.service
 
 [Service]
 Environment="SCRIPT_ARGS=%I"

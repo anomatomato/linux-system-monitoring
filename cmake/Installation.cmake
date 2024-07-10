@@ -48,11 +48,11 @@ install(FILES
 )
 
 # Service Configs
-#install(FILES
-    #systemd-services/argconfigs/cyclic-file-read.conf
-    #DESTINATION /etc
-    #PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-#)
+# install(FILES
+# systemd-services/argconfigs/cyclic-file-read.conf
+# DESTINATION /etc
+# PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+# )
 
 # Manpages
 install(FILES
@@ -69,4 +69,21 @@ install(FILES
     manpages/stats-recording.8
     DESTINATION /usr/local/share/man/man8
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+)
+
+install(FILES ${CMAKE_SOURCE_DIR}/package-scripts/setup_acct.sh
+    DESTINATION /usr/local/bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
+configure_file(
+    ${CMAKE_SOURCE_DIR}/package-scripts/postinst
+    ${CMAKE_BINARY_DIR}/DEBIAN/postinst
+    COPYONLY
+)
+
+install(FILES
+    ${CMAKE_BINARY_DIR}/DEBIAN/postinst
+    DESTINATION DEBIAN
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )

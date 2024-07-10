@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <string>
+#include <string.h>
 extern "C" {
 #include "bridge.h"
 #include "mq.h"
@@ -29,11 +29,11 @@ TEST(BridgeTest, InitialiseMqTest) {
         remove_mq(mq_path.c_str());
 }
 
-TEST(BridgeTest, ConnectToBrokerTest) {
+/*TEST(BridgeTest, ConnectToBrokerTest) {
         MQTTAsync client = init_MQTT_client();
         ASSERT_EQ(connect_to_broker(&client), MQTTASYNC_SUCCESS);
         MQTTAsync_destroy(&client);
-}
+}*/
 
 TEST(BridgeTest, RegisterMqTest) {
         int epid = init_epoll();

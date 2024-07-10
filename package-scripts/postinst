@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Enable coredumps
+echo "Enabling core dumps..."
+ulimit -c unlimited
+
+# Set up accounting file
+echo "Setting up accounting file..."
+./usr/local/bin/setup_acct.sh
+
+echo "Post-installation complete."

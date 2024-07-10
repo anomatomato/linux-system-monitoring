@@ -1,111 +1,170 @@
-## 1. Setup
+# Stats-Recording
 
-  **Remark**: *This guide is only for Linux, specifically Ubuntu and other Debian-based distributions*
-  
-### Clone the repository
+Raspberry Pis are versatile and powerful devices used in a wide range of applications, from research and education to industrial automation and home projects. 
+However, their reliability can be a concern, especially when deployed in remote or harsh environments. Unexpected failures can lead to costly downtime, data loss and inefficient usage.
 
-```bash
-git clone git@gitlab.ibr.cs.tu-bs.de:cm-courses/sep/groups/ss24/cm0/stats-recording.git
-```
+*Stats-Recording* aims to address these challenges by collecting real-time data on various performance metrics such as CPU, Memory, Network traffic and coredumps with the help of *systemd-services*. The data is then sent to *Mosquitto* on a server, from where it can be graphically shown in *Grafana*. 
+By analyzing this data, we can detect anomalies, predict failures and take proactive mesaures to prevent them.
+
+
+## Contents
+
+- [Stats-Recording](#stats-recording)
+  - [Contents](#contents)
+  - [Getting started](#getting-started)
+    - [Install essential packages](#install-essential-packages)
+    - [Setup](#setup)
+  - [How to install](#how-to-install)
+  - [How to uninstall](#how-to-uninstall)
+  - [Build from source](#build-from-source)
+  - [Testing](#testing)
+  - [How it works](#how-it-works)
+  - [Cross compilation](#cross-compilation)
+   
+## Getting started
+
 
 ### Install essential packages
-
-- Debian, Ubuntu, popOS, and other Debian-based distributions:
   
 ```bash
-sudo apt-get update && apt-get upgrade -y
-sudo apt-get install build-essential gcc make cmake cmake-gui cmake-curses-gui libssl-dev
-sudo apt-get install libsensors4-dev  # for cyclic-file-read
+apt-get install gcc make cmake libsensors4-dev acct systemd-coredump libdbus-1-dev
 ```
 
-### Install paho-mqtt library
-:open_file_folder: [**Link**](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/paho-mqtt.md)
+### Setup
 
-- Now paho-mqtt is stored in `/usr/local/paho-mqtt`
+1. Verify PSI is enabled by looking for the `/proc/pressure` directory:
 
-## 2. Build and Run
+```sh
+ls /proc/pressure
+```
 
-- Build:
+2. Enable PSI (if `/proc/pressure` doesn't exit):
+>  1. Edit `/boot/firmware/cmdline.txt` (Pi)
+>  2. Add `psi=1` to the kernel command line parameters.
+> 
+>     ```sh
+>     ... existing parameters ... psi=1
+>     ```
+>
+>  3. Reboot your system:
+> 
+>  ```sh
+>  sudo reboot
+>  ```
+>
+>  4. Check if `/proc/pressure` is now available:
+> 
+>  ```sh
+>  ls /proc/pressure
+>  ```
+
+[Back to Contents](#contents)
+
+## How to install
+
+There are already debian packages in `debs/`. Check your architecture with:
+
+```sh
+dpkg --print-architecture
+```
+
+and then install the right package with:
+
+```sh
+dpkg -i stats-recording_<version>_<arch>.deb
+```
+
+[Back to Contents](#contents)
+
+## How to uninstall
+
+```sh
+dpkg -r stats-recording_<version>_<arch>.deb
+```
+
+or
+
+```sh
+apt remove stats-recording
+```
+
+[Back to Contents](#contents)
+
+## Build from source
+
+You can use the `build.sh`, which builds a debian package into `debs/` and builds with CMake in `build-<arch>`:
   
 ```bash
-mkdir build   # if not already exists
+./build.sh
+```
+
+## Testing
+
+Test code is available in the `test` directory. The tests can be built and run by using CMake option `-DSTATS_ENABLE_TESTING`:
+
+```sh
+cmake -DSTATS_ENABLE_TESTING=ON -B build
+cmake --build build
 cd build
-cmake ..
-make
+ctest -V
+```
+[Back to Contents](#contents)
+
+## How it works
+
+The stats-collection is divided into multiple components. You can decide on which components to enable:
+
+- **posix-mq-to-mqtt-bridge**: The bridge between *all* the other components and the server. ***Start posix-mq-to-mqtt-bridge first***
+- **inotify-coredump**: Monitor `/var/lib/systemd/coredump` for quickly notifying `posix-mq-to-mqtt-bridge` about a
+core dump.
+- **inotify-pacct**: Send relevant information about terminated processes to `posix-mq-to-mqtt-bridge`
+- **cyclic-sysinfo**: Cyclic reading of statistics reported by `sysinfo(2)` and seding those to `posix-mq-to-mqtt-bridge`.
+- **cyclic-file-read**: Send stats about CPU, network, disks, proccesses und chip temperature from `proc/` and `sys/` to `posix-mq-to-mqtt-bridge`.
+- **epoll-psi**: Send pressure stall information (PSI) to `posix-mq-to-mqtt-bridge`.
+- **dbus-systemd-signals**: Send systemd events to `posix-mq-to-mqtt-bridge`.
+
+Starting a component works like with every other systemd-service, e.g.:
+
+```sh
+systemctl start posix-mq-to-mqtt-bridge
 ```
 
-- Run:
-```bash
-./bridge-exec
+
+You can find more detailed documentation in the manpage `stats-recording(8)`.
+
+[Back to Contents](#contents)
+
+## Cross compilation
+
+Cross compilation using CMake is performed by using so called "toolchain files" , see `cmake-toolchains(7)`.
+
+The path to the toolchain file can be specified by using CMake's `-DCMAKE_TOOLCHAIN_FILE` option. In case no toolchain file is specified, the build is performed for the native build platform.
+
+For your convenience toolchain files for the following platforms can be found in the `cmake` directory:
+- Linux amd64
+- Linux arm64
+- Linux armhf
+
+Example invocation for the Raspberry Pi:
+
+```sh
+cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain.arm64.cmake -B build
 ```
 
-- Alternatively use the **CMake-Extension** in VSCode:
-  1. Access the Command Palette: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
-  2. Try following commands:
-     * *CMake:Build*
-     * *CMake:Debug*  
+You can compile and build a debian package for all 3 architectures, for that you will need to install `crossbuild-essential-arm64`
+and `crossbuild-essential-armhf`: 
 
-- if you even want to save time, you can use the predefined **tasks.json**:
-  1. Access the Command Palette: Press `F1`, `⇧+⌘+P` or `Ctrl+Shift+P` to open the Command Palette
-  2. If you want to build run a specific component, type `run task`:
-     * choose *cmake[all]* to build 
-     * choose *run bridge* to activate the bridge
-     * choose *run inotify-pacct* to activate inotifying pacct
-     * choose *run inotify-coredump* to activate the inotifying coredump
-     * choose *run cyclic-file-read* to activate the cyclic-file-read
-  3. If you want to deactivate a specific component, type  `Ctrl+Shift+P` then `terminate task`:
-     * choose *run bridge* to deactivate the bridge
-     * choose *run inotify-pacct* to deactivate inotifying pacct
-     * choose *run inotify-coredump* to deactivate the inotifying coredump
-     * choose *run cyclic-file-read* to deactivate the cyclic-file-read
-  4. If you want to remove build directory, type `remove build directory`
-  
-- You need [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn) in order to send stats to the server
+```sh
+./build.sh --all
+```
+
+Or you can use the `Dockerfile`:
+
+```sh
+docker build -t stats-recording-builder .  
+docker run --rm -v $(pwd):/app stats-recording-builder
+```
 
 
-
-## 3. Components
-
-### Inotify-Coredump
-
-- This component gets notified, whenever a coredump is created in `/var/lib/systemd/coredump`
-- First build the project
-- For Unit Testing run `ctest -V inotify-coredump-test`
-- Enable [VPN](https://gitlab.ibr.cs.tu-bs.de/cm-courses/sep/groups/ss24/cm0/documentation/-/blob/main/Server.md/#enable-vpn)
-- For the following, you will need 3 terminals in `stats-recording`:
-
-  **Terminal 1**:
-
-  ```bash
-  cd build
-  ./bridge-exec
-  ```
-
-  **Terminal 2**:
-
-  ```bash
-  cd build
-  ./inotify-coredump-exec
-  ```
-
-  **Terminal 3**:
-
-  ```bash
-  cd testing/create_coredumps
-  gcc -o segmentation_fault segmentation_fault.c
-  ./segmentation_fault
-  ```
-
-- Now you should see the output in *Terminal 1* and *Terminal 2*
-
-- For more information [read](/testing/create_coredumps/README.md) the `README.md` in `testing/create_coredumps`
-
-### Inotify-Pacct
-
-- Read [here](/src/inotify-pacct/README.md)
-
-### Cyclic-File-Read
-
-- Read [here](/src/cyclic-file-read/README.md)
 
 ***Good luck*** :sunglasses:
