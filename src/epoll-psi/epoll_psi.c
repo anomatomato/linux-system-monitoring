@@ -31,6 +31,7 @@ struct psi_values {
 
 void process_psi_data(char *data, const char *resource, char *output, size_t output_size) {
         struct psi_values psi = { 0 };
+        printf("data: %s\n", data);
         sscanf(data,
                "some avg10=%lf avg60=%lf avg300=%lf total=%ld",
                &psi.avg10,
