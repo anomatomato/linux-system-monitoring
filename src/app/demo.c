@@ -1,4 +1,5 @@
 #include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -47,10 +48,9 @@ void calc_pi() {
                 sum += term;
         }
         pi = 4 * sum;
-        printf("%f\n", pi);
 }
 
-void *forking() {
+void forking() {
         int j = 0;
         while (j < 20) {
                 pid_t p = fork();
@@ -59,13 +59,11 @@ void *forking() {
                         break;
                 }
                 else if (p == 0) {
-                        printf("Hello from Child!\n");
                         fill_memory();
                         j++;
                         _exit(0);
                 }
                 else {
-                        printf("Hello from Parent!\n");
                         calc_pi();
                         wait(NULL);
                         j++;
@@ -78,6 +76,21 @@ int main() {
         int g = 0;
         while (g < 20) {
                 forking();
+                g++;
+        }
+
+        g = 0;
+        while (g < 5) {
+                pid_t p = fork();
+                if(p < 0) {
+                        perror("fork fail");
+                        break;
+                }
+                else if (p == 0) {
+                        raise(SIGABRT);
+                        _exit(0);
+                }
+                else
                 g++;
         }
 }

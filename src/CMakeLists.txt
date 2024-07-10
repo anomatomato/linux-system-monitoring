@@ -1,4 +1,5 @@
 # Add subdirectories
+add_subdirectory(app)
 add_subdirectory(cyclic-file-read)
 add_subdirectory(cyclic-sysinfo)
 add_subdirectory(dbus-systemd-signals)
@@ -16,6 +17,7 @@ set_target_properties(cyclic-file-read-exec
     inotify-coredump-exec
     inotify-pacct-exec
     bridge-exec
+    demo-exec
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
