@@ -162,16 +162,16 @@ int main(int argc, char *argv[]) {
         int fds[NUM_RESOURCES];
         struct epoll_event event, events[MAX_EVENTS];
 
-        int timer_fd = -1;
-        if (duty_cycle > 0) {
-                timer_fd = create_timer_fd(duty_cycle);
-                event.events = EPOLLIN;
-                event.data.fd = timer_fd;
-                if (epoll_ctl(epfd, EPOLL_CTL_ADD, timer_fd, &event) == -1) {
-                        perror("epoll_ctl");
-                        exit(EXIT_FAILURE);
-                }
-        }
+        // int timer_fd = -1;
+        // if (duty_cycle > 0) {
+        //         timer_fd = create_timer_fd(duty_cycle);
+        //         event.events = EPOLLIN;
+        //         event.data.fd = timer_fd;
+        //         if (epoll_ctl(epfd, EPOLL_CTL_ADD, timer_fd, &event) == -1) {
+        //                 perror("epoll_ctl");
+        //                 exit(EXIT_FAILURE);
+        //         }
+        // }
 
         for (int i = 0; i < NUM_RESOURCES; i++) {
                 char path[256];
@@ -251,9 +251,9 @@ int main(int argc, char *argv[]) {
                 close(fds[i]);
         }
 
-        if (timer_fd != -1) {
-                close(timer_fd);
-        }
+        // if (timer_fd != -1) {
+        //         close(timer_fd);
+        // }
 
         return 0;
 }
