@@ -15,7 +15,7 @@
 
 
 #define MAX_EVENTS 30
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1024
 #define MQ_PATH "/psi"
 #define NUM_RESOURCES 3
 #define DEFAULT_DUTY_CYCLE 0
@@ -159,37 +159,28 @@ int main(int argc, char *argv[]) {
                 exit(EXIT_FAILURE);
         }
 
-        int fds[NUM_RESOURCES];
+        const int max_dirs = 9;
         struct epoll_event event, events[MAX_EVENTS];
 
-        // int timer_fd = -1;
-        // if (duty_cycle > 0) {
-        //         timer_fd = create_timer_fd(duty_cycle);
-        //         event.events = EPOLLIN;
-        //         event.data.fd = timer_fd;
-        //         if (epoll_ctl(epfd, EPOLL_CTL_ADD, timer_fd, &event) == -1) {
-        //                 perror("epoll_ctl");
-        //                 exit(EXIT_FAILURE);
-        //         }
-        // }
-
-        for (int i = 0; i < NUM_RESOURCES; i++) {
-                char path[256];
-                snprintf(path, sizeof(path), "/proc/pressure/%s", resources[i]);
-                fds[i] = open(path, O_RDONLY | O_NONBLOCK);
-                if (fds[i] == -1) {
-                        perror("open");
-                        exit(EXIT_FAILURE);
-                }
-
+        int timer_fd = -1;
+        if (duty_cycle > 0) {
+                timer_fd = create_timer_fd(duty_cycle);
                 event.events = EPOLLIN;
-                event.data.fd = fds[i];
-                if (epoll_ctl(epfd, EPOLL_CTL_ADD, fds[i], &event) == -1) {
+                event.data.fd = timer_fd;
+                if (epoll_ctl(epfd, EPOLL_CTL_ADD, timer_fd, &event) == -1) {
                         perror("epoll_ctl");
                         exit(EXIT_FAILURE);
                 }
         }
-
+        register_files_in_dir("/proc/pressure/", epfd);
+        char* dirs[max_dirs];
+        find_directories(dirs, max_dirs, "/sys/fs/cgroup");
+        for(int i = 0; i < max_dirs; i++) {
+                if (dirs[i] == NULL)
+                        break;
+                register_files_in_dir(dirs[i], epfd);
+                free(dirs[i]);
+        }
         printf("Entering main loop with duty cycle of %d seconds\n", duty_cycle);
 
         if (init_mq(MQ_PATH) == -1)
@@ -200,21 +191,24 @@ int main(int argc, char *argv[]) {
         time_t last_read_time = 0;
 
         while (1) {
-                int n = epoll_wait(epfd, events, MAX_EVENTS, -1);
-                if (n == -1) {
+                int nfds = epoll_wait(epfd, events, MAX_EVENTS, -1);
+                if (nfds == -1) {
                         perror("epoll_wait");
                         exit(EXIT_FAILURE);
                 }
 
                 time_t current_time = time(NULL);
                 if (current_time - last_read_time >= duty_cycle) {
-                        for (int j = 0; j < NUM_RESOURCES; j++) {
+                        for (int n = 0; n < nfds; ++n) {
                                 char buf[BUFFER_SIZE];
-                                if (lseek(fds[j], 0, SEEK_SET) == -1) {
+                                int fd = events[n].data.fd;
+                                if (fd == timer_fd)
+                                        continue;
+                                if (lseek(fd, 0, SEEK_SET) == -1) {
                                         perror("lseek");
                                         continue;
                                 }
-                                ssize_t count = read(fds[j], buf, BUFFER_SIZE - 1);
+                                ssize_t count = read(fd, buf, BUFFER_SIZE - 1);
                                 if (count == -1) {
                                         perror("read");
                                         continue;
@@ -224,7 +218,7 @@ int main(int argc, char *argv[]) {
                                         buf[count] = '\0';
                                         process_psi_data(
                                                         buf,
-                                                        resources[j],
+                                                        resources[n%3],
                                                         message_batch[batch_index],
                                                         BUFFER_SIZE);
                                         if (verbose) {
@@ -247,13 +241,8 @@ int main(int argc, char *argv[]) {
                 nanosleep(&sleep_time, NULL);
         }
 
-        for (int i = 0; i < NUM_RESOURCES; i++) {
-                close(fds[i]);
-        }
-
-        // if (timer_fd != -1) {
-        //         close(timer_fd);
-        // }
+        if (timer_fd != -1)
+                close(timer_fd);
 
         return 0;
 }
