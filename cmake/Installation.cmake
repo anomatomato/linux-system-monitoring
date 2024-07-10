@@ -11,6 +11,15 @@ install(TARGETS
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
 
+# Scripts of Log-Recording
+install(FILES
+    journal-filter/journal-filter.sh
+    journal-filter/journal-upload.sh
+    journal-filter/journal-config.sh
+    DESTINATION /usr/local/bin
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
+
 # install(FILES
 # ${CMAKE_BINARY_DIR}/bridge-exec
 # ${CMAKE_BINARY_DIR}/cyclic-file-read-exec
@@ -32,6 +41,7 @@ install(FILES
     systemd-services/epoll-psi.service
     systemd-services/dbus-systemd-signals.service
     systemd-services/cyclic-sysinfo.service
+    systemd-services/sd-journal-filter.service
     DESTINATION /etc/systemd/system
     PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
 )
@@ -52,6 +62,9 @@ install(FILES
     manpages/epoll-psi.8
     manpages/dbus-systemd-signals.8
     manpages/cyclic-sysinfo.8
+    manpages/sd-journal-filter.8
+    manpages/sd-journal-to-influxdb.8
+    manpages/coredump-to-influxdb.8
     manpages/stats-recording.8
     DESTINATION /usr/local/share/man/man8
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ

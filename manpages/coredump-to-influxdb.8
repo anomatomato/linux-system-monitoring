@@ -1,0 +1,26 @@
+.\" Manpage for coredump-to-influxdb.
+.\" Contact an.hoang@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "06 Juli 2024" "1.0" "coredump-to-influxdb man page"
+.SH NAME
+coredump-to-influxdb - Send the filtered Systemd-Journals to server.
+.SH SYNOPSIS
+coredump-to-influxdb server
+.SH DESCRIPTION
+
+coredump-to-influxdb liest coredumps aus einer Journaldatei im Verzeichnis /var/log/journal/remote des
+Docker-Containers systemd-journal-remote über coredumpctl(1) und konvertiert sie in das Line-Protokol.
+Anschließend werden die cordumps per MQTT an InfluxDB gesendet.
+
+Um direkt cordumps im Verzeichnis /var/log/journal/remote des Docker-Containers systemd-journal-remote lesen
+zu können, muss coredump-to-influxdb auf der gleichen Umgebung wie sd-journal-filter laufen.
+Deswegen wird es auf einem Docker-Container namens metrics-to-influxdb() mit der gewünschten Umgebung ausgeführt
+(zusammen mit der Komponente sd-jurnal-to-influxdb). In diesem Container teilen sich die beiden Docker-Container
+metrics-to-influxdb und systemd-journal-remote das gleiche Volume systemd-journal-data, dessen Wert
+/var/log/journal/remote ist.
+
+.SH SEE ALSO
+.BR sd-journal-filter(8),
+.BR coredumpctl(1),
+.BR https://eclipse.github.io/paho.mqtt.c/MQTTClient/html/
+.SH AUTHOR
+An Hoang (an.hoang@tu-braunschweig.de)
