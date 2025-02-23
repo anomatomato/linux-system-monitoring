@@ -1,0 +1,56 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image: gcc:latest
+  allow_failure: false
+  before_script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y gcc systemd-journal-remote libsystemd-dev cmake make libssl-dev git mosquitto mosquitto-clients systemd-journal-remote psmisc lsof
+  script:
+    # Build app
+    - cd metrics-to-influxdb/sd-journal-to-influxdb
+    - git submodule init && git submodule update
+    - mkdir build && cd build
+    - cmake ..
+    - make
+  artifacts:
+    paths:
+      - "metrics-to-influxdb/sd-journal-to-influxdb/build"
+    expire_in: 3 days
+
+test-sd-journal-to-influxdb:
+  stage: test
+  image: gcc:latest
+  allow_failure: false
+  dependencies:
+    - build
+  before_script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y gcc systemd-journal-remote libsystemd-dev cmake make libssl-dev git mosquitto mosquitto-clients systemd-journal-remote psmisc lsof
+  script:
+    - cd metrics-to-influxdb/sd-journal-to-influxdb/build
+    - ctest
+  after_script:
+    - cat metrics-to-influxdb/sd-journal-to-influxdb/build/Testing/Temporary/LastTest.log
+  artifacts:
+    paths:
+      - "metrics-to-influxdb/sd-journal-to-influxdb/build/Testing"
+      - "metrics-to-influxdb/sd-journal-to-influxdb/build/tests"
+    expire_in: 3 days
+
+test_coredump_to_influxdb:
+  stage: test
+  image: gcc:latest
+  allow_failure: false
+  dependencies:
+    - build
+  before_script:
+    - apt-get update && apt-get upgrade -y
+    - apt-get install -y git mosquitto mosquitto-clients 
+    - cd metrics-to-influxdb/coredump-to-influxdb/test
+    - git submodule update --init --recursive
+  script:
+    - ./bats-core/bin/bats coredump-to-influx-test.bats

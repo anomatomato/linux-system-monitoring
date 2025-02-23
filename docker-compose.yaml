@@ -1,0 +1,83 @@
+version: "3.8"
+services:
+  debian-package-repo-service:
+    container_name: debian-package-repo
+    build: ./debian-package-repo
+    image: debian-package-repo
+    ports:
+      - "80:80"
+    restart: always
+    volumes:
+      - /srv/raspi-package-repo:/usr/share/nginx/html:ro
+  grafana-service:
+    container_name: grafana
+    depends_on:
+      - influxdb-service
+    image: grafana/grafana:latest
+    ports:
+     - "3000:3000"
+    restart: always
+    volumes:
+      - grafana-data:/var/lib/grafana
+  influxdb-service:
+    container_name: influxdb2
+    image: influxdb:latest
+    ports:
+      - "8086:8086"
+    restart: always
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-data:/etc/influxdb2
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUXDB_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=my-org
+      - DOCKER_INFLUXDB_INIT_BUCKET=my-bucket
+  mosquitto-service:
+    container_name: mosquitto
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    restart: always
+    volumes:
+      - mosquitto-data:/mosquitto/data
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+  systemd-journal-remote-service:
+    container_name: systemd-journal-remote
+    build: ./systemd-journal-remote
+    depends_on:
+      - influxdb-service
+    image: systemd-journal-remote
+    ports:
+      - "19532:19532"
+    restart: always
+    volumes:
+      - systemd-journal-data:/var/log/journal/remote/
+  telegraf-service:
+    container_name: telegraf
+    depends_on:
+      - influxdb-service
+      - mosquitto-service
+    env_file:
+      - ./telegraf.env
+    image: telegraf:latest
+    restart: always
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  metrics-to-influxdb-service:
+    container_name: metrics-to-influxdb
+    build: ./metrics-to-influxdb
+    depends_on:
+      - systemd-journal-remote-service
+    image: metrics-to-influxdb
+    restart: always
+    volumes:
+      - systemd-journal-data:/var/log/journal/remote/
+volumes:
+  grafana-data: {}
+  influxdb-data: {}
+  mosquitto-data: {}
+  systemd-journal-data:
+    driver: local
