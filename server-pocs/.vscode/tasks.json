@@ -1,0 +1,71 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "attach metrics_to_influxdb",
+            "type": "shell",
+            "command": "docker exec -it metrics-to-influxdb bash",
+            "dependsOn": [
+                "restart metrics-to-influxdb-service"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "restart metrics-to-influxdb-service",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "(docker-compose stop metrics-to-influxdb-service && docker-compose rm -f metrics-to-influxdb-service || true) && (docker image prune || true) && docker-compose up -d --build metrics-to-influxdb-service",
+        },
+        {
+            "label": "build & run dockers",
+            "type": "shell",
+            "command": "",
+            "problemMatcher": [],
+            "dependsOn": [
+                "stop all containers",
+                "start all containers"
+            ],
+            "dependsOrder": "sequence",
+        },
+        {
+            "label": "start all containers",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "docker-compose up -d --remove-orphans",
+        },
+        {
+            "label": "stop all containers",
+            "type": "shell",
+            "problemMatcher": [],
+            "command": "(docker-compose down || true)",
+        },
+        {
+            "label": "clean up",
+            "type": "shell",
+            "command": "(docker stop $(docker ps -aq) || true) && (docker rm -f $(docker ps -aq) || true) && (docker rmi $(docker images -q) || true) && (docker volume prune -f || true) && (docker volume rm $(docker volume ls -q) || true)",
+            "problemMatcher": [],
+        },
+        {
+            "label": "remove build directory",
+            "type": "shell",
+            "command": "sudo rm -rf metrics-to-influxdb/sd-journal-to-influxdb/build/",
+            "problemMatcher": []
+        },
+        {
+            "label": "build sd-journal-to-influxdb",
+            "type": "shell",
+            "command": "sudo mkdir -p ./metrics-to-influxdb/sd-journal-to-influxdb/build && cd metrics-to-influxdb/sd-journal-to-influxdb/build && sudo cmake .. && sudo make",
+            "problemMatcher": []
+        }
+        // {
+        //     "label": "clean sd-journal topic influxdb",
+        //     "type": "shell",
+        //     "command": "sudo docker exec -it influxdb2 influx delete --bucket my-bucket --start 1970-01-01T00:00:00Z --stop $(date --utc +"%Y-%m-%dT%H:%M:%SZ") --predicate '_measurement="sd-journal"'",
+        //     "problemMatcher": [],
+        // }
+    ]
+}

@@ -1,0 +1,7 @@
+Origin: my-raspi-debs
+Label: my-raspi-debs
+Codename: bookworm
+Architectures: arm64 armhf
+Components: main
+Description: My Debian package repo for Raspberry Pi
+SignWith: yes

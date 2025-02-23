@@ -1,0 +1,15 @@
+[submodule "metrics-to-influxdb/sd-journal-to-influxdb/paho.mqtt.c"]
+	path = metrics-to-influxdb/sd-journal-to-influxdb/paho.mqtt.c
+	url = https://github.com/eclipse/paho.mqtt.c.git
+[submodule "metrics-to-influxdb/test/bats-core"]
+	path = metrics-to-influxdb/test/bats-core
+	url = https://github.com/bats-core/bats-core.git
+[submodule "metrics-to-influxdb/test/helpers/bats-support"]
+	path = metrics-to-influxdb/test/helpers/bats-support
+	url = https://github.com/bats-core/bats-support.git
+[submodule "metrics-to-influxdb/test/helpers/bats-assert"]
+	path = metrics-to-influxdb/test/helpers/bats-assert
+	url = https://github.com/bats-core/bats-assert.git
+[submodule "metrics-to-influxdb/test/helpers/bats-mock"]
+	path = metrics-to-influxdb/test/helpers/bats-mock
+	url = https://github.com/jasonkarns/bats-mock.git
