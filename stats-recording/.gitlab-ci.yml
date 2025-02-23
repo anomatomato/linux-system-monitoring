@@ -1,0 +1,62 @@
+stages:
+  - build-docker
+  - build
+  - run
+
+build-docker-job:
+  stage: build-docker
+  tags:
+    - dind
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker info
+  script:
+    - echo "Building Docker image"
+    - docker build -t $CI_REGISTRY_IMAGE/debian:latest .
+    - echo "Pushing Docker image"
+    - docker push $CI_REGISTRY_IMAGE/debian:latest
+  rules:
+    - changes:
+        - Dockerfile
+
+build-app-job:
+  stage: build
+  image: $CI_REGISTRY_IMAGE/debian:latest
+  allow_failure: false
+  script:
+    - echo "Building debian package" $CI_PROJECT_NAME
+    - ./build.sh --all
+  artifacts:
+    paths:
+      - "debs/"
+    expire_in: 3 days
+  needs:
+    - job: build-docker-job
+      optional: true
+
+test_inotify_coredump:
+  stage: run
+  image: $CI_REGISTRY_IMAGE/debian:latest
+  allow_failure: false
+  script:
+    - mkdir -p build && cd build
+    - cmake -DSTATS_ENABLE_TESTING=ON ..
+    - make
+    - ctest -V -R Inotify
+
+test_bridge:
+  stage: run
+  image: $CI_REGISTRY_IMAGE/debian:latest
+  allow_failure: false
+  script:
+    - mkdir -p build && cd build
+    - cmake -DSTATS_ENABLE_TESTING=ON ..
+    - make
+    - ctest -V -R BridgeTest
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - build/

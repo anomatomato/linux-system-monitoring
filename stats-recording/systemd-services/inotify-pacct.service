@@ -1,0 +1,11 @@
+[Unit]
+Description=inotify-pacct
+After=posix-mq-to-mqtt-bridge.service
+Requires=posix-mq-to-mqtt-bridge.service
+
+[Service]
+ExecStart=/usr/local/bin/inotify-pacct-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

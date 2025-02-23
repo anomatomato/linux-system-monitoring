@@ -1,0 +1,30 @@
+.\" Manpage for posix-mq-to-mqtt-bridge.
+.\" Contact k.meliksetian@tu-braunschweig.de to correct errors or typos.
+.TH man 8 "03 Juli 2024" "1.0" "posix-mq-to-mqtt-bridge man page"
+.SH NAME
+posix-mq-to-mqtt-bridge - start sending metrics to the server.
+.SH SYNOPSIS
+.PP
+.B /dev/mqueue
+.PP
+.B posix\-mq\-to\-mqtt\-bridge@\&.service
+.PP
+.B ./bridge\-exec
+.PP
+.SH DESCRIPTION
+Diese Komponente ist dafür zuständig die Metriken von anderen Komponenten an den Server zu schicken.
+
+Wenn eine Message Queue kreiert wird, wird die Komponente mittels inotify(7) darüber notifiziert und mit epoll(7) registriert.
+Sobald eine Nachricht in die Message Queue gepusht wird, wird die Nachricht abgelesen, bearbeitet und an den Server geschickt.
+.SH "SEE ALSO"
+.B mq_overview(7),
+.B inotify(7),
+.B epoll(7),
+.B gethostname(2)
+.B https://eclipse.github.io/paho.mqtt.c/MQTTClient/html/
+.SH OPTIONS
+Keine Optionen.
+.SH BUGS
+Keine Bugs.
+.SH AUTHOR
+Karen Meliksetian (k.meliksetian@tu-braunschweig.de)

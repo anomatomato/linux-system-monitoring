@@ -1,0 +1,10 @@
+[Unit]
+Description=posix-mq-to-mqtt-bridge
+Before=cyclic-file-read.service inotify-coredump.service inotify-pacct.service epoll-psi.service dbus-systemd-signals.service cyclic-sysinfo.service
+
+[Service]
+ExecStart=/usr/local/bin/bridge-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=inotify-coredump
+After=posix-mq-to-mqtt-bridge.service
+Requires=posix-mq-to-mqtt-bridge.service
+
+[Service]
+ExecStart=/usr/local/bin/inotify-coredump-exec
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,12 @@
+[Unit]
+Description=cyclic-file-read
+After=posix-mq-to-mqtt-bridge.service
+Requires=posix-mq-to-mqtt-bridge.service
+
+[Service]
+Environment="SCRIPT_ARGS=%I"
+ExecStart=/usr/local/bin/cyclic-file-read-exec $SCRIPT_ARGS
+#Type=simple
+
+[Install]
+WantedBy=multi-user.target

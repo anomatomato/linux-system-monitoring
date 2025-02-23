@@ -1,0 +1,48 @@
+.\" Manpage for inotify\-pacct.
+.\" Contact b.pham@tu\-braunschweig.de to correct errors or typos.
+.TH man 8 "06 Juli 2024" "1.0" "inotify-pacct man page"
+.SH NAME
+inotify-pacct \- Send a message to a message queue, whenever a process is terminated
+.SH SYNOPSIS
+.PP
+.B /var/log/pacct/acct
+.PP
+.B inotify\-pacct@\&.service
+.PP
+.B ./inotify\-pacct\-exec [\fI\,OPTION\/\fR]...
+.PP
+.SH DESCRIPTION
+.PP
+\fIinotify\-pacct\fR is a utility designed to monitor 
+.I /var/log/pacct/acct file
+with
+.BR inotify (7) 
+for terminated processes\&. It will send relevant information about terminated processes to 
+the POSIX message queue \fI/inotify_pacct\fR with
+. This message is in 
+.B InfluxDB\-Line\-Protocol,
+and the message queue is managed by
+.BR mq_overview (7)\&. 
+.PP
+.BR posix\-mq\-to\-mqtt\-bridge (8) 
+can then send the messages to a MQTT Broker\&.
+.PP
+.SH OPTIONS
+.TP
+\fB\-v\fR                       
+Verbose mode: print the message in Line Protocol to the message queue 
+.TP
+\fB\-h\fR
+print help message
+.SH "SEE ALSO"
+.BR posix\-mq\-to\-mqtt\-bridge (8),
+.BR mq_overview (7),
+.BR inotify (7),
+.BR acct(2),
+.BR acct(5)
+.SH ARGUMENTS
+The program must be started with 'sudo'.
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+Bao Ngoc Pham (b.pham@tu\-braunschweig.de)

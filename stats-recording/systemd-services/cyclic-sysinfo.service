@@ -1,0 +1,11 @@
+[Unit]
+Description=cyclic-sysinfo
+After=posix-mq-to-mqtt-bridge.service
+Requires=posix-mq-to-mqtt-bridge.service
+
+[Service]
+ExecStart=/usr/local/bin/cyclic-sysinfo-exec -c 10
+Type=simple
+
+[Install]
+WantedBy=multi-user.target
