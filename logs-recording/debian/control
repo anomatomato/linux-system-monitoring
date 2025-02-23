@@ -1,0 +1,10 @@
+Source: sd-journal-filter
+Section: base
+Priority: optional
+Maintainer: Emre Onbasiogullari <e.onbasiogullari@tu-braunschweig.de>
+Build-Depends: systemd-journal-remote (>= 239)
+
+Package: sd-journal-filter
+Architecture: amd64 arm64 armhf
+Homepage: https://gitlab.ibr.cs.tu-bs.de/raspberrypi/logs-recording
+Description: Filter für Journal
