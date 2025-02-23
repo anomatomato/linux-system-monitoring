@@ -243,7 +243,11 @@ export -u ... -u ... | systemd-journal-remote -o /tmp/dir/foo.journal -`
 
 ## Component Diagram
 
-<div hidden>
+![](components.svg)
+
+<details>
+  <summary>Show PlantUML code</summary>
+
 ```plantuml
 @startuml components
 
@@ -304,11 +308,8 @@ telegraf --> influxdb
 influxdb -> grafana
 
 @enduml
-
 ```
 
-```
+</details>
 
-</div>
 
-![](components.svg)
