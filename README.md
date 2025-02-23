@@ -243,19 +243,20 @@ export -u ... -u ... | systemd-journal-remote -o /tmp/dir/foo.journal -`
 
 ## Component Diagram
 
+<div hidden>
 ```plantuml
 @startuml components
 
 component "\
 cyclic-file-read\n\
-  /proc/stat\n\
-  /proc/net/dev\n\
-  /proc/diskstats\n\
-  /proc/pid/stat\n\
-  /proc/pid/statm\n\
-  /proc/pid/io\n\
-  /sys/class/hwmon\
-  " as cyclic_file_read #lightblue
+ /proc/stat\n\
+ /proc/net/dev\n\
+ /proc/diskstats\n\
+ /proc/pid/stat\n\
+ /proc/pid/statm\n\
+ /proc/pid/io\n\
+ /sys/class/hwmon\
+ " as cyclic_file_read #lightblue
 component "epoll-psi" as epoll_psi #lightblue
 component "inotify-pacct" as inotify_pacct #lightblue
 component "cyclic-sysinfo" as sysinfo #lightblue
@@ -303,6 +304,11 @@ telegraf --> influxdb
 influxdb -> grafana
 
 @enduml
+
 ```
 
-- Arrows represent the flow of data
+```
+
+</div>
+
+![](components.svg)
